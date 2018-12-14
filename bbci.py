@@ -1,0 +1,693 @@
+#!/usr/bin/env python3
+
+import sys
+import re
+import yaml
+import subprocess
+import os
+import argparse
+import xmlrpc.client
+import shutil
+
+###############################################################################
+###############################################################################
+# create a directory
+def lab_create_directory(lab, directory):
+    destdir = lab["datadir"]
+    # check remote vs local (TODO)
+    for part in directory.split("/"):
+        destdir = destdir + '/' + part
+        if args.debug:
+            print("DEBUG: Check %s" % destdir)
+        if not os.path.isdir(destdir):
+            if args.debug:
+                print("DEBUG: create %s" % destdir)
+            os.mkdir(destdir)
+
+###############################################################################
+###############################################################################
+def lab_copy(lab, src, directory):
+    destdir = lab["datadir"]
+    # check remote vs local (TODO)
+    for part in directory.split("/"):
+        destdir = destdir + '/' + part
+        if args.debug:
+            print("DEBUG: Check %s" % destdir)
+        if not os.path.isdir(destdir):
+            if args.debug:
+                print("DEBUG: create %s" % destdir)
+            os.mkdir(destdir)
+    if args.debug:
+        print("DEBUG: copy %s to %s" % (src, destdir))
+    shutil.copy(src, destdir)
+
+###############################################################################
+###############################################################################
+def linuxmenu(param):
+    larch = param["larch"]
+    kdir = param["kdir"]
+    make_opts = param["make_opts"]
+
+    pbuild = subprocess.Popen("make %s menuconfig" % make_opts, shell=True)
+    outs, err = pbuild.communicate()
+    return err
+
+###############################################################################
+###############################################################################
+def linux_clean(param):
+    larch = param["larch"]
+    kdir = param["kdir"]
+    make_opts = param["make_opts"]
+
+    pbuild = subprocess.Popen("make %s clean" % make_opts, shell=True)
+    outs, err = pbuild.communicate()
+    return err
+
+###############################################################################
+###############################################################################
+def build(param):
+    larch = param["larch"]
+    kdir = param["kdir"]
+    make_opts = param["make_opts"] + " %s" % param["full_tgt"]
+    print("BUILD: %s to %s" % (larch, kdir))
+    print("DEBUG: makeopts=%s" % make_opts)
+
+    if args.quiet:
+        pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
+    else:
+        pbuild = subprocess.Popen("make %s" % make_opts, shell=True)
+    outs, err = pbuild.communicate()
+    builds[param["target"]] = {}
+    if err == None and pbuild.returncode == 0:
+        builds[param["target"]]["result"] = 'PASS'
+    else:
+        builds[param["target"]]["result"] = 'FAIL'
+    return err
+
+###############################################################################
+###############################################################################
+def boot(param):
+    larch = param["larch"]
+    subarch = param["subarch"]
+    flavour = param["flavour"]
+    kdir = param["kdir"]
+    modules_dir = param["modules_dir"]
+    sourcename = param["sourcename"]
+
+    arch_endian = None
+    make_opts = param["make_opts"]
+
+    kconfig = open("%s/.config" % kdir)
+    kconfigs = kconfig.read()
+    kconfig.close()
+    if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
+        endian="big"
+    else:
+        endian="little"
+    if re.search("CONFIG_SPARC32=", kconfigs):
+        print("SPARC32")
+        arch="sparc"
+        arch_endian="sparc"
+        qarch="sparc"
+    if re.search("CONFIG_SPARC64=", kconfigs):
+        print("SPARC64")
+        arch="sparc64"
+        arch_endian="sparc64"
+        qarch="sparc64"
+    if re.search("CONFIG_ARM=", kconfigs):
+        print("ARM")
+        arch="arm"
+        arch_endian="armel"
+        qarch="arm"
+    if re.search("CONFIG_ARM64=", kconfigs):
+        print("ARM64")
+        arch="arm64"
+        arch_endian="arm64"
+        qarch="arm64"
+    if re.search("CONFIG_MIPS=", kconfigs):
+        if re.search("CONFIG_64BIT=y", kconfigs):
+            print("MIPS64")
+            arch="mips64"
+            if endian == 'big':
+                arch_endian="mips64be"
+            else:
+                arch_endian='mips64el'
+        else:
+            arch="mips"
+            qarch="mips"
+            if endian == 'big':
+                print("MIPSBE")
+                arch_endian="mipsbe"
+            else:
+                print("MIPSEL")
+                arch_endian='mipsel'
+                qarch="mipsel"
+    if re.search("CONFIG_ALPHA=", kconfigs):
+        print("ARCH: ALPHA")
+        arch="alpha"
+        arch_endian="alpha"
+        qarch="alpha"
+    if re.search("CONFIG_PPC=", kconfigs):
+        print("ARCH: PPC")
+        arch="powerpc"
+        arch_endian="powerpc"
+        qarch="ppc"
+    if re.search("CONFIG_PPC64=", kconfigs):
+        print("ARCH: PPC64")
+        arch="powerpc64"
+        arch_endian="ppc64"
+        qarch="ppc64"
+    if re.search("CONFIG_X86_64=", kconfigs):
+        print("X86_64")
+        arch="x86_64"
+        arch_endian="x86_64"
+        qarch="x86_64"
+    if re.search("CONFIG_X86=", kconfigs) and not re.search("CONFIG_X86_64=", kconfigs):
+        print("X86")
+        arch="x86"
+        arch_endian="x86"
+        qarch="i386"
+
+    if arch_endian is None:
+        print("ERROR: Missing endian arch")
+        return 1
+
+    # TODO check RAMFS and INITRD and MODULES and DEVTMPFS_MOUNT
+
+    #TODO check error
+    if os.path.isdir(".git"):
+        git_describe = subprocess.check_output('git describe', shell=True).strip().decode("utf-8")
+        git_lastcommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip().decode("utf-8")
+    else:
+        VERSION = subprocess.check_output('grep ^VERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
+        PATCHLEVEL = subprocess.check_output('grep ^PATCHLEVEL Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
+        SUBLEVEL = subprocess.check_output('grep ^SUBLEVEL Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
+        EXTRAVERSION = subprocess.check_output('grep ^EXTRAVERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
+        git_describe = "%s.%s.%s%s" % (VERSION, PATCHLEVEL, SUBLEVEL, EXTRAVERSION)
+        git_lastcommit = "None"
+
+    # generate modules.tar.gz
+    #TODO check error
+    if args.quiet:
+        pbuild = subprocess.Popen("make %s modules_install" % make_opts, shell=True, stdout=subprocess.DEVNULL)
+        outs, err = pbuild.communicate()
+        pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True, stdout=subprocess.DEVNULL)
+        outs, err = pbuild.communicate()
+    else:
+        pbuild = subprocess.Popen("make %s modules_install" % make_opts, shell=True)
+        outs, err = pbuild.communicate()
+        pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True)
+        outs, err = pbuild.communicate()
+
+    for device in t["templates"]:
+        if "devicename" in device:
+            devicename = device["devicename"]
+        else:
+            devicename = device["devicetype"]
+        print("==============================================")
+        print("CHECK: %s" % devicename)
+        if "larch" in device:
+            device_larch = device["larch"]
+        else:
+            device_larch = device["arch"]
+        if device_larch != larch:
+            print("\tSKIP: larch")
+            continue
+        if device["arch"] != arch:
+            print("\tSKIP: arch: %s vs %s" % (device["arch"], arch))
+            continue
+        # check config requirements
+        skip = False
+        if "configs" in device and device["configs"] is not None:
+            for config in device["configs"]:
+                if not "name" in config:
+                    print("Invalid config")
+                    print(config)
+                    continue
+                if not re.search(config["name"], kconfigs):
+                    if "type" in config and config["type"] == "mandatory":
+                        print("\tSKIP: missing %s" % config["name"])
+                        skip = True
+                    else:
+                        print("\tINFO: missing %s" % config["name"])
+                else:
+                    print("DEBUG: found %s" % config["name"])
+        if skip:
+            continue
+        goodtag = True
+        if args.tag:
+            for tag in args.tag.split(","):
+                if args.debug:
+                    print("DEBUG: check tag %s" % tag)
+                if not "tags" in device:
+                    print("SKIP: no tag")
+                    gootdtag = False
+                    continue
+                tagfound = False
+                for dtag in device["tags"]:
+                    if args.debug:
+                        print("DEBUG: found device tag %s" % dtag)
+                    if dtag == tag:
+                        tagfound = True
+                if not tagfound:
+                    print("SKIP: cannot found tag %s" % tag)
+                    goodtag = False
+        if not goodtag:
+            continue
+        kerneltype = "image"
+        kernelfile = device["kernelfile"]
+        if kernelfile == "zImage":
+            kerneltype = "zimage"
+        if "qemu" in device:
+            jobf = open("%s/defaultqemu.yaml" % templatedir)
+        else:
+            jobf = open("%s/default.yaml" % templatedir)
+        jobt = jobf.read()
+        # check needed files
+        if not "kernelfile" in device:
+            print("ERROR: missing kernelfile")
+            continue
+        if args.debug:
+            print("DEBUG: seek %s" % device["kernelfile"])
+        kfile = "%s/arch/%s/boot/%s" % (kdir, larch, device["kernelfile"])
+        if os.path.isfile(kfile):
+            if args.debug:
+                print("DEBUG: found %s" % kfile)
+        else:
+            if args.debug:
+                print("DEBUG: %s not found" % kfile)
+            kfile = "%s/%s" % (kdir, device["kernelfile"])
+            if os.path.isfile(kfile):
+                if args.debug:
+                    print("DEBUG: found %s" % kfile)
+            else:
+                print("SKIP: no kernelfile")
+                continue
+        # Fill lab indepedant data
+        jobt = jobt.replace("__KERNELFILE__", kernelfile)
+        jobt = jobt.replace("__DEVICETYPE__", device["devicetype"])
+        jobt = jobt.replace("__MACH__", device["mach"])
+        jobt = jobt.replace("__ARCH__", device["arch"])
+        jobt = jobt.replace("__PATH__", "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour))
+        jobt = jobt.replace("__ARCHENDIAN__", arch_endian)
+        jobt = jobt.replace("__GIT_DESCRIBE__", git_describe)
+        jobt = jobt.replace("__KVERSION__", git_describe)
+        jobt = jobt.replace("__KENDIAN__", endian)
+        jobt = jobt.replace("__KERNELTYPE__", kerneltype)
+        jobt = jobt.replace("__GIT_LASTCOMMIT__", git_lastcommit)
+        jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s" % (git_describe, sourcename, larch, subarch, flavour, devicename))
+        # now convert to YAML
+        ft = yaml.load(jobt)
+        if "dtb" in device:
+            for action in ft["actions"]:
+                if "deploy" in action:
+                    if "qemu" in device:
+                        action["deploy"]["images"]["dtb"] = {}
+                        action["deploy"]["images"]["dtb"]["url"] = "__BOOT_FQDN__/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
+                    else:
+                        action["deploy"]["dtb"] = {}
+                        action["deploy"]["dtb"]["url"] = "__BOOT_FQDN__/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
+        if "qemu" in device:
+            print("\tQEMU")
+            ft["context"] = {}
+            ft["context"]["arch"] = qarch
+            if "netdevice" in device["qemu"]:
+                ft["context"]["netdevice"] = "tap"
+            if "model" in device["qemu"]:
+                ft["context"]["model"] = device["qemu"]["model"]
+            if "machine" in device["qemu"]:
+                ft["context"]["machine"] = device["qemu"]["machine"]
+            if "cpu" in device["qemu"]:
+                ft["context"]["cpu"] = device["qemu"]["cpu"]
+            if "memory" in device["qemu"]:
+                ft["context"]["memory"] = device["qemu"]["memory"]
+            if "guestfs_interface" in device["qemu"]:
+                ft["context"]["guestfs_interface"] = device["qemu"]["guestfs_interface"]
+            if "extra_options" in device["qemu"]:
+                ft["context"]["extra_options"] = device["qemu"]["extra_options"]
+            for action in ft["actions"]:
+    #            if "boot" in action:
+    #                action["boot"]["method"] = "qemu"
+    #                action["boot"]["media"] = "tmpfs"
+                if "deploy" in action:
+    #                action["deploy"]["to"] = "tmpfs"
+    #                action["deploy"]["kernel"]["image_arg"] = '-kernel {dtb}'
+    #                action["deploy"]["ramdisk"]["image_arg"] = '-initrd {dtb}'
+                    if "dtb" in device:
+                        action["deploy"]["images"]["dtb"]["image_arg"] = '-dtb {dtb}'
+    #    else:
+    #        for action in ft["actions"]:
+    #            if "boot" in action:
+    #                action["boot"]["commands"] = "ramdisk"
+        fw = open("job-%s.yaml" % devicename, "w")
+        yaml.dump(ft, fw, default_flow_style=False)
+        fw.close()
+        jobf.close()
+        for lab in t["labs"]:
+            send_to_lab = False
+            print("\tCheck %s on %s" % (devicename, lab["name"]))
+            if "disabled" in lab and lab["disabled"]:
+                continue
+        # LAB dependant DATA
+            server = xmlrpc.client.ServerProxy(lab["lavauri"])
+            devlist = server.scheduler.devices.list()
+            for labdevice in devlist:
+                if labdevice["type"] == device["devicetype"]:
+                    send_to_lab = True
+            if not send_to_lab:
+                print("\tSKIP: not found")
+                continue
+            #copy files
+            data_relpath = "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour)
+            lab_create_directory(lab, data_relpath)
+            datadir = lab["datadir"]
+            destdir = "%s/%s/%s/%s/%s" % (datadir, sourcename, larch, subarch, flavour)
+            # copy kernel
+            if args.debug:
+                print("DEBUG: copy %s" % kfile)
+            lab_copy(lab, kfile, data_relpath)
+            # copy dtb
+            # TODO dtb metadata
+            if "dtb" in device:
+                dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
+                dtbsubdir = device["dtb"].split('/')
+                dtb_relpath = "/dts/"
+                if len(dtbsubdir) > 1:
+                    dtb_relpath = dtb_relpath + dtbsubdir[0]
+                if not os.path.isfile(dtbfile):
+                    print("SKIP: no dtb at %s" % dtbfile)
+                    continue
+                lab_copy(lab, dtbfile, "%s/%s" % (data_relpath, dtb_relpath))
+            # modules.tar.gz
+            lab_copy(lab, "%s/modules.tar.gz" % modules_dir, data_relpath)
+            # final job
+            if not os.path.isdir(outputdir):
+                os.mkdir(outputdir)
+            if not os.path.isdir("%s/%s" % (outputdir, lab["name"])):
+                os.mkdir("%s/%s" % (outputdir, lab["name"]))
+            result = subprocess.check_output("chmod -R o+rX %s" % datadir, shell=True)
+            #print(result.decode("UTF-8"))
+            jobf = open("job-%s.yaml" % devicename)
+            jobt = jobf.read()
+            jobf.close()
+            jobt = jobt.replace("__BOOT_FQDN__", lab["datahost_baseuri"])
+            jobt = jobt.replace("__ROOT_FQDN__", lab["rootfs_baseuri"])
+            jobf = open("%s/%s/job-%s.yaml" % (outputdir, lab["name"], devicename), 'w')
+            jobf.write(jobt)
+            jobf.close()
+            if not args.noact:
+                jobid = server.scheduler.jobs.submit(jobt)
+                print(jobid)
+                boots[jobid] = {}
+                boots[jobid]["lab"] = lab["name"]
+                boots[jobid]["devicename"] = devicename
+            else:
+                print("\tSKIP: send job to %s" % lab["name"])
+    return 0
+
+###############################################################################
+###############################################################################
+def genconfig(sourcedir, param, defconfig):
+    os.chdir(sourcedir)
+
+    make_opts = param["make_opts"]
+    pbuild = subprocess.Popen("make %s %s" % (make_opts, defconfig), shell=True)
+    outs, err = pbuild.communicate()
+
+    shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
+    # add needed options for LAVA
+    print("DEBUG: add LAVA configs")
+    fconfig = open("%s/.config" % param["kdir"], 'a')
+    fconfig.write("CONFIG_BLK_DEV_INITRD=y\n")
+    fconfig.write("CONFIG_BLK_DEV_RAM=y\n")
+    fconfig.write("CONFIG_DEVTMPFS_MOUNT=y\n")
+    fconfig.write("CONFIG_MODULES=y\n")
+    fconfig.write("CONFIG_IKCONFIG=y\n")
+    fconfig.write("CONFIG_IKCONFIG_PROC=y\n")
+    fconfig.close()
+
+    subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
+
+    pbuild = subprocess.Popen("make %s olddefconfig" % make_opts, shell=True)
+    outs, err = pbuild.communicate()
+    subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell = True)
+    subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell = True)
+    print("DEBUG: genconfig end")
+    return err
+
+###############################################################################
+###############################################################################
+def common(sourcename, target):
+    sourcedir = None
+    found_target = False
+    param = {}
+    for t_target in t["targets"]:
+        if t_target["name"] == target:
+            larch = t_target["larch"]
+            found_target = True
+            if "flavour" in t_target:
+                flavour = t_target["flavour"]
+            else:
+                flavour = "default"
+            if "subarch" in t_target:
+                subarch = t_target["subarch"]
+            else:
+                subarch = "default"
+            break;
+    if not found_target:
+        print("ERROR: target %s not found" % target)
+        sys.exit(1)
+
+    for t_source in t["sources"]:
+        if t_source["name"] == sourcename:
+            sourcedir = os.path.expandvars(t_source["directory"])
+            break
+
+    if sourcedir is None or not os.path.exists(sourcedir):
+        print("ERROR: source %s not found" % sourcedir)
+        sys.exit(1)
+    os.chdir(sourcedir)
+
+    builddir = os.path.expandvars(t["config"]["builddir"])
+
+    kdir = "%s/%s/%s/%s/%s" % (builddir, sourcename, larch, subarch, flavour)
+    print("Builddir is %s" % kdir)
+
+    modules_dir = "%s/modules/" % builddir
+    if not os.path.isdir(modules_dir):
+        print("DEBUG: %s not exists" % modules_dir)
+        os.mkdir(modules_dir)
+    modules_dir = "%s/modules/%s" % (builddir, target)
+    if not os.path.isdir(modules_dir):
+        print("DEBUG: %s not exists" % modules_dir)
+        os.mkdir(modules_dir)
+    #else:
+        #print("DEBUG: %s exists" % modules_dir)
+    headers_dir = "%s/header/%s" % (builddir, target)
+    if not os.path.isdir(headers_dir):
+        print("DEBUG: %s not exists" % headers_dir)
+        os.mkdir(headers_dir)
+    #else:
+        #print("DEBUG: %s exists" % headers_dir)
+
+    make_opts = "ARCH=%s" % larch
+    if "cross_compile" in t_target:
+        if t_target["cross_compile"] == "None":
+            print("DEBUG: native compilation")
+        else:
+            make_opts = make_opts + " CROSS_COMPILE=%s" % t_target["cross_compile"]
+    else:
+        print("ERROR: missing cross_compile")
+        sys.exit(1)
+
+    make_opts = make_opts + " -j%d" % os.cpu_count()
+    if "warnings" in t_target:
+        make_opts = make_opts + " " + t_target["warnings"]
+    make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_MOD_PATH=%s INSTALL_HDR_PATH=%s" % (kdir, modules_dir, headers_dir)
+    if not "full_tgt" in t_target:
+        print("ERROR: Missing full_tgt")
+        sys.exit(1)
+    param["full_tgt"] = t_target["full_tgt"]
+
+    param["make_opts"] = make_opts
+    param["larch"] = larch
+    param["subarch"] = subarch
+    param["flavour"] = flavour
+    param["kdir"] = kdir
+    param["target"] = target
+    param["modules_dir"] = modules_dir
+    param["sourcename"] = sourcename
+
+    if not os.path.exists("%s/.config" % kdir) or "defconfig" in t_target:
+        if "defconfig" in t_target:
+            err = genconfig(sourcedir, param, t_target["defconfig"])
+            if err:
+                param["error"] = 1
+            return param
+        else:
+            print("No config, cannot do anything")
+            param["error"] = 1
+            return param
+    return param
+
+###############################################################################
+###############################################################################
+def do_action(sourcename, target, action):
+    if action == "clean":
+        print("CLEAN: %s" % target)
+        p = common(sourcename, target)
+        if "error" in p:
+            return p["error"]
+        linux_clean(p)
+        return 0
+    if action == "menu":
+        print("MENU: %s" % target)
+        p = common(sourcename, target)
+        if "error" in p:
+            return p["error"]
+        linuxmenu(p)
+        return 0
+    if action == "build":
+        print("BUILD: %s" % target)
+        p = common(sourcename, target)
+        if "error" in p:
+            return p["error"]
+        build(p)
+        return 0
+    if action == "boot":
+        p = common(sourcename, target)
+        if "error" in p:
+            return p["error"]
+        boot(p)
+        return 0
+    if action == "update":
+        do_source_update(sourcename)
+        return 0
+    if action == "create":
+        do_source_create(sourcename)
+        return 0
+    print("ERROR: unknow action %s" % action)
+    return 1
+
+###############################################################################
+###############################################################################
+def do_source_create(sourcename):
+    for t_source in t["sources"]:
+        if t_source["name"] == sourcename:
+            sourcedir = os.path.expandvars(t_source["directory"])
+            break
+
+    if sourcedir is None:
+        print("ERROR: sourcedir is mandatory")
+        return 1
+    if os.path.exists(sourcedir):
+        print("ERROR: source %s already exists at %s" % (sourcename, sourcedir))
+        return 1
+    if "create_script" in t_source:
+        git_create_args="--sourcedir %s" % sourcedir
+        if "ltag" in t_source and t_source["ltag"] is not None:
+            git_create_args += " --ltag %s" % t_source["ltag"]
+        git_create_cmd = "%s %s" % (t_source["create_script"], git_create_args)
+        subprocess.run(git_create_cmd, shell = True)
+        return 0
+    if not "gituri" in t_source or t_source["gituri"] == None:
+        print("ERROR: Need gituri for %s" % sourcename)
+        return 1
+
+    git_create_cmd = "git clone %s %s" % (t_source["gituri"], sourcedir)
+    if args.noact:
+        print("DEBUG: will do %s" % git_create_cmd)
+    else:
+        subprocess.run(git_create_cmd, shell=True)
+    #TODO check return
+###############################################################################
+###############################################################################
+def do_source_update(sourcename):
+    for t_source in t["sources"]:
+        if t_source["name"] == sourcename:
+            sourcedir = os.path.expandvars(t_source["directory"])
+            break
+
+    if sourcedir is None or not os.path.exists(sourcedir):
+        print("ERROR: source %s not found" % sourcedir)
+        return 1
+    if "update_script" in t_source and t_source["update_script"] is not None:
+        print("DEBUG: update with %s" % t_source["update_script"])
+        git_update_args="--sourcedir %s" % sourcedir
+        if "ltag" in t_source and t_source["ltag"] is not None:
+            git_update_args += " --ltag %s" % t_source["ltag"]
+
+        git_update_cmd = "%s %s" % (t_source["update_script"], git_update_args)
+        if args.noact:
+            print("DEBUG: Will do %s" % git_update_cmd)
+        else:
+            subprocess.run(git_update_cmd, shell = True)
+        return 0
+
+###############################################################################
+###############################################################################
+def do_actions(all_sources, all_targets, all_actions):
+    #print("DEBUG: Check sources %s with target %s" % (all_sources, all_targets))
+    if re.search(",", all_actions):
+        for action in all_actions.split(","):
+            do_actions(all_sources, all_targets, action)
+        return 0
+    # all_actions is now only one name
+    if all_sources == "all":
+        for t_source in t["sources"]:
+            do_actions(t_source["name"], all_targets, all_actions)
+        return 0
+    if re.search(",", all_sources):
+        for sourcearg in all_sources.split(","):
+            do_actions(sourcearg, all_targets, all_actions)
+        return 0
+    # all_sources is now only one name
+    if all_actions == "update" or all_actions == "create":
+        # no need to cycle target for sources actions
+        ret = do_action(all_sources, all_targets, all_actions)
+        return ret
+    if all_targets == "all":
+        for t_target in t["targets"]:
+            do_actions(all_sources, t_target["name"], all_actions)
+        return 0
+    if re.search(",", all_targets):
+        for targetarg in all_targets.split(","):
+            do_actions(all_sources, targetarg, all_actions)
+        return 0
+    # all_targets is now only one name
+
+    ret = do_action(all_sources, all_targets, all_actions)
+
+###############################################################################
+###############################################################################
+
+arch = None
+outputdir = "/tmp/joboutput/"
+boots = {}
+builds = {}
+templatedir = os.getcwd()
+
+os.environ["LC_ALL"] = "C"
+os.environ["LC_MESSAGES"] = "C"
+os.environ["LANG"] = "C"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--noact", "-n", help="No act", action="store_true")
+parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
+parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
+parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
+parser.add_argument("--tag", "-T", type=str, help="Select device via some tags")
+parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
+parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
+args = parser.parse_args()
+
+tfile = open("all.yaml")
+t = yaml.load(tfile)
+
+do_actions(args.source, args.target, args.action)
+
+print(builds)
+print(boots)
+
+sys.exit(0)
+

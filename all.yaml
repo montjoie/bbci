@@ -1,0 +1,912 @@
+config:
+    builddir: $HOME/crossbuild
+targets:
+  - name: arm_generic
+    larch: arm
+    cross_compile: armv7a-hardfloat-linux-gnueabi-
+    full_tgt: dtbs Image modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: arm64_generic
+    larch: arm64
+    cross_compile: aarch64-unknown-linux-gnu-
+    full_tgt: dtbs Image modules
+    warnings: "-W1"
+  - name: amlogic_generic
+    larch: arm64
+    subarch: amlogic
+    cross_compile: aarch64-unknown-linux-gnu-
+    full_tgt: dtbs Image modules
+    warnings: "-W1"
+  - name: rpi3_bcm2837_generic
+    larch: arm64
+    cross_compile: aarch64-unknown-linux-gnu-
+    full_tgt: dtbs Image modules
+    warnings: "-W1"
+  - name: alpha_clipper
+    larch: alpha
+    subarch: clipper
+    cross_compile: alpha-unknown-linux-gnu-
+    full_tgt: boot vmlinux modules
+    warnings: "-W1"
+  - name: bamboo_defconfig
+    larch: powerpc
+    subarch: 44x
+    flavour: bamboo_defconfig
+    defconfig: 44x/bamboo_defconfig
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs
+    warnings: "-W1"
+  - name: canyonlands_defconfig
+    larch: powerpc
+    subarch: 44x
+    flavour: canyonlands_defconfig
+    defconfig: 44x/canyonlands_defconfig
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs zImage
+    warnings: "-W1"
+  - name: 44x_generic
+    larch: powerpc
+    subarch: 44x
+    flavour: default
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs zImage
+    warnings: "-W1"
+  - name: alpha_defconfig
+    larch: alpha
+    subarch: default
+    flavour: defconfig
+    defconfig: defconfig
+    cross_compile: alpha-unknown-linux-gnu-
+    full_tgt: boot vmlinux modules
+    warnings: "-W1"
+  - name: arm64_defconfig
+    larch: arm64
+    subarch: default
+    flavour: defconfig
+    defconfig: defconfig
+    cross_compile: aarch64-unknown-linux-gnu-
+    full_tgt: dtbs Image modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: imx_generic
+    larch: arm
+    subarch: imx
+    flavour: default
+    cross_compile: armv7a-hardfloat-linux-gnueabi-
+    full_tgt: dtbs zImage modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: imx_defconfig
+    larch: arm
+    subarch: imx
+    flavour: defconfig
+    defconfig: imx_v6_v7_defconfig
+    cross_compile: armv7a-hardfloat-linux-gnueabi-
+    full_tgt: dtbs zImage modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: malta_kvm_defconfig
+    larch: mips
+    subarch: default
+    flavour: defconfig
+    defconfig: malta_kvm_defconfig
+    cross_compile: mips-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: malta_defconfig
+    larch: mips
+    subarch: mips32
+    flavour: defconfig
+    defconfig: malta_kvm_guest_defconfig
+    cross_compile: mips-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: mips_generic
+    larch: mips
+    subarch: mips32
+    flavour: default
+    cross_compile: mips-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: mips_jazz_defconfig
+    larch: mips
+    subarch: mips64
+    flavour: defconfig
+    defconfig: jazz_defconfig
+    cross_compile: mips64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: mips_malta
+    larch: mips
+    subarch: mips32
+    flavour: malta
+    cross_compile: mips-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: mips64_generic
+    larch: mips
+    subarch: mips64
+    flavour: default
+    cross_compile: mips64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+  - name: mips64_malta
+    larch: mips
+    subarch: mips64
+    flavour: malta
+    cross_compile: mips64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: mpc85xx_defconfig
+    larch: powerpc
+    subarch: 85xx
+    flavour: defconfig
+    defconfig: 85xx/mpc85xx_cds_defconfig
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules uImage dtbs
+    warnings: "-W1"
+  - name: pmac_generic
+    larch: powerpc
+    subarch: pmac
+    flavour: default
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs
+    warnings: "-W1"
+  - name: pmac32_defconfig
+    larch: powerpc
+    subarch: pmac
+    flavour: defconfig
+    defconfig: pmac32_defconfig
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: ppc64_pseries
+    larch: powerpc
+    subarch: pseries
+    cross_compile: powerpc64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+  - name: powerpc_generic
+    larch: powerpc
+    subarch: ppc32
+    flavour: default
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs
+  - name: pseries_defconfig
+    larch: powerpc
+    subarch: pseries
+    flavour: defconfig
+    defconfig: pseries_defconfig
+    cross_compile: powerpc64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+  - name: sparc_generic
+    larch: sparc
+    cross_compile: sparc-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+  - name: sparc64_generic
+    larch: sparc
+    subarch: sparc64
+    cross_compile: sparc64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+  - name: sunxi_defconfig
+    larch: arm
+    subarch: sunxi
+    flavour: defconfig
+    defconfig: sunxi_defconfig
+    cross_compile: armv7a-hardfloat-linux-gnueabi-
+    full_tgt: dtbs zImage modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: virtex5_defconfig
+    larch: powerpc
+    subarch: 44x
+    flavour: virtex5_defconfig
+    defconfig: 44x/virtex5_defconfig
+    cross_compile: powerpc-unknown-linux-gnu-
+    full_tgt: vmlinux modules dtbs zImage
+    warnings: "-W1"
+  - name: x86_64_generic
+    larch: x86_64
+    cross_compile: None
+    full_tgt: bzImage modules
+    warnings: "-W1"
+  - name: x86_64_defconfig
+    larch: x86_64
+    flavour: defconfig
+    defconfig: x86_64_defconfig
+    cross_compile: None
+    full_tgt: bzImage modules
+    warnings: "-W1"
+  - name: x86_defconfig
+    larch: x86
+    flavour: defconfig
+    defconfig: i386_defconfig
+    cross_compile: None
+    full_tgt: bzImage modules
+    warnings: "-W1"
+  - name: x86_generic
+    larch: x86
+    cross_compile: None
+    full_tgt: bzImage modules
+    warnings: "-W1"
+labs:
+  - name: local
+    lavauri: http://admin:pass@127.0.0.1/RPC2
+    datadir: /var/www/boot.montjoie.local/htdocs/storage
+    datahost: Red
+    datahost_baseuri: http://boot.montjoie.local/storage
+    rootfs_baseuri: http://boot.montjoie.local
+sources:
+  - name: next
+    directory: /usr/src/linux-next
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    update_script: ./scripts/git-stable
+    tag: next-
+  - name: linux
+    directory: /usr/src/linux-master
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    update_command: "git pull"
+  - name: stable
+    directory: /usr/src/linux-stable
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+    update_script: ./scripts/git-stable
+    tag: v4.19
+templates:
+  - name: SS-10
+    arch: sparc
+    larch: sparc
+    devicetype: qemu
+    devicename: qemu-SS-10
+    kernelfile: zImage
+    mach: sparc
+    qemu:
+        machine: SS-10
+        model: model=lance
+        memory: 256
+        guestfs_interface: scsi
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_SUNLANCE
+    tags:
+      - broken
+  - name: sun4u
+    arch: sparc64
+    larch: sparc
+    devicetype: qemu
+    devicename: qemu-sun4u
+    kernelfile: vmlinux
+    mach: sparc64
+    qemu:
+        machine: sun4u
+        model: model=pcnet
+        memory: 384
+        netdevice: tap
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PATA_CMD64X
+      - name: CONFIG_RTC_DRV_M48T59
+      - name: MOSTEK?
+      - name: SABRE?
+      - name: NE2K
+    tags:
+      - ok
+  - name: cubieboard
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-cubieboard
+    kernelfile: zImage
+    dtb: sun4i-a10-cubieboard.dtb
+    mach: sunxi
+    qemu:
+        cpu: cortex-a7
+        machine: cubieboard
+        model: model=allwinner-emac
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - "-device ide-hd,drive=test"
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+      - name: CONFIG_AHCI_SUNXI
+        type: test
+      - name: CONFIG_EMAC
+        type: test
+    tags:
+      - ok
+  - name: qemu-arm64
+    arch: arm64
+    devicetype: qemu
+    devicename: qemu-arm64
+    kernelfile: Image
+    mach: qemu
+    qemu:
+        machine: virt
+        cpu: cortex-a57
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyAMA0 root=/dev/ram0"'
+        - '-device virtio-blk-device,drive=test'
+    configs:
+      - name: RTC_DRV_PL031?
+      - name: PCIE?
+    tags:
+      - ok
+  - name: qemu-vexpress-a9
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-vexpress-a9
+    kernelfile: zImage
+    mach: qemu
+    qemu:
+        machine: vexpress-a9
+        cpu: cortex-a9
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - '-device virtio-blk-device,drive=test'
+    configs:
+      - name: ARCH_VEXPRESS
+      - name: MTD_CFI?
+      - name: RTC_DRV_PL031?
+    tags:
+      - ok
+      - vexpress
+  - name: qemu-sabrelite
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-sabrelite
+    kernelfile: zImage
+    mach: qemu
+    qemu:
+        machine: sabrelite
+        cpu: cortex-a9
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: ARCH_IMX6Q?
+      - name: IMX_SATA?
+      - name: SERIAL?
+    tags:
+      - broken
+  - name: MIPS malta
+    arch: mips
+    devicetype: qemu
+    devicename: qemu-mips-malta
+    kernelfile: vmlinux
+    mach: mips
+    qemu:
+        machine: malta
+        memory: 128
+        model: model=pcnet
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - "-device ide-hd,drive=test"
+    configs:
+      - name: CONFIG_MIPS_MALTA=y
+        type: mandatory
+      - name: CONFIG_PCNET=
+      - name: CONFIG_RTC_CMOS=
+      - name: CONFIG_PIIX=
+    tags:
+      - ok
+  - name: malta64
+    arch: mips64
+    larch: mips
+    devicetype: qemu
+    devicename: qemu-malta64
+    kernelfile: vmlinux
+    mach: mips64
+    qemu:
+        machine: malta
+        memory: 128
+        model: model=pcnet
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - "-device ide-hd,drive=test"
+    configs:
+      - name: CONFIG_MIPS_MALTA=y
+        type: mandatory
+      - name: CONFIG_PCNET
+      - name: CONFIG_RTC_CMOS
+      - name: CONFIG_PIIX
+    tags:
+      - ok
+  - name: x86_64
+    arch: x86_64
+    devicetype: qemu
+    devicename: qemu-x86_64
+    kernelfile: bzImage
+    mach: x86_64
+    qemu:
+        cpu: qemu64
+        netdevice: tap
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+    tags:
+      - ok
+  - name: x86
+    arch: x86
+    devicetype: qemu
+    devicename: qemu-x86
+    kernelfile: bzImage
+    mach: x86
+    qemu:
+        cpu: qemu32
+        netdevice: tap
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+    tags:
+      - ok
+  - name: QEMU alpha DP264/CLIPPER
+    arch: alpha
+    devicetype: qemu
+    devicename: qemu-alpha
+    kernelfile: vmlinux
+    mach: alpha
+    qemu:
+        machine: clipper
+        netdevice: tap
+        smp: 4
+        memory: 512
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+    tags:
+      - ok
+  - name: QEMU PPC G3beige
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-G3beige
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: g3beige
+        netdevice: tap
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyPZ0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PPC_PMAC=y
+        type: mandatory
+    tags:
+      - ok
+      - g3beige
+  - name: QEMU PPC virtex-ml507
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-virtex-ml507
+    kernelfile: vmlinux
+    dtb: virtex440-ml507.dtb
+    mach: powerpc
+    qemu:
+        machine: virtex-ml507
+        memory: 512
+        guestfs_interface: none
+        netdevice: tap
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - '-device virtio-scsi-pci'
+    configs:
+      - name: CONFIG_44x=y
+        type: mandatory
+      - name: CONFIG_XILINX_VIRTEX440_GENERIC_BOARD=y
+        type: mandatory
+    tags:
+      - ok
+      - virtex
+      - notest
+  - name: QEMU PPC Sam460ex
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-Sam460ex
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: sam460ex
+        memory: 512
+        guestfs_interface: none
+        netdevice: tap
+        model: model=pcnet
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - '-device virtio-scsi-pci,id=scsi'
+        - '-device scsi-hd,drive=test'
+    configs:
+      - name: CONFIG_44x=y
+        type: mandatory
+      - name: CONFIG_CANYONLANDS=y
+        type: mandatory
+      - name: CONFIG_IBM_EMAC=y
+      - name: CONFIG_SATA_SIL=y
+        type: test
+    tags:
+      - ok
+      - sam460ex
+      - sil_not_working
+  - name: QEMU PPC 40p
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-40p
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: 40p
+        netdevice: tap
+        guestfs_interface: none
+        memory: 192
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+    tags:
+      - broken
+  - name: QEMU PPC Mac99
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-mac99
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: mac99,via=pmu
+        netdevice: tap
+        model: model=sungem
+        extra_options:
+        - '-append "console=ttyPZ0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PPC_PMAC=y
+        type: mandatory
+    tags:
+      - ok
+      - mac99
+  - name: QEMU PPC Bamboo
+    arch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-bamboo
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: bamboo
+        netdevice: tap
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+        - '-device virtio-scsi-pci,id=scsi'
+        - '-device scsi-hd,drive=test'
+    configs:
+      - name: IBM_EMAC
+      - name: CONFIG_BAMBOO=y
+        type: mandatory
+      - name: CONFIG_SCSI_VIRTIO=y
+        type: test
+      - name: CONFIG_BLK_DEV_SD=y
+        type: test
+    tags:
+      - ok
+      - bamboo
+  - name: QEMU PPC64 pseries
+    arch: powerpc64
+    larch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc64-pseries
+    kernelfile: vmlinux
+    mach: powerpc64
+    qemu:
+        machine: pseries
+        cpu: POWER8
+        netdevice: tap
+        model: model=pcnet
+        guestfs_interface: scsi
+        extra_options:
+        - '-append "console=hvc0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PPC_PSERIES=y
+        type: mandatory
+    tags:
+      - ok
+  - name: QEMU mpc8544ds
+    arch: powerpc
+    larch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-mpc8544ds
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: mpc8544ds
+        netdevice: tap
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PPC_85xx=y
+        type: mandatory
+    tags:
+      - ok
+      - 85xx
+  - name: QEMU ppce500
+    arch: powerpc
+    larch: powerpc
+    devicetype: qemu
+    devicename: qemu-ppc-ppce500
+    kernelfile: vmlinux
+    mach: powerpc
+    qemu:
+        machine: ppce500
+        netdevice: tap
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_E500=y
+        type: mandatory
+      - name: CONFIG_PPC_QEMU_E500=y
+    tags:
+      - broken
+      - 85xx
+  - name: jetson-tk1
+    arch: arm
+    devicetype: jetson-tk1
+    kernelfile: zImage
+    mach: tegra
+    dtb: tegra124-jetson-tk1.dtb
+    configs:
+      - name: CONFIG_ARCH_TEGRA=y
+        type: mandatory
+      - name: CONFIG_ARCH_TEGRA_124_SOC=y
+        type: mandatory
+    tags:
+      - ok
+  - name: sun50i-h5-libretech-all-h3-cc
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h5-libretech-all-h3-cc
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h5-libretech-all-h3-cc.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h5
+      - allwinner
+  - name: sun50i-h5-nanopi-neo-plus2
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h5-nanopi-neo-plus2
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h5-nanopi-neo-plus2.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h5
+      - allwinner
+  - name: sun7i-a20-cubietruck
+    arch: arm
+    devicetype: cubietruck
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun7i-a20-cubietruck.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a20
+      - allwinner
+  - name: sun8i-h2-plus-libretech-all-h3-cc
+    arch: arm
+    devicetype: sun8i-h2-plus-libretech-all-h3-cc
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h2-plus-libretech-all-h3-cc.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h2+
+      - allwinner
+  - name: sun8i-h2-plus-orangepi-zero
+    arch: arm
+    devicetype: sun8i-h2-plus-orangepi-zero
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h2-plus-orangepi-zero.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h2+
+      - allwinner
+  - name: sun8i-h2-plus-orangepi-r1
+    arch: arm
+    devicetype: sun8i-h2-plus-orangepi-r1
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h2-plus-orangepi-r1.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+      - name: CONFIG_USB_RTL8152=
+        type: test
+    tags:
+      - ok
+      - h2+
+      - allwinner
+  - name: sun8i-h3-libretech-all-h3-cc
+    arch: arm
+    devicetype: sun8i-h3-libretech-all-h3-cc
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h3-libretech-all-h3-cc.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h3
+      - allwinner
+  - name: sun8i-r40-bananapi-m2-ultra
+    arch: arm
+    larch: arm
+    devicetype: sun8i-r40-bananapi-m2-ultra
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-r40-bananapi-m2-ultra.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - r40
+      - allwinner
+  - name: imx6q-sabrelite
+    arch: arm
+    larch: arm
+    devicetype: imx6q-sabrelite
+    kernelfile: zImage
+    mach: imx
+    dtb: imx6q-sabrelite.dtb
+    configs:
+      - name: CONFIG_SOC_IMX6=y
+        type: mandatory
+    tags:
+      - ok
+      - imx
+  - name: meson8b-odroidc1
+    arch: arm
+    larch: arm
+    devicetype: meson8b-odroidc1
+    kernelfile: zImage
+    mach: meson
+    dtb: meson8b-odroidc1.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxbb-nanopi-k2
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxbb-nanopi-k2
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxbb-nanopi-k2.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxbb-p200
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxbb-p200
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxbb-p200.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxl-s905x-khadas-vim
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxl-s905x-khadas-vim
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxl-s905x-khadas-vim.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxl-s905x-libretech-cc
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxl-s905x-libretech-cc
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxl-s905x-libretech-cc.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxl-s805x-p241
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxl-s805x-p241
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxl-s805x-p241.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-gxm-khadas-vim2
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxm-khadas-vim2
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxm-khadas-vim2.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
