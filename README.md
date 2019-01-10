@@ -7,7 +7,8 @@ BBCI is a simple tool for building, booting and testing kernel.
 ```
 
 You can separate source, target and actions by ","
-You can also use all for source and target
+You can also use all for source and target.
+You can use defconfig for target for filtering only targets with defconfig: attribute.
 
 Example:
 build all source with all targets and boot them

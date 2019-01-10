@@ -70,7 +70,12 @@ def build(param):
     kdir = param["kdir"]
     make_opts = param["make_opts"] + " %s" % param["full_tgt"]
     print("BUILD: %s to %s" % (larch, kdir))
-    print("DEBUG: makeopts=%s" % make_opts)
+    if args.debug:
+        print("DEBUG: makeopts=%s" % make_opts)
+
+    if args.noact:
+        print("Will run make %s" % make_opts)
+        return 0
 
     if args.quiet:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
@@ -411,6 +416,9 @@ def genconfig(sourcedir, param, defconfig):
     os.chdir(sourcedir)
 
     make_opts = param["make_opts"]
+    if args.noact:
+        print("Will do make %s %s" % (make_opts, defconfig))
+        return 0
     pbuild = subprocess.Popen("make %s %s" % (make_opts, defconfig), shell=True)
     outs, err = pbuild.communicate()
 
@@ -649,6 +657,11 @@ def do_actions(all_sources, all_targets, all_actions):
     if all_targets == "all":
         for t_target in t["targets"]:
             do_actions(all_sources, t_target["name"], all_actions)
+        return 0
+    if all_targets == "defconfig":
+        for t_target in t["targets"]:
+            if "defconfig" in t_target:
+                do_actions(all_sources, t_target["name"], all_actions)
         return 0
     if re.search(",", all_targets):
         for targetarg in all_targets.split(","):
