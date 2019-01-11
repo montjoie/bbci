@@ -332,7 +332,12 @@ sources:
     directory: /usr/src/linux-stable
     gituri: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
     update_script: ./scripts/git-stable
-    tag: v4.19
+    ltag: v4.19
+  - name: gentoo-4.20
+    directory: /usr/src/gentoo/linux-4.20
+    ltag: 4.20
+    create_script: ./scripts/gentoo_add_sources.py
+    update_script: ./scripts/gentoo_add_sources.py
 templates:
   - name: SS-10
     arch: sparc
