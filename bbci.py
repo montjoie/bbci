@@ -240,8 +240,8 @@ def boot(param):
         if skip:
             continue
         goodtag = True
-        if args.tag:
-            for tag in args.tag.split(","):
+        if args.dtag:
+            for tag in args.dtag.split(","):
                 if args.debug:
                     print("DEBUG: check tag %s" % tag)
                 if not "tags" in device:
@@ -481,6 +481,9 @@ def common(sourcename, target):
     kdir = "%s/%s/%s/%s/%s" % (builddir, sourcename, larch, subarch, flavour)
     print("Builddir is %s" % kdir)
 
+    if not os.path.isdir(builddir):
+        print("DEBUG: %s not exists" % builddir)
+        os.mkdir(builddir)
     modules_dir = "%s/modules/" % builddir
     if not os.path.isdir(modules_dir):
         print("DEBUG: %s not exists" % modules_dir)
@@ -489,8 +492,9 @@ def common(sourcename, target):
     if not os.path.isdir(modules_dir):
         print("DEBUG: %s not exists" % modules_dir)
         os.mkdir(modules_dir)
-    #else:
-        #print("DEBUG: %s exists" % modules_dir)
+    if not os.path.isdir("%s/header" % builddir):
+        print("DEBUG: %s/header not exists" % builddir)
+        os.mkdir("%s/header" % builddir)
     headers_dir = "%s/header/%s" % (builddir, target)
     if not os.path.isdir(headers_dir):
         print("DEBUG: %s not exists" % headers_dir)
@@ -634,6 +638,121 @@ def do_source_update(sourcename):
 
 ###############################################################################
 ###############################################################################
+def toolchain_validate(targetname):
+    target = None
+    for t_target in t["targets"]:
+        if t_target["name"] == targetname:
+            larch = t_target["larch"]
+            target = t_target
+            break
+    if target is None:
+        print("ERROR: Cannot found target")
+        return 1
+
+    need64bits = False
+    if "bits" in target and target["bits"] == 64:
+        need64bits = True
+        if args.debug:
+            print("DEBUG: target need 64 bits")
+    if "cross_compile" in target:
+        ret = subprocess.run("%sgcc --version" % target["cross_compile"], shell = True)
+        if ret.returncode == 0:
+            if args.debug:
+                print("DEBUG: cross_compile prefix is valid")
+            return 0
+        print("ERROR: Current cross_compile settings is wrong")
+
+    print("DEBUG: Try to detect a toolchain")
+    toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
+    for toolchain in t["toolchains"]:
+        if toolchain["larch"] != larch:
+            if args.debug:
+                print("DEBUG: ignore %s due to larch %s" % (toolchain["name"], toolchain["larch"]))
+            continue
+        if need64bits:
+            if not "bits" in toolchain:
+                if args.debug:
+                    print("DEBUG: ignore %s due to missing bits" % toolchain["name"])
+                continue
+            if 64 not in toolchain["bits"]:
+                if args.debug:
+                    print("DEBUG: ignore %s due to missing 64" % toolchain["name"])
+                continue
+        print("DEBUG: Check %s" % toolchain["name"])
+        if "url" in toolchain:
+            toolchain_file = os.path.basename(toolchain["url"])
+            toolchain_subdir = toolchain_file.split(".tar")[0]
+            os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
+        if "prefix" in toolchain:
+            ret = subprocess.run("%sgcc --version" % toolchain["prefix"], shell = True)
+            if ret.returncode == 0:
+                target["cross_compile"] = toolchain["prefix"]
+                return 0
+    return 1
+
+###############################################################################
+###############################################################################
+def toolchain_download(targetname):
+    target = None
+    for t_target in t["targets"]:
+        if t_target["name"] == targetname:
+            larch = t_target["larch"]
+            target = t_target
+            break
+    if target is None:
+        print("ERROR: Cannot found target")
+        return 1
+    need64bits = False
+    if "bits" in target and target["bits"] == 64:
+        need64bits = True
+        if args.debug:
+            print("DEBUG: target need 64 bits")
+
+    print("DEBUG: try to download a toolchain for %s" % larch)
+    cachedir = os.path.expandvars(t["config"]["cache"])
+    if not os.path.isdir(cachedir):
+        os.mkdir(cachedir)
+    for toolchain in t["toolchains"]:
+        if toolchain["larch"] != larch:
+            continue
+        if need64bits:
+            if not "bits" in toolchain:
+                if args.debug:
+                    print("DEBUG: ignore %s due to missing bits" % toolchain["name"])
+                continue
+            if 64 not in toolchain["bits"]:
+                if args.debug:
+                    print("DEBUG: ignore %s due to missing 64" % toolchain["name"])
+                continue
+        if not "url" in toolchain:
+            continue
+        print("DEBUG: Check %s" % toolchain["name"])
+        if args.debug:
+            print("DEBUG: download from %s" % toolchain["url"])
+        subprocess.run("cd %s && wget -N %s" % (cachedir, toolchain["url"]), shell = True)
+        #TODO
+        toolchain_file = os.path.basename(toolchain["url"])
+        tarcmd = "tar xjf"
+        if re.search(".xz", toolchain_file):
+            tarcmd = "tar xJf"
+        toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
+        if not os.path.isdir(toolchain_dir):
+            os.mkdir(toolchain_dir)
+        toolchain_subdir = toolchain_file.split(".tar")[0]
+        subprocess.run("cd %s && %s %s/%s" % (toolchain_dir, tarcmd, cachedir, toolchain_file), shell = True)
+        if "url" in toolchain:
+            toolchain_file = os.path.basename(toolchain["url"])
+            toolchain_subdir = toolchain_file.split(".tar")[0]
+            os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
+        if "prefix" in toolchain:
+            ret = subprocess.run("%sgcc --version" % toolchain["prefix"], shell = True)
+            if ret.returncode == 0:
+                target["cross_compile"] = toolchain["prefix"]
+                return 0
+    return 1
+
+###############################################################################
+###############################################################################
 def do_actions(all_sources, all_targets, all_actions):
     #print("DEBUG: Check sources %s with target %s" % (all_sources, all_targets))
     if re.search(",", all_actions):
@@ -654,6 +773,9 @@ def do_actions(all_sources, all_targets, all_actions):
         # no need to cycle target for sources actions
         ret = do_action(all_sources, all_targets, all_actions)
         return ret
+    if all_targets is None:
+        print("ERROR: target is mandatory")
+        return 1
     if all_targets == "all":
         for t_target in t["targets"]:
             do_actions(all_sources, t_target["name"], all_actions)
@@ -669,7 +791,17 @@ def do_actions(all_sources, all_targets, all_actions):
         return 0
     # all_targets is now only one name
 
+    # validate toolchain against target
+    ret = toolchain_validate(all_targets)
+    if ret != 0:
+        if args.toolchain == "download":
+            ret = toolchain_download(all_targets)
+        else:
+            print("ERROR: no valid toolchain found for %s", all_targets)
+            return ret
+
     ret = do_action(all_sources, all_targets, all_actions)
+    return ret
 
 ###############################################################################
 ###############################################################################
@@ -683,13 +815,15 @@ templatedir = os.getcwd()
 os.environ["LC_ALL"] = "C"
 os.environ["LC_MESSAGES"] = "C"
 os.environ["LANG"] = "C"
+basepath = os.environ["PATH"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--noact", "-n", help="No act", action="store_true")
 parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
 parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
-parser.add_argument("--tag", "-T", type=str, help="Select device via some tags")
+parser.add_argument("--dtag", "-T", type=str, help="Select device via some tags")
+parser.add_argument("--toolchain", "-g", type=str, help="Toolchain operation")
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 args = parser.parse_args()

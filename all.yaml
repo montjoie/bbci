@@ -1,11 +1,77 @@
 config:
     builddir: $HOME/crossbuild
+    toolchains: $HOME/data/toolchains
+    cache: $HOME/bbci/cache
+toolchains:
+  - name: Bootlin armv7-eabihf
+    larch: arm
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/armv7-eabihf/tarballs/armv7-eabihf--glibc--stable-2018.11-1.tar.bz2
+    prefix: arm-buildroot-linux-gnueabihf-
+  - name: Linaro ARM
+    larch: arm
+    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz
+    prefix: arm-linux-gnueabihf-
+  - name: Gentoo crossdev ARM
+    larch: arm
+    prefix: armv7a-hardfloat-linux-gnueabi-
+  - name: Gentoo crossdev ARM64
+    larch: arm64
+    prefix: aarch64-unknown-linux-gnu-
+  - name: Linaro ARM64
+    larch: arm64
+    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+    prefix: aarch64-linux-gnu-
+  - name: Gentoo crossdev MIPS
+    larch: mips
+    prefix: mips-unknown-linux-gnu-
+  - name: Bootlin MIPS
+    larch: mips
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/mips32/tarballs/mips32--uclibc--stable-2018.11-1.tar.bz2
+    prefix: mips-buildroot-linux-uclibc-
+  - name: Bootlin MIPS64
+    larch: mips
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/mips64-n32/tarballs/mips64-n32--uclibc--stable-2018.11-1.tar.bz2
+    prefix: mips64-buildroot-linux-uclibc-
+    bits: {32,64}
+  - name: Bootlin PPC
+    larch: powerpc
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/powerpc-e500mc/tarballs/powerpc-e500mc--uclibc--stable-2018.11-1.tar.bz2
+    prefix: powerpc-buildroot-linux-uclibc-
+  - name: Bootlin PPC64
+    larch: powerpc
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/powerpc64-power8/tarballs/powerpc64-power8--musl--stable-2018.11-1.tar.bz2
+    prefix: powerpc64-buildroot-linux-musl-
+    bits: {32,64}
+  - name: Gentoo crossdev PPC
+    larch: powerpc
+    prefix: powerpc-unknown-linux-gnu-
+  - name: Gentoo crossdev PPC64
+    larch: powerpc
+    prefix: powerpc64-unknown-linux-gnu-
+    bits: {32,64}
+  - name: Bootlin sparc
+    larch: sparc
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparcv8/tarballs/sparcv8--uclibc--stable-2018.11-1.tar.bz2
+    prefix: sparc-buildroot-linux-uclibc-
+  - name: Bootlin sparc64
+    larch: sparc
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparc64/tarballs/sparc64--glibc--stable-2018.11-1.tar.bz2
+    prefix: sparc64-buildroot-linux-gnu-
+    bits: {32,64}
 targets:
   - name: arm_generic
     larch: arm
     cross_compile: armv7a-hardfloat-linux-gnueabi-
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "-W1"
+  - name: multi_v7_defconfig
+    larch: arm
+    flavour: defconfig
+    cross_compile: armv7a-hardfloat-linux-gnueabi-
+    defconfig: multi_v7_defconfig
+    full_tgt: dtbs Image modules LOADADDR=0x40008000
+    warnings: "-W1"
+    tags: { defconfig }
   - name: arm64_generic
     larch: arm64
     cross_compile: aarch64-unknown-linux-gnu-
@@ -113,6 +179,7 @@ targets:
     cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
+    bits: 64
   - name: mips_malta
     larch: mips
     subarch: mips32
@@ -126,6 +193,7 @@ targets:
     flavour: default
     cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
+    bits: 64
   - name: mips64_malta
     larch: mips
     subarch: mips64
@@ -133,6 +201,7 @@ targets:
     cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
+    bits: 64
   - name: mpc85xx_defconfig
     larch: powerpc
     subarch: 85xx
@@ -161,6 +230,7 @@ targets:
     subarch: pseries
     cross_compile: powerpc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
+    bits: 64
   - name: powerpc_generic
     larch: powerpc
     subarch: ppc32
@@ -175,6 +245,7 @@ targets:
     cross_compile: powerpc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
+    bits: 64
   - name: sparc_generic
     larch: sparc
     cross_compile: sparc-unknown-linux-gnu-
@@ -184,6 +255,22 @@ targets:
     subarch: sparc64
     cross_compile: sparc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
+    bits: 64
+  - name: sparc_defconfig
+    larch: sparc
+    subarch: sparc32
+    flavour: defconfig
+    cross_compile: sparc-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    defconfig: sparc32_defconfig
+  - name: sparc64_defconfig
+    larch: sparc
+    subarch: sparc64
+    flavour: defconfig
+    cross_compile: sparc64-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    defconfig: sparc64_defconfig
+    bits: 64
   - name: sunxi_defconfig
     larch: arm
     subarch: sunxi
@@ -422,7 +509,7 @@ templates:
     qemu:
         cpu: qemu64
         netdevice: tap
-        model: model=pcnet
+        model: model=e1000
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -437,7 +524,7 @@ templates:
     qemu:
         cpu: qemu32
         netdevice: tap
-        model: model=pcnet
+        model: model=e1000
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
