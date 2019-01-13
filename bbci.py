@@ -82,11 +82,11 @@ def build(param):
     else:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True)
     outs, err = pbuild.communicate()
-    builds[param["target"]] = {}
+    builds[param["targetname"]] = {}
     if err == None and pbuild.returncode == 0:
-        builds[param["target"]]["result"] = 'PASS'
+        builds[param["targetname"]]["result"] = 'PASS'
     else:
-        builds[param["target"]]["result"] = 'FAIL'
+        builds[param["targetname"]]["result"] = 'FAIL'
     return err
 
 ###############################################################################
@@ -432,38 +432,53 @@ def genconfig(sourcedir, param, defconfig):
     fconfig.write("CONFIG_MODULES=y\n")
     fconfig.write("CONFIG_IKCONFIG=y\n")
     fconfig.write("CONFIG_IKCONFIG_PROC=y\n")
+    if "configs" in param["target"]:
+        for config in param["target"]["configs"]:
+            fconfig.write(config["name"] + "\n")
+    #fconfig.write("CONFIG_XTENSA_VARIANT_DC232B=y\n")
+    #fconfig.write("CONFIG_NIOS2_PASS_CMDLINE=y\n")
+    #fconfig.write("# SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS is not set\n")
+    #fconfig.write("CONFIG_NIOS2_DTB_SOURCE_BOOL=y\n")
+    #fconfig.write('CONFIG_NIOS2_DTB_SOURCE="10m50_devboard.dts"\n')
     fconfig.close()
 
     subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
 
-    pbuild = subprocess.Popen("make %s olddefconfig" % make_opts, shell=True)
-    outs, err = pbuild.communicate()
+    if args.debug:
+        print("DEBUG: do olddefconfig")
+    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+    if args.debug:
+        print("DEBUG: sed SERIAL")
     subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell = True)
-    subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell = True)
-    print("DEBUG: genconfig end")
+    if args.debug:
+        print("DEBUG: do olddefconfig")
+    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+    if args.debug:
+        subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell = True)
+        print("DEBUG: genconfig end")
     return err
 
 ###############################################################################
 ###############################################################################
-def common(sourcename, target):
+def common(sourcename, targetname):
     sourcedir = None
-    found_target = False
+    target = None
     param = {}
     for t_target in t["targets"]:
-        if t_target["name"] == target:
-            larch = t_target["larch"]
-            found_target = True
-            if "flavour" in t_target:
-                flavour = t_target["flavour"]
+        if t_target["name"] == targetname:
+            target = t_target
+            larch = target["larch"]
+            if "flavour" in target:
+                flavour = target["flavour"]
             else:
                 flavour = "default"
-            if "subarch" in t_target:
-                subarch = t_target["subarch"]
+            if "subarch" in target:
+                subarch = target["subarch"]
             else:
                 subarch = "default"
             break;
-    if not found_target:
-        print("ERROR: target %s not found" % target)
+    if target is None:
+        print("ERROR: target %s not found" % targetname)
         sys.exit(1)
 
     for t_source in t["sources"]:
@@ -488,14 +503,14 @@ def common(sourcename, target):
     if not os.path.isdir(modules_dir):
         print("DEBUG: %s not exists" % modules_dir)
         os.mkdir(modules_dir)
-    modules_dir = "%s/modules/%s" % (builddir, target)
+    modules_dir = "%s/modules/%s" % (builddir, targetname)
     if not os.path.isdir(modules_dir):
         print("DEBUG: %s not exists" % modules_dir)
         os.mkdir(modules_dir)
     if not os.path.isdir("%s/header" % builddir):
         print("DEBUG: %s/header not exists" % builddir)
         os.mkdir("%s/header" % builddir)
-    headers_dir = "%s/header/%s" % (builddir, target)
+    headers_dir = "%s/header/%s" % (builddir, targetname)
     if not os.path.isdir(headers_dir):
         print("DEBUG: %s not exists" % headers_dir)
         os.mkdir(headers_dir)
@@ -503,36 +518,37 @@ def common(sourcename, target):
         #print("DEBUG: %s exists" % headers_dir)
 
     make_opts = "ARCH=%s" % larch
-    if "cross_compile" in t_target:
-        if t_target["cross_compile"] == "None":
+    if "cross_compile" in target:
+        if target["cross_compile"] == "None":
             print("DEBUG: native compilation")
         else:
-            make_opts = make_opts + " CROSS_COMPILE=%s" % t_target["cross_compile"]
+            make_opts = make_opts + " CROSS_COMPILE=%s" % target["cross_compile"]
     else:
         print("ERROR: missing cross_compile")
         sys.exit(1)
 
     make_opts = make_opts + " -j%d" % os.cpu_count()
-    if "warnings" in t_target:
-        make_opts = make_opts + " " + t_target["warnings"]
+    if "warnings" in target:
+        make_opts = make_opts + " " + target["warnings"]
     make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_MOD_PATH=%s INSTALL_HDR_PATH=%s" % (kdir, modules_dir, headers_dir)
-    if not "full_tgt" in t_target:
+    if not "full_tgt" in target:
         print("ERROR: Missing full_tgt")
         sys.exit(1)
-    param["full_tgt"] = t_target["full_tgt"]
+    param["full_tgt"] = target["full_tgt"]
 
     param["make_opts"] = make_opts
     param["larch"] = larch
     param["subarch"] = subarch
     param["flavour"] = flavour
     param["kdir"] = kdir
+    param["targetname"] = targetname
     param["target"] = target
     param["modules_dir"] = modules_dir
     param["sourcename"] = sourcename
 
-    if not os.path.exists("%s/.config" % kdir) or "defconfig" in t_target:
-        if "defconfig" in t_target:
-            err = genconfig(sourcedir, param, t_target["defconfig"])
+    if not os.path.exists("%s/.config" % kdir) or "defconfig" in target:
+        if "defconfig" in target:
+            err = genconfig(sourcedir, param, target["defconfig"])
             if err:
                 param["error"] = 1
             return param
@@ -544,30 +560,30 @@ def common(sourcename, target):
 
 ###############################################################################
 ###############################################################################
-def do_action(sourcename, target, action):
+def do_action(sourcename, targetname, action):
     if action == "clean":
-        print("CLEAN: %s" % target)
-        p = common(sourcename, target)
+        print("CLEAN: %s" % targetname)
+        p = common(sourcename, targetname)
         if "error" in p:
             return p["error"]
         linux_clean(p)
         return 0
     if action == "menu":
-        print("MENU: %s" % target)
-        p = common(sourcename, target)
+        print("MENU: %s" % targetname)
+        p = common(sourcename, targetname)
         if "error" in p:
             return p["error"]
         linuxmenu(p)
         return 0
     if action == "build":
-        print("BUILD: %s" % target)
-        p = common(sourcename, target)
+        print("BUILD: %s" % targetname)
+        p = common(sourcename, targetname)
         if "error" in p:
             return p["error"]
         build(p)
         return 0
     if action == "boot":
-        p = common(sourcename, target)
+        p = common(sourcename, targetname)
         if "error" in p:
             return p["error"]
         boot(p)
@@ -642,8 +658,8 @@ def toolchain_validate(targetname):
     target = None
     for t_target in t["targets"]:
         if t_target["name"] == targetname:
-            larch = t_target["larch"]
             target = t_target
+            larch = t_target["larch"]
             break
     if target is None:
         print("ERROR: Cannot found target")
@@ -794,10 +810,14 @@ def do_actions(all_sources, all_targets, all_actions):
     # validate toolchain against target
     ret = toolchain_validate(all_targets)
     if ret != 0:
-        if args.toolchain == "download":
+        if all_actions == "download":
             ret = toolchain_download(all_targets)
+            return ret
         else:
-            print("ERROR: no valid toolchain found for %s", all_targets)
+            print("ERROR: no valid toolchain found for %s" % all_targets)
+            return ret
+    else:
+        if all_actions == "download":
             return ret
 
     ret = do_action(all_sources, all_targets, all_actions)
@@ -823,7 +843,6 @@ parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", actio
 parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
 parser.add_argument("--dtag", "-T", type=str, help="Select device via some tags")
-parser.add_argument("--toolchain", "-g", type=str, help="Toolchain operation")
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 args = parser.parse_args()
