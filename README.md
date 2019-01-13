@@ -1,6 +1,18 @@
 # Build & Boot CI
 BBCI is a simple tool for building, booting and testing kernel.
 
+BBCI is licensed under the GPL-v2
+
+## External dependencies:
+For using BBCI, you need the following:
+* A LAVA instance for booting devices/qemu
+	See https://wiki.linaro.org/LAVA
+* A web server for hosting builded kernel, since LAVA need to download them
+	The docroot need to be set in lab/datadir
+* A collection of rootfs for all arches.
+	Availlable via the lab/rootfs_baseuri parameter.
+* A toolchain for building. Note that BBCI could download one for you
+
 ## Usage:
 ```
 ./bbci.py -s source -t target -a action
@@ -16,12 +28,68 @@ build all source with all targets and boot them
 ./bbci.py -s all -t all -a build,boot
 ```
 
+## Quickstart
+### build linux-next for x86
+This is an example on how to test linux-next on x86 qemu.
+This example assume you build on a X86 machine, see next example for cross compiling.
+#### Checkout sources
+```
+./bbcy.py -s next -a create
+```
+This will checkout linux-next in the directory specified in
+
+#### build linux-next for x86
+```
+./bbci.py -s next -t x86_defconfig -a build
+```
+
+#### boot the builded kernel on qemu
+```
+./bbci.py -s next -t x86_defconfig -a boot
+```
+
+### build a 4.20 linux-stable for ARM
+This is an example on how to test the 4.20 stable Linux tree on ARM qemu.
+#### Checkout sources
+Add the following source section:
+```
+  - name: stable-4.20
+    directory: $HOME/linux-stable-4.20
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+    update_script: ./scripts/git-stable
+    ltag: v4.20
+```
+Then do
+```
+./bbcy.py -s stable-4.20 -a create
+```
+This will checkout sources in $HOME/linux-stable-4.20
+
+#### Verify and download cross compile toolchain
+```
+./bbcy.py -s stable-4.20 -t arm_defconfig -a download
+```
+
+#### build the stable sources
+```
+./bbci.py -s stable-4.20 -t arm_defconfig -a build
+```
+
+#### boot the builded kernel on qemu
+```
+./bbci.py -s stable-4.20 -t arm_defconfig -a boot
+```
+
 ## Workflow
 ### build
+```
 ./bbci.py -s source -t target -a build
+```
 
 ### boot
+```
 ./bbci.py -s source -t target -a boot
+```
 
 ### Example
 
@@ -40,19 +108,29 @@ Then boot it
 ./bbci.py -s next -t arm64_generic -a boot
 ```
 
-## External dependencies:
-For using BBCI, you need the following:
-* A LAVA instance
-  	See https://wiki.linaro.org/LAVA
-* A web server for hosting builded kernel
-	The docroot need to be set in lab/datadir
-* A collection of rootfs for all arches.
-	Availlable via the lab/rootfs_baseuri parameter.
 
-TODO: more documentation on buildroot and test
+## all.yaml documentation
+### config section
+This section configure general bbci options
+```
+config:
+    builddir: 	(mandatory) where to store build output
+    toolchains: (mandatory) where to store downloaded toolchains
+    cache:	(mandatory) where to store cached objects
+```
 
+### toolchains section
+This section configure availlable toolchains
+```
+toolchains:
+  - name:	(mandatory) Name of the toolchains
+    larch:	(mandatory) The linux arch compilable by this toolchain
+    url:	(optional)  Where to download this toolchain
+    prefix:	(mandatory) The prefix of this toolchain
+```
 
-## Sources
+### Sources section
+This section configure sources and where to store them
 ```
 sources:
   - name: 		(mandatory) Nickname of the sources
@@ -77,13 +155,14 @@ Example:
 "./bbci.py -s next -a create" Will checkout linux-next in $HOME/linux-next
 "./bbci.py -s next -a update" Will update linux-next in $HOME/linux-next
 
-## Target triplet
+### Target triplet section
 Target triplet are arch/subarch/flavour:
 * Arch need to be set to arch as used by Linux.
 * Subarch are for either, SoC names for ARM/ARM64, 32/64 for others.
 * Flavour are for having different kernel for the same arch/subarch
 
 ```
+targets:
   - name: 		(mandatory) Name of the target
     larch:		(mandatory) Architecture as called by Linux
     cross_compile:	(mandatory) cross_compile prefix (or None)
@@ -100,7 +179,7 @@ Examples:
 
 Note: If defconfig is not set, a .config must be already present in the final build directory.
 
-## LAVA Lab
+### LAVA Lab section
 The labs entry describes a LAVA lab and how to interact with it.
 ```
 labs:
@@ -136,6 +215,22 @@ labs:
     tags:			(optional)
       - ok
 ```
+
+# TODO list
+<ul>
+<li>
+Implement a local qemu boot without LAVA
+</li>
+<li>
+Split all.yaml in config.yaml + many linuxarch.yaml
+</li>
+<li>
+More arch
+</li>
+<li>
+more documentation on buildroot and test
+</li>
+</ul>
 
 # WIP
 ## LAVA support
