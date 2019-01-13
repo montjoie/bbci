@@ -109,6 +109,16 @@ def boot(param):
         endian="big"
     else:
         endian="little"
+    if re.search("CONFIG_NIOS2=", kconfigs):
+        print("NIOS2")
+        arch="nios2"
+        arch_endian="nios2"
+        qarch="nios2"
+    if re.search("CONFIG_XTENSA=", kconfigs):
+        print("XTENSA")
+        arch="xtensa"
+        arch_endian="xtensa"
+        qarch="xtensa"
     if re.search("CONFIG_SPARC32=", kconfigs):
         print("SPARC32")
         arch="sparc"

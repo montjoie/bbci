@@ -58,6 +58,14 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparc64/tarballs/sparc64--glibc--stable-2018.11-1.tar.bz2
     prefix: sparc64-buildroot-linux-gnu-
     bits: {32,64}
+  - name: Bootlin xtensa
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/xtensa-lx60/tarballs/xtensa-lx60--uclibc--bleeding-edge-2018.11-1.tar.bz2
+    larch: xtensa
+    prefix: xtensa-buildroot-linux-uclibc-
+  - name: Bootlin nios2
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/nios2/tarballs/nios2--glibc--stable-2018.11-1.tar.bz2
+    larch: nios2
+    prefix: nios2-buildroot-linux-gnu-
 targets:
   - name: arm_generic
     larch: arm
@@ -311,6 +319,26 @@ targets:
     cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
+  - name: smp_lx200_defconfig
+    larch: xtensa
+    cross_compile: None
+    full_tgt: uImage modules dtbs
+    warnings: "-W1"
+    defconfig: smp_lx200_defconfig
+    configs:
+      - name: "CONFIG_XTENSA_VARIANT_DC232B=y"
+  - name: 10m50_defconfig
+    larch: nios2
+    flavour: defconfig
+    full_tgt: vmlinux modules dtbs 10m50_devboard.dtb
+    warnings: "-W1"
+    defconfig: 10m50_defconfig
+    configs:
+      - name: "CONFIG_NIOS2_PASS_CMDLINE=y"
+      - name: "CONFIG_NIOS2_DTB_SOURCE_BOOL=y"
+      - name: 'CONFIG_NIOS2_DTB_SOURCE="10m50_devboard.dts"'
+      - name: "CONSOLE_SERIAL_ALTERA_JTAGUART_CONSOLE=y"
+      - name: "# CONFIG_SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS is not set"
 labs:
   - name: local
     lavauri: http://admin:pass@127.0.0.1/RPC2
@@ -741,6 +769,62 @@ templates:
     tags:
       - broken
       - 85xx
+  - name: QEMU xtensa-lx60
+    arch: xtensa
+    larch: xtensa
+    devicetype: qemu
+    devicename: qemu-xtensa-lx60
+    kernelfile: uImage
+    mach: xtensa
+    qemu:
+        machine: lx60
+        netdevice: tap
+        memory: 512
+        guestfs_interface: none
+        extra_options:
+        - '-append "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_XTENSA_VARIANT_DC232B=y
+        type: mandatory
+    tags:
+      - ok
+  - name: QEMU xtensa-lx200
+    arch: xtensa
+    larch: xtensa
+    devicetype: qemu
+    devicename: qemu-xtensa-lx200
+    kernelfile: uImage
+    mach: xtensa
+    qemu:
+        machine: lx200
+        netdevice: tap
+        memory: 512
+        guestfs_interface: none
+        extra_options:
+        - '-append "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_XTENSA_VARIANT_DC232B=y
+        type: mandatory
+    tags:
+      - ok
+  - name: QEMU nios2 10m50-ghrd
+    arch: nios2
+    devicetype: qemu
+    devicename: qemu-nios2-10m50-ghrd
+    kernelfile: vmlinux
+    mach: nios2
+    qemu:
+        machine: 10m50-ghrd
+        netdevice: tap
+        memory: 512
+        guestfs_interface: none
+        extra_options:
+        - '-append "earlycon=uart8250,mmio32,0x18001600 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_NIOS2=y
+        type: mandatory
+    tags:
+      - ok
   - name: jetson-tk1
     arch: arm
     devicetype: jetson-tk1
