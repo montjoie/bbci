@@ -319,6 +319,16 @@ targets:
     cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
+  - name: generic_kc705_defconfig
+    larch: xtensa
+    subarch: kc705
+    flavour: defconfig
+    cross_compile: None
+    full_tgt: uImage modules dtbs
+    warnings: "-W1"
+    defconfig: generic_kc705_defconfig
+    configs:
+      - name: "CONFIG_XTENSA_VARIANT_DC232B=y"
   - name: smp_lx200_defconfig
     larch: xtensa
     cross_compile: None
@@ -622,7 +632,7 @@ templates:
     tags:
       - ok
       - virtex
-      - notest
+      - notests
   - name: QEMU PPC Sam460ex
     arch: powerpc
     devicetype: qemu
@@ -787,7 +797,7 @@ templates:
       - name: CONFIG_XTENSA_VARIANT_DC232B=y
         type: mandatory
     tags:
-      - ok
+      - broken
   - name: QEMU xtensa-lx200
     arch: xtensa
     larch: xtensa
@@ -806,7 +816,7 @@ templates:
       - name: CONFIG_XTENSA_VARIANT_DC232B=y
         type: mandatory
     tags:
-      - ok
+      - broken
   - name: QEMU nios2 10m50-ghrd
     arch: nios2
     devicetype: qemu
@@ -825,6 +835,7 @@ templates:
         type: mandatory
     tags:
       - ok
+      - notests
   - name: jetson-tk1
     arch: arm
     devicetype: jetson-tk1
