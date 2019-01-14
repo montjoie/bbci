@@ -313,6 +313,15 @@ def boot(param):
         jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s" % (git_describe, sourcename, larch, subarch, flavour, devicename))
         # now convert to YAML
         ft = yaml.load(jobt)
+        for dtag in device["tags"]:
+            if dtag == "notests":
+                if args.debug:
+                    print("DEBUG: Remove test from job")
+                newaction = []
+                for action in ft["actions"]:
+                    if "test" not in action:
+                        newaction.append(action)
+                ft["actions"] = newaction
         if "dtb" in device:
             for action in ft["actions"]:
                 if "deploy" in action:
@@ -354,7 +363,8 @@ def boot(param):
     #        for action in ft["actions"]:
     #            if "boot" in action:
     #                action["boot"]["commands"] = "ramdisk"
-        fw = open("job-%s.yaml" % devicename, "w")
+        cachedir = os.path.expandvars(t["config"]["cache"])
+        fw = open("%s/job-%s.yaml" % (cachedir, devicename), "w")
         yaml.dump(ft, fw, default_flow_style=False)
         fw.close()
         jobf.close()
@@ -402,7 +412,7 @@ def boot(param):
                 os.mkdir("%s/%s" % (outputdir, lab["name"]))
             result = subprocess.check_output("chmod -R o+rX %s" % datadir, shell=True)
             #print(result.decode("UTF-8"))
-            jobf = open("job-%s.yaml" % devicename)
+            jobf = open("%s/job-%s.yaml" % (cachedir, devicename))
             jobt = jobf.read()
             jobf.close()
             jobt = jobt.replace("__BOOT_FQDN__", lab["datahost_baseuri"])
