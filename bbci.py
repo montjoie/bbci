@@ -691,6 +691,10 @@ def toolchain_validate(targetname):
         if args.debug:
             print("DEBUG: target need 64 bits")
     if "cross_compile" in target:
+        if target["cross_compile"] == "None":
+            if args.debug:
+                print("DEBUG: no need for cross_compile")
+            return 0
         ret = subprocess.run("%sgcc --version" % target["cross_compile"], shell = True)
         if ret.returncode == 0:
             if args.debug:
