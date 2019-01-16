@@ -452,14 +452,12 @@ def genconfig(sourcedir, param, defconfig):
     fconfig.write("CONFIG_MODULES=y\n")
     fconfig.write("CONFIG_IKCONFIG=y\n")
     fconfig.write("CONFIG_IKCONFIG_PROC=y\n")
+    fconfig.write("CONFIG_DMA_API_DEBUG=y\n")
+    fconfig.write("CONFIG_DEBUG_INFO=y\n")
+    fconfig.write("CONFIG_DEBUG_KERNEL=y\n")
     if "configs" in param["target"]:
         for config in param["target"]["configs"]:
             fconfig.write(config["name"] + "\n")
-    #fconfig.write("CONFIG_XTENSA_VARIANT_DC232B=y\n")
-    #fconfig.write("CONFIG_NIOS2_PASS_CMDLINE=y\n")
-    #fconfig.write("# SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS is not set\n")
-    #fconfig.write("CONFIG_NIOS2_DTB_SOURCE_BOOL=y\n")
-    #fconfig.write('CONFIG_NIOS2_DTB_SOURCE="10m50_devboard.dts"\n')
     fconfig.close()
 
     subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
