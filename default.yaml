@@ -36,9 +36,9 @@ notify:
 job_name: __JOBNAME__
 timeouts:
   job:
-    minutes: 15
+    minutes: 20
   action:
-   minutes: 15
+   minutes: 20
   actions:
     power-off:
       seconds: 30
@@ -73,7 +73,7 @@ actions:
 
 - test:
     timeout:
-        minutes: 15
+        minutes: 20
     definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
