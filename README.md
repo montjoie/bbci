@@ -260,4 +260,14 @@ patch will be sent upstream soon
 
 ### SPARC64
 * niagara: need external firmware
-* sun4v: expirimental, fail to boot
+* sun4v: experimental, fail to boot
+
+### nios2
+* No test (missing storage)
+
+### xtensa
+* boot stuck
+
+### openrisc
+* Not enough RAM for test
+* Need initrd at buildtime
