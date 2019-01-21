@@ -66,6 +66,14 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/nios2/tarballs/nios2--glibc--stable-2018.11-1.tar.bz2
     larch: nios2
     prefix: nios2-buildroot-linux-gnu-
+  - name: Bootlin microblaze
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/microblazeel/tarballs/microblazeel--uclibc--stable-2018.11-1.tar.bz2
+    larch: microblaze
+    prefix: microblazeel-buildroot-linux-uclibc-
+  - name: Bootlin openrisc
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--uclibc--stable-2018.11-1.tar.bz2
+    larch: openrisc
+    prefix: or1k-buildroot-linux-uclibc-
 targets:
   - name: arm_generic
     larch: arm
@@ -77,7 +85,7 @@ targets:
     flavour: defconfig
     cross_compile: armv7a-hardfloat-linux-gnueabi-
     defconfig: multi_v7_defconfig
-    full_tgt: dtbs Image modules LOADADDR=0x40008000
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
     tags: { defconfig }
   - name: arm64_generic
@@ -450,33 +458,64 @@ templates:
     mach: qemu
     qemu:
         machine: virt
+        memory: 1024
         cpu: cortex-a57
-        guestfs_interface: none
+        guestfs_interface: virtio
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
-        - '-device virtio-blk-device,drive=test'
     configs:
       - name: RTC_DRV_PL031?
       - name: PCIE?
     tags:
       - ok
+      - virt
   - name: qemu-vexpress-a9
     arch: arm
     devicetype: qemu
     devicename: qemu-vexpress-a9
     kernelfile: zImage
+    dtb: vexpress-v2p-ca9.dtb
     mach: qemu
     qemu:
         machine: vexpress-a9
         cpu: cortex-a9
+        model: model=lan9118
         guestfs_interface: none
         extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        - '-append "console=ttyAMA0 root=/dev/ram0"'
         - '-device virtio-blk-device,drive=test'
     configs:
-      - name: ARCH_VEXPRESS
-      - name: MTD_CFI?
-      - name: RTC_DRV_PL031?
+      - name: CONFIG_ARCH_VEXPRESS
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - vexpress
+  - name: qemu-vexpress-a15
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-vexpress-a115
+    kernelfile: zImage
+    dtb: vexpress-v2p-ca15-tc1.dtb
+    mach: qemu
+    qemu:
+        machine: vexpress-a15
+        cpu: cortex-a15
+        model: model=lan9118
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttyAMA0 root=/dev/ram0"'
+        - '-device virtio-blk-device,drive=test'
+    configs:
+      - name: CONFIG_ARCH_VEXPRESS
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
     tags:
       - ok
       - vexpress
@@ -493,7 +532,8 @@ templates:
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
-      - name: ARCH_IMX6Q?
+      - name: CONFIG_SOC_IMX6=y
+        type: mandatory
       - name: IMX_SATA?
       - name: SERIAL?
     tags:
@@ -508,10 +548,8 @@ templates:
         machine: malta
         memory: 128
         model: model=pcnet
-        guestfs_interface: none
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
-        - "-device ide-hd,drive=test"
     configs:
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
@@ -531,10 +569,8 @@ templates:
         machine: malta
         memory: 128
         model: model=pcnet
-        guestfs_interface: none
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
-        - "-device ide-hd,drive=test"
     configs:
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
