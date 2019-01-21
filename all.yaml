@@ -384,6 +384,21 @@ sources:
     ltag: 4.20
     create_script: ./scripts/gentoo_add_sources.py
     update_script: ./scripts/gentoo_add_sources.py
+configoverlays:
+  - name: crypto
+    list:
+      - config: CONFIG_CRYPTO_USER_API_HASH=m
+      - config: CONFIG_CRYPTO_USER_API_SKCIPHER=m
+      - config: CONFIG_CRYPTO_USER_API_RNG=m
+      - config: CONFIG_CRYPTO_TEST=m
+      - config: CONFIG_CRYPTO_XTS=m
+      - config: CONFIG_DM_CRYPT=y
+      - config: "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set"
+  - name: debug
+    list:
+      - config: CONFIG_DMA_API_DEBUG=y
+      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_KERNEL=y
 templates:
   - name: SS-10
     arch: sparc

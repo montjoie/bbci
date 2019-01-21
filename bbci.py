@@ -143,6 +143,7 @@ def boot(param):
         if re.search("CONFIG_64BIT=y", kconfigs):
             print("MIPS64")
             arch="mips64"
+            qarch="mips64"
             if endian == 'big':
                 arch_endian="mips64be"
             else:
@@ -432,6 +433,24 @@ def boot(param):
 
 ###############################################################################
 ###############################################################################
+# TODO finish this
+def add_config(param, config):
+    fconfig = open("%s/.config" % param["kdir"], 'r')
+    if re.search(config, fconfig.read()):
+        print("%s already here" % config)
+        fconfig.close()
+        return 0
+    fconfig.close()
+    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+    fconfig = open("%s/.config" % param["kdir"], 'a')
+    fconfig.write("%s\n" % config)
+    fconfig.close()
+    make_opts = param["make_opts"]
+    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+    print("===============================")
+    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+###############################################################################
+###############################################################################
 def genconfig(sourcedir, param, defconfig):
     os.chdir(sourcedir)
 
@@ -444,7 +463,8 @@ def genconfig(sourcedir, param, defconfig):
 
     shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
     # add needed options for LAVA
-    print("DEBUG: add LAVA configs")
+    if args.debug:
+        print("DEBUG: add LAVA configs")
     fconfig = open("%s/.config" % param["kdir"], 'a')
     fconfig.write("CONFIG_BLK_DEV_INITRD=y\n")
     fconfig.write("CONFIG_BLK_DEV_RAM=y\n")
@@ -452,9 +472,41 @@ def genconfig(sourcedir, param, defconfig):
     fconfig.write("CONFIG_MODULES=y\n")
     fconfig.write("CONFIG_IKCONFIG=y\n")
     fconfig.write("CONFIG_IKCONFIG_PROC=y\n")
-    fconfig.write("CONFIG_DMA_API_DEBUG=y\n")
-    fconfig.write("CONFIG_DEBUG_INFO=y\n")
-    fconfig.write("CONFIG_DEBUG_KERNEL=y\n")
+    fconfig.close()
+
+    if args.configoverlay:
+        for coverlay in args.configoverlay.split(","):
+            if coverlay == "fullsound":
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+            if coverlay == "fulldrm":
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+            if coverlay == "fullcrypto":
+                fconfig = open("%s/.config" % param["kdir"], 'a')
+                fconfig.write("CONFIG_MD=y\n")
+                fconfig.write("CONFIG_BLK_DEV_DM=y\n")
+                fconfig.write("CONFIG_DM_CRYPT=m\n")
+                fconfig.close()
+                #add_config(param, "CONFIG_MD=y")
+                #add_config(param, "CONFIG_BLK_DEV_DM=y")
+                #add_config(param, "CONFIG_DM_CRYPT=m")
+                subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+                continue
+            if coverlay == "fulldebug":
+                subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*DEBUG.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+                continue
+            for overlay in t["configoverlays"]:
+                if overlay["name"] == coverlay:
+                    fconfig = open("%s/.config" % param["kdir"], 'a')
+                    for oconfig in overlay["list"]:
+                        fconfig.write("%s\n" % oconfig["config"])
+                    fconfig.close()
+
+    fconfig = open("%s/.config" % param["kdir"], 'a')
     if "configs" in param["target"]:
         for config in param["target"]["configs"]:
             fconfig.write(config["name"] + "\n")
@@ -512,7 +564,8 @@ def common(sourcename, targetname):
     builddir = os.path.expandvars(t["config"]["builddir"])
 
     kdir = "%s/%s/%s/%s/%s" % (builddir, sourcename, larch, subarch, flavour)
-    print("Builddir is %s" % kdir)
+    if args.debug:
+        print("DEBUG: Builddir is %s" % kdir)
 
     if not os.path.isdir(builddir):
         print("DEBUG: %s not exists" % builddir)
@@ -693,14 +746,15 @@ def toolchain_validate(targetname):
             if args.debug:
                 print("DEBUG: no need for cross_compile")
             return 0
-        ret = subprocess.run("%sgcc --version" % target["cross_compile"], shell = True)
+        ret = subprocess.run("%sgcc --version > /dev/null" % target["cross_compile"], shell = True)
         if ret.returncode == 0:
             if args.debug:
                 print("DEBUG: cross_compile prefix is valid")
             return 0
         print("ERROR: Current cross_compile settings is wrong")
 
-    print("DEBUG: Try to detect a toolchain")
+    if args.debug:
+        print("DEBUG: Try to detect a toolchain")
     toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
     for toolchain in t["toolchains"]:
         if toolchain["larch"] != larch:
@@ -716,13 +770,14 @@ def toolchain_validate(targetname):
                 if args.debug:
                     print("DEBUG: ignore %s due to missing 64" % toolchain["name"])
                 continue
-        print("DEBUG: Check %s" % toolchain["name"])
+        if args.debug:
+            print("DEBUG: Check %s" % toolchain["name"])
         if "url" in toolchain:
             toolchain_file = os.path.basename(toolchain["url"])
             toolchain_subdir = toolchain_file.split(".tar")[0]
             os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
         if "prefix" in toolchain:
-            ret = subprocess.run("%sgcc --version" % toolchain["prefix"], shell = True)
+            ret = subprocess.run("%sgcc --version >/dev/null" % toolchain["prefix"], shell = True)
             if ret.returncode == 0:
                 target["cross_compile"] = toolchain["prefix"]
                 return 0
@@ -783,7 +838,7 @@ def toolchain_download(targetname):
             toolchain_subdir = toolchain_file.split(".tar")[0]
             os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
         if "prefix" in toolchain:
-            ret = subprocess.run("%sgcc --version" % toolchain["prefix"], shell = True)
+            ret = subprocess.run("%sgcc --version > /dev/null" % toolchain["prefix"], shell = True)
             if ret.returncode == 0:
                 target["cross_compile"] = toolchain["prefix"]
                 return 0
@@ -814,14 +869,23 @@ def do_actions(all_sources, all_targets, all_actions):
     if all_targets is None:
         print("ERROR: target is mandatory")
         return 1
-    if all_targets == "all":
+    if all_targets == "all" or all_targets == "defconfig":
         for t_target in t["targets"]:
-            do_actions(all_sources, t_target["name"], all_actions)
-        return 0
-    if all_targets == "defconfig":
-        for t_target in t["targets"]:
-            if "defconfig" in t_target:
+            if all_targets == "defconfig" and "defconfig" not in t_target:
+                continue
+            useit = False
+            if args.ttag:
+                if args.debug:
+                    print("Select target by tags")
+                for tag in args.ttag.split(","):
+                    if tag == t_target["larch"]:
+                        useit = True
+            else:
+                useit = True
+            if useit:
                 do_actions(all_sources, t_target["name"], all_actions)
+            else:
+                print("DEBUG: ignored due to missing tag")
         return 0
     if re.search(",", all_targets):
         for targetarg in all_targets.split(","):
@@ -864,9 +928,11 @@ parser.add_argument("--noact", "-n", help="No act", action="store_true")
 parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
 parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
-parser.add_argument("--dtag", "-T", type=str, help="Select device via some tags")
+parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
+parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
+parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 args = parser.parse_args()
 
 tfile = open("all.yaml")
