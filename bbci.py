@@ -543,16 +543,19 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_MD=y")
                 enable_config(param, "CONFIG_BLK_DEV_DM=y")
                 enable_config(param, "CONFIG_DM_CRYPT=m")
-                print("======================================")
-                subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+                if args.debug:
+                    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+                if args.debug:
+                    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
             if coverlay == "fulldebug":
-                subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+                if args.debug:
+                    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*DEBUG.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+                if args.debug:
+                    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
             if coverlay == "hack_drm_mxfsb":
                 disable_config(param, "CONFIG_DRM_MXSFB")
@@ -944,7 +947,7 @@ def do_actions(all_sources, all_targets, all_actions):
             useit = False
             if args.ttag:
                 if args.debug:
-                    print("Select target by tags")
+                    print("DEBUG: Select target by tags")
                 for tag in args.ttag.split(","):
                     if tag == t_target["larch"]:
                         useit = True

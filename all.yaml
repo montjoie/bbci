@@ -598,6 +598,7 @@ templates:
         type: blacklist
     tags:
       - ok
+      - notests
   - name: MIPS malta
     arch: mips
     devicetype: qemu
