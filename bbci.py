@@ -369,6 +369,27 @@ def boot(param):
         yaml.dump(ft, fw, default_flow_style=False)
         fw.close()
         jobf.close()
+        if "doqemu" in param:
+            if not "qemu" in device:
+                return 0
+            qemu_cmd = "qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
+            if "extra_options" in device["qemu"]:
+                for extrao in device["qemu"]["extra_options"]:
+                    qemu_cmd += " %s" % extrao
+            qemu_cmd += " -drive format=qcow2,file=$HOME/bbci/flash.bin"
+            if "dtb" in device:
+                dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
+                if not os.path.isfile(dtbfile):
+                    print("SKIP: no dtb at %s" % dtbfile)
+                    continue
+                qemu_cmd += " -dtb %s" % dtbfile
+            if "memory" in device["qemu"]:
+                qemu_cmd += " -m %s" % device["qemu"]["memory"]
+            print(qemu_cmd)
+            subprocess.run(qemu_cmd, shell=True)
+            return 0
+
+        # now try to boot on LAVA
         for lab in t["labs"]:
             send_to_lab = False
             print("\tCheck %s on %s" % (devicename, lab["name"]))
@@ -433,22 +454,60 @@ def boot(param):
 
 ###############################################################################
 ###############################################################################
-# TODO finish this
-def add_config(param, config):
-    fconfig = open("%s/.config" % param["kdir"], 'r')
-    if re.search(config, fconfig.read()):
-        print("%s already here" % config)
-        fconfig.close()
-        return 0
-    fconfig.close()
-    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
-    fconfig = open("%s/.config" % param["kdir"], 'a')
-    fconfig.write("%s\n" % config)
-    fconfig.close()
+def enable_config(param, econfig):
+    rawconfig = econfig.split("=")[0]
+
+    if args.debug:
+        print("DEBUG: Try enable config %s" % econfig)
+        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+    with open("%s/.config" % param["kdir"], 'r') as fconfig:
+        wconfig = fconfig.read()
+    if re.search("=", econfig):
+        if re.search("%s" % econfig, wconfig):
+            if args.debug:
+                print("DEBUG: %s is already enabled" % econfig)
+            return 0
+        wconfig = re.sub("# %s is not set" % rawconfig, "%s" % econfig, wconfig)
+        # handle case CONFIG="" replaced by CONFIG="xxxx"
+        wconfig = re.sub("%s=.*" % rawconfig, "%s" % econfig, wconfig)
+    else:
+        if re.search("%s=" % econfig, wconfig):
+            if args.debug:
+                print("DEBUG: %s is already enabled" % econfig)
+            return 0
+        wconfig = re.sub("# %s is not set" % rawconfig, "%s=y" % econfig, wconfig)
+    with open("%s/.config" % param["kdir"], 'w') as fconfig:
+         fconfig.write(wconfig)
+    make_opts = param["make_opts"]
+    if args.debug:
+        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+    pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
+    if args.debug:
+        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+
+###############################################################################
+###############################################################################
+def disable_config(param, dconfig):
+    if args.debug:
+        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+    with open("%s/.config" % param["kdir"], 'r') as fconfig:
+        wconfig = fconfig.read()
+        if not re.search("^%s=" % dconfig, wconfig):
+            print("DEBUG: %s is already disabled" % dconfig)
+            return 0
+    wconfig = re.sub("%s.*" % dconfig, "# %s is not set" % dconfig, wconfig)
+    with open("%s/.config" % param["kdir"], 'w') as fconfig:
+         fconfig.write(wconfig)
+    if args.debug:
+        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
     make_opts = param["make_opts"]
     pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
-    print("===============================")
-    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+    # verify it is still disabled
+    with open("%s/.config" % param["kdir"], 'r') as fconfig:
+        wconfig = fconfig.read()
+        if re.search("^%s=" % dconfig, wconfig):
+            print("BADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+
 ###############################################################################
 ###############################################################################
 def genconfig(sourcedir, param, defconfig):
@@ -465,14 +524,13 @@ def genconfig(sourcedir, param, defconfig):
     # add needed options for LAVA
     if args.debug:
         print("DEBUG: add LAVA configs")
-    fconfig = open("%s/.config" % param["kdir"], 'a')
-    fconfig.write("CONFIG_BLK_DEV_INITRD=y\n")
-    fconfig.write("CONFIG_BLK_DEV_RAM=y\n")
-    fconfig.write("CONFIG_DEVTMPFS_MOUNT=y\n")
-    fconfig.write("CONFIG_MODULES=y\n")
-    fconfig.write("CONFIG_IKCONFIG=y\n")
-    fconfig.write("CONFIG_IKCONFIG_PROC=y\n")
-    fconfig.close()
+    enable_config(param, "CONFIG_BLK_DEV_INITRD")
+    enable_config(param, "CONFIG_BLK_DEV_RAM=y")
+    enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y")
+    enable_config(param, "CONFIG_MODULES=y")
+    enable_config(param, "CONFIG_DEVTMPFS_MOUNT")
+    enable_config(param, "CONFIG_IKCONFIG")
+    enable_config(param, "CONFIG_IKCONFIG_PROC")
 
     if args.configoverlay:
         for coverlay in args.configoverlay.split(","):
@@ -481,14 +539,11 @@ def genconfig(sourcedir, param, defconfig):
             if coverlay == "fulldrm":
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
             if coverlay == "fullcrypto":
-                fconfig = open("%s/.config" % param["kdir"], 'a')
-                fconfig.write("CONFIG_MD=y\n")
-                fconfig.write("CONFIG_BLK_DEV_DM=y\n")
-                fconfig.write("CONFIG_DM_CRYPT=m\n")
-                fconfig.close()
-                #add_config(param, "CONFIG_MD=y")
-                #add_config(param, "CONFIG_BLK_DEV_DM=y")
-                #add_config(param, "CONFIG_DM_CRYPT=m")
+                enable_config(param, "CONFIG_CRYPTO_CBC=y")
+                enable_config(param, "CONFIG_MD=y")
+                enable_config(param, "CONFIG_BLK_DEV_DM=y")
+                enable_config(param, "CONFIG_DM_CRYPT=m")
+                print("======================================")
                 subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
@@ -499,18 +554,24 @@ def genconfig(sourcedir, param, defconfig):
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*DEBUG.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
                 subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
+            if coverlay == "hack_drm_mxfsb":
+                disable_config(param, "CONFIG_DRM_MXSFB")
+                disable_config(param, "CONFIG_DRM_IMX")
+                disable_config(param, "CONFIG_CAN_FLEXCAN")
             for overlay in t["configoverlays"]:
                 if overlay["name"] == coverlay:
-                    fconfig = open("%s/.config" % param["kdir"], 'a')
                     for oconfig in overlay["list"]:
-                        fconfig.write("%s\n" % oconfig["config"])
-                    fconfig.close()
+                        if "disable" in oconfig:
+                            disable_config(param, oconfig["config"])
+                        else:
+                            enable_config(param, oconfig["config"])
 
-    fconfig = open("%s/.config" % param["kdir"], 'a')
     if "configs" in param["target"]:
-        for config in param["target"]["configs"]:
-            fconfig.write(config["name"] + "\n")
-    fconfig.close()
+        for tconfig in param["target"]["configs"]:
+            if "disable" in tconfig:
+                disable_config(param, tconfig["name"])
+            else:
+                enable_config(param, tconfig["name"])
 
     subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
 
@@ -657,6 +718,13 @@ def do_action(sourcename, targetname, action):
         p = common(sourcename, targetname)
         if "error" in p:
             return p["error"]
+        boot(p)
+        return 0
+    if action == "qemu":
+        p = common(sourcename, targetname)
+        if "error" in p:
+            return p["error"]
+        p["doqemu"] = True
         boot(p)
         return 0
     if action == "update":
@@ -917,6 +985,10 @@ outputdir = "/tmp/joboutput/"
 boots = {}
 builds = {}
 templatedir = os.getcwd()
+
+os.nice(19)
+# ionice need root priv
+#subprocess.run("ionice --class 3 --pid %s" % os.getpid())
 
 os.environ["LC_ALL"] = "C"
 os.environ["LC_MESSAGES"] = "C"

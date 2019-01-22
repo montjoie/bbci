@@ -191,7 +191,35 @@ labs:
     rootfs_baseuri:	(mandatory) Base URI to access rootfs
 ```
 
-## Device job template
+### Config overlays
+When building defconfig, sometime it miss some needed options.
+Config overlays permit to tweak some configs after the defconfig generation
+You can add configoverlays via the "-o". Multiple overlays can be specified, separated by ",".
+
+```
+configoverlays:
+  - name: crypto
+    list:
+      - config: config to enable
+      - config: config to disable
+        disable: True
+```
+Example:
+```
+  - name: debug
+    list:
+      - config: CONFIG_DMA_API_DEBUG=y
+      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_KERNEL=y
+```
+
+The following config overlays are hardcoded:
+* fulldebug: Enable all debug options
+* fullcrypto: Enable all crypto options
+* fulldrm: Enable all DRM options
+* fullsound: Enable all sound options
+
+### Device job template
 ```
   - name: unused
     arch: 		(mandatory)	Arch of the device

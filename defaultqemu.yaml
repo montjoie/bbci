@@ -30,9 +30,9 @@ device_type: qemu
 job_name: __JOBNAME__
 timeouts:
   job:
-    minutes: 15
+    minutes: 20
   action:
-   minutes: 5
+   minutes: 10
   actions:
     power-off:
       seconds: 30

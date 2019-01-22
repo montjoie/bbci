@@ -356,7 +356,28 @@ targets:
       - name: "CONFIG_NIOS2_DTB_SOURCE_BOOL=y"
       - name: 'CONFIG_NIOS2_DTB_SOURCE="10m50_devboard.dts"'
       - name: "CONSOLE_SERIAL_ALTERA_JTAGUART_CONSOLE=y"
-      - name: "# CONFIG_SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS is not set"
+      - name: "CONFIG_SERIAL_ALTERA_JTAGUART_CONSOLE_BYPASS"
+        disable: True
+  - name: microblaze_mmu_defconfig
+    larch: microblaze
+    subarch: mmu
+    flavour: defconfig
+    full_tgt: vmlinux modules linux.bin
+    warnings: "-W1"
+    defconfig: mmu_defconfig
+    configs:
+      - name: 'CONFIG_XILINX_MICROBLAZE0_FAMILY="spartan3adsp"'
+      - name: 'CONFIG_CPU_BIG_ENDIAN=y'
+  - name: or1ksim_defconfig
+    larch: openrisc
+    subarch: default
+    flavour: defconfig
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+    defconfig: or1ksim_defconfig
+    configs:
+      - name: 'CONFIG_RD_GZIP=y'
+      - name: 'CONFIG_INITRAMFS_SOURCE="/home/compile/bbci/rootfs.cpio"'
 labs:
   - name: local
     lavauri: http://admin:pass@127.0.0.1/RPC2
@@ -366,7 +387,7 @@ labs:
     rootfs_baseuri: http://boot.montjoie.local
 sources:
   - name: next
-    directory: /usr/src/linux-next
+    directory: $HOME/linux-next
     gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     update_script: ./scripts/git-stable
     ltag: next-
@@ -393,7 +414,8 @@ configoverlays:
       - config: CONFIG_CRYPTO_TEST=m
       - config: CONFIG_CRYPTO_XTS=m
       - config: CONFIG_DM_CRYPT=y
-      - config: "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set"
+      - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
+        disable: True
   - name: debug
     list:
       - config: CONFIG_DMA_API_DEBUG=y
@@ -455,7 +477,7 @@ templates:
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
-        - "-device ide-hd,drive=test"
+        - "-device ide-hd,drive=lavatest"
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -498,7 +520,7 @@ templates:
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
-        - '-device virtio-blk-device,drive=test'
+        - '-device virtio-blk-device,drive=lavatest'
     configs:
       - name: CONFIG_ARCH_VEXPRESS
         type: mandatory
@@ -523,7 +545,7 @@ templates:
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
-        - '-device virtio-blk-device,drive=test'
+        - '-device virtio-blk-device,drive=lavatest'
     configs:
       - name: CONFIG_ARCH_VEXPRESS
         type: mandatory
@@ -553,6 +575,29 @@ templates:
       - name: SERIAL?
     tags:
       - broken
+  - name: qemu-imx-mcimx6ul-evk
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-imx-mcimx6ul-evk
+    kernelfile: zImage
+    dtb: imx6ul-14x14-evk.dtb
+    mach: qemu
+    qemu:
+        machine: mcimx6ul-evk
+        cpu: cortex-a9
+        memory: 256
+        guestfs_interface: none
+        extra_options:
+        - '-append "console=ttymxc0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_SOC_IMX6=y
+        type: mandatory
+      - name: IMX_SATA?
+      - name: SERIAL?
+      - name: CONFIG_DRM_MXSFB=
+        type: blacklist
+    tags:
+      - ok
   - name: MIPS malta
     arch: mips
     devicetype: qemu
@@ -699,7 +744,7 @@ templates:
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
         - '-device virtio-scsi-pci,id=scsi'
-        - '-device scsi-hd,drive=test'
+        - '-device scsi-hd,drive=lavatest'
     configs:
       - name: CONFIG_44x=y
         type: mandatory
@@ -759,7 +804,7 @@ templates:
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
         - '-device virtio-scsi-pci,id=scsi'
-        - '-device scsi-hd,drive=test'
+        - '-device scsi-hd,drive=lavatest'
     configs:
       - name: IBM_EMAC
       - name: CONFIG_BAMBOO=y
