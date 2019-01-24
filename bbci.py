@@ -77,11 +77,19 @@ def build(param):
         print("Will run make %s" % make_opts)
         return 0
 
+    logdir = os.path.expandvars(t["config"]["logdir"])
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+
+    logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
+
     if args.quiet:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
     else:
-        pbuild = subprocess.Popen("make %s" % make_opts, shell=True)
+        pbuild = subprocess.Popen("make %s 2>&1" % make_opts, shell=True, stdout=logfile)
     outs, err = pbuild.communicate()
+    logfile.close()
+
     builds[param["targetname"]] = {}
     if err == None and pbuild.returncode == 0:
         builds[param["targetname"]]["result"] = 'PASS'
@@ -458,6 +466,7 @@ def enable_config(param, econfig):
     rawconfig = econfig.split("=")[0]
 
     if args.debug:
+        print("=================================================== %s" % econfig)
         print("DEBUG: Try enable config %s" % econfig)
         subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
     with open("%s/.config" % param["kdir"], 'r') as fconfig:
@@ -489,10 +498,11 @@ def enable_config(param, econfig):
 ###############################################################################
 def disable_config(param, dconfig):
     if args.debug:
+        print("=================================================== %s" % dconfig)
         subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
     with open("%s/.config" % param["kdir"], 'r') as fconfig:
         wconfig = fconfig.read()
-        if not re.search("^%s=" % dconfig, wconfig):
+        if not re.search("%s=" % dconfig, wconfig):
             print("DEBUG: %s is already disabled" % dconfig)
             return 0
     wconfig = re.sub("%s.*" % dconfig, "# %s is not set" % dconfig, wconfig)
@@ -517,7 +527,9 @@ def genconfig(sourcedir, param, defconfig):
     if args.noact:
         print("Will do make %s %s" % (make_opts, defconfig))
         return 0
-    pbuild = subprocess.Popen("make %s %s" % (make_opts, defconfig), shell=True)
+    if defconfig == "randconfig" and args.randconfigseed is not None:
+        os.environ["KCONFIG_SEED"] = args.randconfigseed
+    pbuild = subprocess.Popen("make %s %s >/dev/null" % (make_opts, defconfig), shell=True)
     outs, err = pbuild.communicate()
 
     shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
@@ -535,9 +547,16 @@ def genconfig(sourcedir, param, defconfig):
     if args.configoverlay:
         for coverlay in args.configoverlay.split(","):
             if coverlay == "fullsound":
+                enable_config("CONFIG_SOUND")
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
             if coverlay == "fulldrm":
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
             if coverlay == "fullcrypto":
                 enable_config(param, "CONFIG_CRYPTO_CBC=y")
                 enable_config(param, "CONFIG_MD=y")
@@ -546,7 +565,9 @@ def genconfig(sourcedir, param, defconfig):
                 if args.debug:
                     subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
+                #subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
+                disable_config(param, "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS")
+                enable_config(param, "CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y")
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
@@ -560,7 +581,6 @@ def genconfig(sourcedir, param, defconfig):
             if coverlay == "hack_drm_mxfsb":
                 disable_config(param, "CONFIG_DRM_MXSFB")
                 disable_config(param, "CONFIG_DRM_IMX")
-                disable_config(param, "CONFIG_CAN_FLEXCAN")
             for overlay in t["configoverlays"]:
                 if overlay["name"] == coverlay:
                     for oconfig in overlay["list"]:
@@ -576,17 +596,15 @@ def genconfig(sourcedir, param, defconfig):
             else:
                 enable_config(param, tconfig["name"])
 
-    subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
+    #subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
 
     if args.debug:
         print("DEBUG: do olddefconfig")
-    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
-    if args.debug:
-        print("DEBUG: sed SERIAL")
+    pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
     subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell = True)
     if args.debug:
         print("DEBUG: do olddefconfig")
-    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+    pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
     if args.debug:
         subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell = True)
         print("DEBUG: genconfig end")
@@ -681,6 +699,10 @@ def common(sourcename, targetname):
     param["modules_dir"] = modules_dir
     param["sourcename"] = sourcename
 
+    if "randconfig" in target:
+        err = genconfig(sourcedir, param, "randconfig")
+        if err:
+            param["error"] = 1
     if not os.path.exists("%s/.config" % kdir) or "defconfig" in target:
         if "defconfig" in target:
             err = genconfig(sourcedir, param, target["defconfig"])
@@ -843,6 +865,11 @@ def toolchain_validate(targetname):
                 continue
         if args.debug:
             print("DEBUG: Check %s" % toolchain["name"])
+        if "path" in toolchain:
+            toolchain_realdir = os.path.expandvars(toolchain["path"])
+            if args.debug:
+                print("DEBUG: add %s to PATH" % toolchain_realdir)
+            os.environ["PATH"] = "%s/bin:%s" % (toolchain_realdir, basepath)
         if "url" in toolchain:
             toolchain_file = os.path.basename(toolchain["url"])
             toolchain_subdir = toolchain_file.split(".tar")[0]
@@ -1008,6 +1035,7 @@ parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags"
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
+parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 args = parser.parse_args()
 
 tfile = open("all.yaml")

@@ -2,6 +2,7 @@ config:
     builddir: $HOME/crossbuild
     toolchains: $HOME/data/toolchains
     cache: $HOME/bbci/cache
+    logdir: $HOME/bbci/logs
 toolchains:
   - name: Bootlin armv7-eabihf
     larch: arm
@@ -74,6 +75,10 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--uclibc--stable-2018.11-1.tar.bz2
     larch: openrisc
     prefix: or1k-buildroot-linux-uclibc-
+  - name: xtool alpha
+    larch: alpha
+    path: $HOME/data/toolchains/alphaev4-unknown-linux-gnu
+    prefix: alphaev4-unknown-linux-gnu-
 targets:
   - name: arm_generic
     larch: arm
@@ -331,7 +336,6 @@ targets:
     larch: xtensa
     subarch: kc705
     flavour: defconfig
-    cross_compile: None
     full_tgt: uImage modules dtbs
     warnings: "-W1"
     defconfig: generic_kc705_defconfig
@@ -339,11 +343,16 @@ targets:
       - name: "CONFIG_XTENSA_VARIANT_DC232B=y"
   - name: smp_lx200_defconfig
     larch: xtensa
-    cross_compile: None
     full_tgt: uImage modules dtbs
     warnings: "-W1"
     defconfig: smp_lx200_defconfig
     configs:
+      - name: "CONFIG_XTENSA_VARIANT_MMU"
+        disable: True
+      - name: "CONFIG_XTENSA_VARIANT_CUSTOM_NAME"
+        disable: True
+      - name: "CONFIG_XTENSA_VARIANT_CUSTOM"
+        disable: True
       - name: "CONFIG_XTENSA_VARIANT_DC232B=y"
   - name: 10m50_defconfig
     larch: nios2
@@ -377,7 +386,14 @@ targets:
     defconfig: or1ksim_defconfig
     configs:
       - name: 'CONFIG_RD_GZIP=y'
-      - name: 'CONFIG_INITRAMFS_SOURCE="/home/compile/bbci/rootfs.cpio"'
+#      - name: 'CONFIG_INITRAMFS_SOURCE="/home/compile/bbci/rootfs.cpio"'
+  - name: arm_randconfig
+    larch: arm
+    subarch: default
+    flavour: randconfig
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+    randconfig: True
 labs:
   - name: local
     lavauri: http://admin:pass@127.0.0.1/RPC2
