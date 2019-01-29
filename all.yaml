@@ -79,6 +79,10 @@ toolchains:
     larch: alpha
     path: $HOME/data/toolchains/alphaev4-unknown-linux-gnu
     prefix: alphaev4-unknown-linux-gnu-
+  - name: Bootlin ARC
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/arcle-hs38/tarballs/arcle-hs38--uclibc--stable-2018.11-1.tar.bz2
+    larch: arc
+    prefix: arc-buildroot-linux-uclibc-
 targets:
   - name: arm_generic
     larch: arm
@@ -153,6 +157,13 @@ targets:
     defconfig: defconfig
     cross_compile: aarch64-unknown-linux-gnu-
     full_tgt: dtbs Image modules LOADADDR=0x40008000
+    warnings: "-W1"
+  - name: hsdk_defconfig
+    larch: arc
+    full_tgt: dtbs uImage modules
+    subarch: hsdk
+    flavour: defconfig
+    defconfig: hsdk_defconfig
     warnings: "-W1"
   - name: imx_generic
     larch: arm
@@ -1210,3 +1221,20 @@ templates:
       - ok
       - meson
       - amlogic
+  - name: hsdk
+    arch: arc
+    larch: arc
+    devicetype: hsdk
+    kernelfile: uImage
+    mach: hsdk
+    dtb: hsdk.dtb
+    configs:
+      - name: CONFIG_ARC_SOC_HSDK=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+      - name: CONFIG_DWMAC_GENERIC=
+        type: test
+    tags:
+      - ok
+      - hsdk

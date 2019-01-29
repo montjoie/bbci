@@ -147,6 +147,11 @@ def boot(param):
         arch="arm64"
         arch_endian="arm64"
         qarch="arm64"
+    if re.search("CONFIG_ARC=", kconfigs):
+        print("ARC")
+        arch="arc"
+        arch_endian="arc"
+        qarch=None
     if re.search("CONFIG_MIPS=", kconfigs):
         if re.search("CONFIG_64BIT=y", kconfigs):
             print("MIPS64")
