@@ -282,6 +282,8 @@ def boot(param):
         kernelfile = device["kernelfile"]
         if kernelfile == "zImage":
             kerneltype = "zimage"
+        if kernelfile == "uImage":
+            kerneltype = "uimage"
         if "qemu" in device:
             jobf = open("%s/defaultqemu.yaml" % templatedir)
         else:
@@ -568,6 +570,7 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_CRYPTO_CBC=y")
                 enable_config(param, "CONFIG_MD=y")
                 enable_config(param, "CONFIG_BLK_DEV_DM=y")
+                enable_config(param, "CONFIG_BLK_DEV_LOOP=y")
                 enable_config(param, "CONFIG_DM_CRYPT=m")
                 if args.debug:
                     subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
@@ -984,6 +987,8 @@ def do_actions(all_sources, all_targets, all_actions):
                     print("DEBUG: Select target by tags")
                 for tag in args.ttag.split(","):
                     if tag == t_target["larch"]:
+                        useit = True
+                    if tag == t_target["devicetype"]:
                         useit = True
             else:
                 useit = True
