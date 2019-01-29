@@ -532,6 +532,13 @@ def genconfig(sourcedir, param, defconfig):
     pbuild = subprocess.Popen("make %s %s >/dev/null" % (make_opts, defconfig), shell=True)
     outs, err = pbuild.communicate()
 
+    if args.configoverlay:
+        for coverlay in args.configoverlay.split(","):
+            if coverlay == "vanilla":
+                if args.debug:
+                    print("DEBUG: skip all config overlays")
+                return 0
+
     shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
     # add needed options for LAVA
     if args.debug:
