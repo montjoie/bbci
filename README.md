@@ -214,10 +214,12 @@ Example:
 ```
 
 The following config overlays are hardcoded:
-* fulldebug: Enable all debug options
-* fullcrypto: Enable all crypto options
-* fulldrm: Enable all DRM options
-* fullsound: Enable all sound options
+* fulldebug:	Enable all debug options
+* fullcrypto:	Enable all crypto options
+* fulldrm:	Enable all DRM options
+* fullsound:	Enable all sound options
+* vanilla:	Disable all builtin changes
+* nomodule:	Replace all CONFIG from modules to builtin
 
 ### Device job template
 ```
@@ -247,7 +249,20 @@ The following config overlays are hardcoded:
 # TODO list
 <ul>
 <li>
+rootfs selection: permit to use others rootfs
+</li>
+<li>
+toolchain selection: currently it uses the first good one id find
+</li>
+<li>
+toolchain cycling: like source/target
+</li>
+<li>
 Implement a local qemu boot without LAVA
+</li>
+<li>
+The cross_compile: None assume the host is x86, this is a wrong assumption.
+bbci should detect the host arch.
 </li>
 <li>
 Split all.yaml in config.yaml + many linuxarch.yaml
