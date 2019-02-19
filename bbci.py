@@ -91,7 +91,7 @@ def build(param):
     logfile.close()
 
     builds[param["targetname"]] = {}
-    if err == None and pbuild.returncode == 0:
+    if err is None and pbuild.returncode == 0:
         builds[param["targetname"]]["result"] = 'PASS'
     else:
         builds[param["targetname"]]["result"] = 'FAIL'
@@ -114,88 +114,88 @@ def boot(param):
     kconfigs = kconfig.read()
     kconfig.close()
     if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
-        endian="big"
+        endian = "big"
     else:
-        endian="little"
+        endian = "little"
     if re.search("CONFIG_NIOS2=", kconfigs):
         print("NIOS2")
-        arch="nios2"
-        arch_endian="nios2"
-        qarch="nios2"
+        arch = "nios2"
+        arch_endian = "nios2"
+        qarch = "nios2"
     if re.search("CONFIG_XTENSA=", kconfigs):
         print("XTENSA")
-        arch="xtensa"
-        arch_endian="xtensa"
-        qarch="xtensa"
+        arch = "xtensa"
+        arch_endian = "xtensa"
+        qarch = "xtensa"
     if re.search("CONFIG_SPARC32=", kconfigs):
         print("SPARC32")
-        arch="sparc"
-        arch_endian="sparc"
-        qarch="sparc"
+        arch = "sparc"
+        arch_endian = "sparc"
+        qarch = "sparc"
     if re.search("CONFIG_SPARC64=", kconfigs):
         print("SPARC64")
-        arch="sparc64"
-        arch_endian="sparc64"
-        qarch="sparc64"
+        arch = "sparc64"
+        arch_endian = "sparc64"
+        qarch = "sparc64"
     if re.search("CONFIG_ARM=", kconfigs):
         print("ARM")
-        arch="arm"
-        arch_endian="armel"
-        qarch="arm"
+        arch = "arm"
+        arch_endian = "armel"
+        qarch = "arm"
     if re.search("CONFIG_ARM64=", kconfigs):
         print("ARM64")
-        arch="arm64"
-        arch_endian="arm64"
-        qarch="arm64"
+        arch = "arm64"
+        arch_endian = "arm64"
+        qarch = "arm64"
     if re.search("CONFIG_ARC=", kconfigs):
         print("ARC")
-        arch="arc"
-        arch_endian="arc"
-        qarch=None
+        arch = "arc"
+        arch_endian = "arc"
+        qarch = None
     if re.search("CONFIG_MIPS=", kconfigs):
         if re.search("CONFIG_64BIT=y", kconfigs):
             print("MIPS64")
-            arch="mips64"
-            qarch="mips64"
+            arch = "mips64"
+            qarch = "mips64"
             if endian == 'big':
-                arch_endian="mips64be"
+                arch_endian = "mips64be"
             else:
-                arch_endian='mips64el'
+                arch_endian = 'mips64el'
         else:
-            arch="mips"
-            qarch="mips"
+            arch = "mips"
+            qarch = "mips"
             if endian == 'big':
                 print("MIPSBE")
-                arch_endian="mipsbe"
+                arch_endian = "mipsbe"
             else:
                 print("MIPSEL")
-                arch_endian='mipsel'
-                qarch="mipsel"
+                arch_endian = 'mipsel'
+                qarch = "mipsel"
     if re.search("CONFIG_ALPHA=", kconfigs):
         print("ARCH: ALPHA")
-        arch="alpha"
-        arch_endian="alpha"
-        qarch="alpha"
+        arch = "alpha"
+        arch_endian = "alpha"
+        qarch = "alpha"
     if re.search("CONFIG_PPC=", kconfigs):
         print("ARCH: PPC")
-        arch="powerpc"
-        arch_endian="powerpc"
-        qarch="ppc"
+        arch = "powerpc"
+        arch_endian = "powerpc"
+        qarch = "ppc"
     if re.search("CONFIG_PPC64=", kconfigs):
         print("ARCH: PPC64")
-        arch="powerpc64"
-        arch_endian="ppc64"
-        qarch="ppc64"
+        arch = "powerpc64"
+        arch_endian = "ppc64"
+        qarch = "ppc64"
     if re.search("CONFIG_X86_64=", kconfigs):
         print("X86_64")
-        arch="x86_64"
-        arch_endian="x86_64"
-        qarch="x86_64"
+        arch = "x86_64"
+        arch_endian = "x86_64"
+        qarch = "x86_64"
     if re.search("CONFIG_X86=", kconfigs) and not re.search("CONFIG_X86_64=", kconfigs):
         print("X86")
-        arch="x86"
-        arch_endian="x86"
-        qarch="i386"
+        arch = "x86"
+        arch_endian = "x86"
+        qarch = "i386"
 
     if arch_endian is None:
         print("ERROR: Missing endian arch")
@@ -249,7 +249,7 @@ def boot(param):
         skip = False
         if "configs" in device and device["configs"] is not None:
             for config in device["configs"]:
-                if not "name" in config:
+                if "name" not in config:
                     print("Invalid config")
                     print(config)
                     continue
@@ -268,7 +268,7 @@ def boot(param):
             for tag in args.dtag.split(","):
                 if args.debug:
                     print("DEBUG: check tag %s" % tag)
-                if not "tags" in device:
+                if "tags" not in device:
                     print("SKIP: no tag")
                     gootdtag = False
                     continue
@@ -295,7 +295,7 @@ def boot(param):
             jobf = open("%s/default.yaml" % templatedir)
         jobt = jobf.read()
         # check needed files
-        if not "kernelfile" in device:
+        if "kernelfile" not in device:
             print("ERROR: missing kernelfile")
             continue
         if args.debug:
@@ -385,7 +385,7 @@ def boot(param):
         fw.close()
         jobf.close()
         if "doqemu" in param:
-            if not "qemu" in device:
+            if "qemu" not in device:
                 return 0
             qemu_cmd = "qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
             if "extra_options" in device["qemu"]:
@@ -493,7 +493,7 @@ def enable_config(param, econfig):
             return 0
         wconfig = re.sub("# %s is not set" % rawconfig, "%s=y" % econfig, wconfig)
     with open("%s/.config" % param["kdir"], 'w') as fconfig:
-         fconfig.write(wconfig)
+        fconfig.write(wconfig)
     make_opts = param["make_opts"]
     if args.debug:
         subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
@@ -514,7 +514,7 @@ def disable_config(param, dconfig):
             return 0
     wconfig = re.sub("%s.*" % dconfig, "# %s is not set" % dconfig, wconfig)
     with open("%s/.config" % param["kdir"], 'w') as fconfig:
-         fconfig.write(wconfig)
+        fconfig.write(wconfig)
     if args.debug:
         subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
     make_opts = param["make_opts"]
@@ -619,12 +619,12 @@ def genconfig(sourcedir, param, defconfig):
     if args.debug:
         print("DEBUG: do olddefconfig")
     pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
-    subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell = True)
+    subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell=True)
     if args.debug:
         print("DEBUG: do olddefconfig")
     pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
     if args.debug:
-        subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell = True)
+        subprocess.Popen("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
         print("DEBUG: genconfig end")
     return err
 
@@ -646,7 +646,7 @@ def common(sourcename, targetname):
                 subarch = target["subarch"]
             else:
                 subarch = "default"
-            break;
+            break
     if target is None:
         print("ERROR: target %s not found" % targetname)
         sys.exit(1)
@@ -702,7 +702,7 @@ def common(sourcename, targetname):
     if "warnings" in target:
         make_opts = make_opts + " " + target["warnings"]
     make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_MOD_PATH=%s INSTALL_HDR_PATH=%s" % (kdir, modules_dir, headers_dir)
-    if not "full_tgt" in target:
+    if "full_tgt" not in target:
         print("ERROR: Missing full_tgt")
         sys.exit(1)
     param["full_tgt"] = target["full_tgt"]
@@ -794,13 +794,13 @@ def do_source_create(sourcename):
         print("ERROR: source %s already exists at %s" % (sourcename, sourcedir))
         return 1
     if "create_script" in t_source:
-        git_create_args="--sourcedir %s" % sourcedir
+        git_create_args = "--sourcedir %s" % sourcedir
         if "ltag" in t_source and t_source["ltag"] is not None:
             git_create_args += " --ltag %s" % t_source["ltag"]
         git_create_cmd = "%s %s" % (t_source["create_script"], git_create_args)
-        subprocess.run(git_create_cmd, shell = True)
+        subprocess.run(git_create_cmd, shell=True)
         return 0
-    if not "gituri" in t_source or t_source["gituri"] == None:
+    if "gituri" not in t_source or t_source["gituri"] is None:
         print("ERROR: Need gituri for %s" % sourcename)
         return 1
 
@@ -823,7 +823,7 @@ def do_source_update(sourcename):
         return 1
     if "update_script" in t_source and t_source["update_script"] is not None:
         print("DEBUG: update with %s" % t_source["update_script"])
-        git_update_args="--sourcedir %s" % sourcedir
+        git_update_args = "--sourcedir %s" % sourcedir
         if "ltag" in t_source and t_source["ltag"] is not None:
             git_update_args += " --ltag %s" % t_source["ltag"]
 
@@ -831,7 +831,7 @@ def do_source_update(sourcename):
         if args.noact:
             print("DEBUG: Will do %s" % git_update_cmd)
         else:
-            subprocess.run(git_update_cmd, shell = True)
+            subprocess.run(git_update_cmd, shell=True)
         return 0
 
 ###############################################################################
@@ -858,7 +858,7 @@ def toolchain_validate(targetname):
             if args.debug:
                 print("DEBUG: no need for cross_compile")
             return 0
-        ret = subprocess.run("%sgcc --version > /dev/null" % target["cross_compile"], shell = True)
+        ret = subprocess.run("%sgcc --version > /dev/null" % target["cross_compile"], shell=True)
         if ret.returncode == 0:
             if args.debug:
                 print("DEBUG: cross_compile prefix is valid")
@@ -874,7 +874,7 @@ def toolchain_validate(targetname):
                 print("DEBUG: ignore %s due to larch %s" % (toolchain["name"], toolchain["larch"]))
             continue
         if need64bits:
-            if not "bits" in toolchain:
+            if "bits" not in toolchain:
                 if args.debug:
                     print("DEBUG: ignore %s due to missing bits" % toolchain["name"])
                 continue
@@ -894,7 +894,7 @@ def toolchain_validate(targetname):
             toolchain_subdir = toolchain_file.split(".tar")[0]
             os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
         if "prefix" in toolchain:
-            ret = subprocess.run("%sgcc --version >/dev/null" % toolchain["prefix"], shell = True)
+            ret = subprocess.run("%sgcc --version >/dev/null" % toolchain["prefix"], shell=True)
             if ret.returncode == 0:
                 target["cross_compile"] = toolchain["prefix"]
                 return 0
@@ -926,7 +926,7 @@ def toolchain_download(targetname):
         if toolchain["larch"] != larch:
             continue
         if need64bits:
-            if not "bits" in toolchain:
+            if "bits" not in toolchain:
                 if args.debug:
                     print("DEBUG: ignore %s due to missing bits" % toolchain["name"])
                 continue
@@ -934,12 +934,12 @@ def toolchain_download(targetname):
                 if args.debug:
                     print("DEBUG: ignore %s due to missing 64" % toolchain["name"])
                 continue
-        if not "url" in toolchain:
+        if "url" not in toolchain:
             continue
         print("DEBUG: Check %s" % toolchain["name"])
         if args.debug:
             print("DEBUG: download from %s" % toolchain["url"])
-        subprocess.run("cd %s && wget -N %s" % (cachedir, toolchain["url"]), shell = True)
+        subprocess.run("cd %s && wget -N %s" % (cachedir, toolchain["url"]), shell=True)
         #TODO
         toolchain_file = os.path.basename(toolchain["url"])
         tarcmd = "tar xjf"
@@ -949,7 +949,7 @@ def toolchain_download(targetname):
         if not os.path.isdir(toolchain_dir):
             os.mkdir(toolchain_dir)
         toolchain_subdir = toolchain_file.split(".tar")[0]
-        subprocess.run("cd %s && %s %s/%s" % (toolchain_dir, tarcmd, cachedir, toolchain_file), shell = True)
+        subprocess.run("cd %s && %s %s/%s" % (toolchain_dir, tarcmd, cachedir, toolchain_file), shell=True)
         # fix bootlin toolchain TODO HACK
         subprocess.run("cd %s && find %s -iname bison -type f | xargs rm" % (toolchain_dir, toolchain_dir))
         if "url" in toolchain:
@@ -957,7 +957,7 @@ def toolchain_download(targetname):
             toolchain_subdir = toolchain_file.split(".tar")[0]
             os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
         if "prefix" in toolchain:
-            ret = subprocess.run("%sgcc --version > /dev/null" % toolchain["prefix"], shell = True)
+            ret = subprocess.run("%sgcc --version > /dev/null" % toolchain["prefix"], shell=True)
             if ret.returncode == 0:
                 target["cross_compile"] = toolchain["prefix"]
                 return 0
@@ -1070,4 +1070,3 @@ print(builds)
 print(boots)
 
 sys.exit(0)
-
