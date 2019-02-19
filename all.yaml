@@ -281,7 +281,7 @@ targets:
   - name: sparc_generic
     larch: sparc
     cross_compile: sparc-unknown-linux-gnu-
-    full_tgt: vmlinux modules
+    full_tgt: vmlinux modules zImage
   - name: sparc64_generic
     larch: sparc
     subarch: sparc64
@@ -293,7 +293,7 @@ targets:
     subarch: sparc32
     flavour: defconfig
     cross_compile: sparc-unknown-linux-gnu-
-    full_tgt: vmlinux modules
+    full_tgt: vmlinux modules zImage
     defconfig: sparc32_defconfig
   - name: sparc64_defconfig
     larch: sparc
@@ -309,7 +309,7 @@ targets:
     flavour: defconfig
     defconfig: sunxi_defconfig
     cross_compile: armv7a-hardfloat-linux-gnueabi-
-    full_tgt: dtbs zImage modules LOADADDR=0x40008000
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: virtex5_defconfig
     larch: powerpc
