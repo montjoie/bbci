@@ -560,6 +560,8 @@ def genconfig(sourcedir, param, defconfig):
 
     if args.configoverlay:
         for coverlay in args.configoverlay.split(","):
+            if coverlay == "nomodule":
+                subprocess.run("sed -i 's,=m$,=y,' %s/.config" % param["kdir"], shell=True)
             if coverlay == "fullsound":
                 enable_config("CONFIG_SOUND")
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
