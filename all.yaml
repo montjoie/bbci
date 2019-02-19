@@ -405,13 +405,6 @@ targets:
     full_tgt: vmlinux modules
     warnings: "-W1"
     randconfig: True
-labs:
-  - name: local
-    lavauri: http://admin:pass@127.0.0.1/RPC2
-    datadir: /var/www/boot.montjoie.local/htdocs/storage
-    datahost: Red
-    datahost_baseuri: http://boot.montjoie.local/storage
-    rootfs_baseuri: http://boot.montjoie.local
 sources:
   - name: next
     directory: $HOME/linux-next

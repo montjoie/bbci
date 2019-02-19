@@ -179,18 +179,6 @@ Examples:
 
 Note: If defconfig is not set, a .config must be already present in the final build directory.
 
-### LAVA Lab section
-The labs entry describes a LAVA lab and how to interact with it.
-```
-labs:
-  - name: 		(mandatory) Nickname of the LAB
-    lavauri:		(mandatory) URI to access the LAVA LAB
-    datadir:		(mandatory) Local directory where to copy data (kernel, dtb, modules) to use if bbCI is run on datahost
-    datahost:		(mandatory) FQDN of the host storing data (kernel, dtb, modules)
-    datahost_baseuri:	(mandatory) Base URI to access data (kernel, dtb, modules)
-    rootfs_baseuri:	(mandatory) Base URI to access rootfs
-```
-
 ### Config overlays
 When building defconfig, sometime it miss some needed options.
 Config overlays permit to tweak some configs after the defconfig generation
@@ -245,6 +233,20 @@ The following config overlays are hardcoded:
     tags:			(optional)
       - ok
 ```
+
+## labs.yaml
+### LAVA Lab section
+The labs entry describes a LAVA lab and how to interact with it.
+```
+labs:
+  - name: 		(mandatory) Nickname of the LAB
+    lavauri:		(mandatory) URI to access the LAVA LAB
+    datadir:		(mandatory) Local directory where to copy data (kernel, dtb, modules) to use if bbCI is run on datahost
+    datahost:		(mandatory) FQDN of the host storing data (kernel, dtb, modules)
+    datahost_baseuri:	(mandatory) Base URI to access data (kernel, dtb, modules)
+    rootfs_baseuri:	(mandatory) Base URI to access rootfs
+```
+
 
 # TODO list
 <ul>

@@ -405,7 +405,7 @@ def boot(param):
             return 0
 
         # now try to boot on LAVA
-        for lab in t["labs"]:
+        for lab in tlabs["labs"]:
             send_to_lab = False
             print("\tCheck %s on %s" % (devicename, lab["name"]))
             if "disabled" in lab and lab["disabled"]:
@@ -1063,6 +1063,8 @@ args = parser.parse_args()
 
 tfile = open("all.yaml")
 t = yaml.load(tfile)
+tlabsfile = open("labs.yaml")
+tlabs = yaml.load(tlabsfile)
 
 do_actions(args.source, args.target, args.action)
 
