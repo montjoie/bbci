@@ -22,7 +22,7 @@ if not os.path.isdir(cachedir):
     os.mkdir(cachedir)
 if not os.path.isdir("%s/linux-patches" % cachedir):
     print("DEBUG: checkout gentoo/linux-patches")
-    subprocess.check_output("git clone https://github.com/gentoo/linux-patches.git cache/linux-patches", shell=True)
+    subprocess.check_output("git clone https://github.com/gentoo/linux-patches.git %s/linux-patches" % cachedir, shell=True)
 else:
     subprocess.check_output("cd %s/linux-patches && git pull" % cachedir, shell=True)
 
@@ -43,7 +43,7 @@ for tag in tags.decode("UTF-8").split('\n'):
         continue
     print("Handle %s" % tag)
     try:
-        subprocess.check_output("cd cache/ && wget -N https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-%s.tar.xz" % tag, shell = True)
+        subprocess.check_output("cd %s && wget -N https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-%s.tar.xz" % (cachedir, tag), shell = True)
     except:
         continue
     sourcename = "gentoo-%s" % tag
@@ -65,7 +65,7 @@ for tag in tags.decode("UTF-8").split('\n'):
     flc.close()
     if not os.path.isdir(finaldir):
         os.mkdir(finaldir)
-    subprocess.check_output("tar xJf cache/linux-%s.tar.xz -C %s/.." % (tag, finaldir), shell = True)
+    subprocess.check_output("tar xJf %s/linux-%s.tar.xz -C %s/.." % (cachedir, tag, finaldir), shell = True)
     subprocess.check_output("cd %s/linux-patches && git checkout %s" % (cachedir, tag), shell = True)
     print("Apply patches")
     patchs = subprocess.check_output("cd %s && ls %s/linux-patches/*patch" % (finaldir, cachedir), shell = True)
