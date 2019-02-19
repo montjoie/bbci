@@ -836,6 +836,7 @@ def do_source_update(sourcename):
 
 ###############################################################################
 ###############################################################################
+# validate that the toolchain for targetname works
 def toolchain_validate(targetname):
     target = None
     for t_target in t["targets"]:
@@ -949,6 +950,8 @@ def toolchain_download(targetname):
             os.mkdir(toolchain_dir)
         toolchain_subdir = toolchain_file.split(".tar")[0]
         subprocess.run("cd %s && %s %s/%s" % (toolchain_dir, tarcmd, cachedir, toolchain_file), shell = True)
+        # fix bootlin toolchain TODO HACK
+        subprocess.run("cd %s && find %s -iname bison -type f | xargs rm" % (toolchain_dir, toolchain_dir))
         if "url" in toolchain:
             toolchain_file = os.path.basename(toolchain["url"])
             toolchain_subdir = toolchain_file.split(".tar")[0]
