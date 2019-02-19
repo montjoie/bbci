@@ -552,6 +552,7 @@ def genconfig(sourcedir, param, defconfig):
         print("DEBUG: add LAVA configs")
     enable_config(param, "CONFIG_BLK_DEV_INITRD")
     enable_config(param, "CONFIG_BLK_DEV_RAM=y")
+    enable_config(param, "CONFIG_DEVTMPFS=y")
     enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y")
     enable_config(param, "CONFIG_MODULES=y")
     enable_config(param, "CONFIG_DEVTMPFS_MOUNT")
