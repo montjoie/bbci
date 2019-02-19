@@ -982,6 +982,20 @@ templates:
         type: mandatory
     tags:
       - ok
+  - name: sun50i-a64-bananapi-m64
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-a64-bananapi-m64
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-a64-bananapi-m64.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a64
+      - allwinner
   - name: sun50i-h5-libretech-all-h3-cc
     arch: arm64
     larch: arm64
