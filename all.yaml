@@ -440,6 +440,8 @@ configoverlays:
       - config: CONFIG_CRYPTO_USER_API_RNG=m
       - config: CONFIG_CRYPTO_TEST=m
       - config: CONFIG_CRYPTO_XTS=m
+      - config: CONFIG_MD=y
+      - config: CONFIG_BLK_DEV_DM=y
       - config: CONFIG_DM_CRYPT=y
       - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
         disable: True
@@ -448,6 +450,13 @@ configoverlays:
       - config: CONFIG_DMA_API_DEBUG=y
       - config: CONFIG_DEBUG_INFO=y
       - config: CONFIG_DEBUG_KERNEL=y
+  - name: lavatest
+    list:
+      - config: CONFIG_SCSI=y
+      - config: CONFIG_BLK_DEV_SD=y
+      - config: CONFIG_VIRTIO_PCI=y
+      - config: CONFIG_VIRTIO_MMIO=y
+      - config: CONFIG_SCSI_VIRTIO=y
 templates:
   - name: SS-10
     arch: sparc
