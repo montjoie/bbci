@@ -1024,6 +1024,20 @@ templates:
       - ok
       - h5
       - allwinner
+  - name: sun50i-h6-pine-h64
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h6-pineh64
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h6-pine-h64.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h6
+      - allwinner
   - name: sun7i-a20-cubietruck
     arch: arm
     devicetype: cubietruck
