@@ -405,6 +405,13 @@ targets:
     full_tgt: vmlinux modules
     warnings: "-W1"
     randconfig: True
+  - name: x86_64_randconfig
+    larch: x86_64
+    subarch: default
+    flavour: randconfig
+    full_tgt: bzImage modules
+    warnings: "-W1"
+    randconfig: True
 sources:
   - name: next
     directory: $HOME/linux-next
