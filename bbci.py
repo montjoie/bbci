@@ -5,6 +5,7 @@ import re
 import yaml
 import subprocess
 import os
+import platform
 import argparse
 import xmlrpc.client
 import shutil
@@ -694,9 +695,9 @@ def common(sourcename, targetname):
             print("DEBUG: native compilation")
         else:
             make_opts = make_opts + " CROSS_COMPILE=%s" % target["cross_compile"]
-    else:
-        print("ERROR: missing cross_compile")
-        sys.exit(1)
+    #else:
+    #    print("ERROR: missing cross_compile")
+    #    sys.exit(1)
 
     make_opts = make_opts + " -j%d" % os.cpu_count()
     if "warnings" in target:
@@ -865,6 +866,12 @@ def toolchain_validate(targetname):
             return 0
         print("ERROR: Current cross_compile settings is wrong")
 
+    #detect native build
+    local_arch = platform.machine()
+    if local_arch == target["larch"]:
+        print("DEBUG: no need of cross compiler")
+        return 0
+
     if args.debug:
         print("DEBUG: Try to detect a toolchain")
     toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
@@ -896,6 +903,7 @@ def toolchain_validate(targetname):
         if "prefix" in toolchain:
             ret = subprocess.run("%sgcc --version >/dev/null" % toolchain["prefix"], shell=True)
             if ret.returncode == 0:
+                print("INFO: Will use %s as toolchain" % toolchain["name"])
                 target["cross_compile"] = toolchain["prefix"]
                 return 0
     return 1
@@ -935,8 +943,8 @@ def toolchain_download(targetname):
                     print("DEBUG: ignore %s due to missing 64" % toolchain["name"])
                 continue
         if "url" not in toolchain:
+            print("Cannot download, missing url")
             continue
-        print("DEBUG: Check %s" % toolchain["name"])
         if args.debug:
             print("DEBUG: download from %s" % toolchain["url"])
         subprocess.run("cd %s && wget -N %s" % (cachedir, toolchain["url"]), shell=True)
