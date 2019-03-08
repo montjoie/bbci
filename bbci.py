@@ -364,6 +364,8 @@ def boot(param):
                 ft["context"]["memory"] = device["qemu"]["memory"]
             if "guestfs_interface" in device["qemu"]:
                 ft["context"]["guestfs_interface"] = device["qemu"]["guestfs_interface"]
+            if "guestfs_driveid" in device["qemu"]:
+                ft["context"]["guestfs_driveid"] = device["qemu"]["guestfs_driveid"]
             if "extra_options" in device["qemu"]:
                 ft["context"]["extra_options"] = device["qemu"]["extra_options"]
             for action in ft["actions"]:
