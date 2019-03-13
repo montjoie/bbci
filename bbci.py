@@ -219,12 +219,12 @@ def boot(param):
     # generate modules.tar.gz
     #TODO check error
     if args.quiet:
-        pbuild = subprocess.Popen("make %s modules_install" % make_opts, shell=True, stdout=subprocess.DEVNULL)
+        pbuild = subprocess.Popen("make %s modules_install > /dev/null" % make_opts, shell=True, stdout=subprocess.DEVNULL)
         outs, err = pbuild.communicate()
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True, stdout=subprocess.DEVNULL)
         outs, err = pbuild.communicate()
     else:
-        pbuild = subprocess.Popen("make %s modules_install" % make_opts, shell=True)
+        pbuild = subprocess.Popen("make %s modules_install > /dev/null" % make_opts, shell=True)
         outs, err = pbuild.communicate()
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True)
         outs, err = pbuild.communicate()
