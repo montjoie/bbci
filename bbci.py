@@ -9,6 +9,8 @@ import platform
 import argparse
 import xmlrpc.client
 import shutil
+import time
+import fcntl
 
 ###############################################################################
 ###############################################################################
@@ -107,6 +109,7 @@ def boot(param):
     kdir = param["kdir"]
     modules_dir = param["modules_dir"]
     sourcename = param["sourcename"]
+    global qemu_boot_id
 
     arch_endian = None
     make_opts = param["make_opts"]
@@ -397,7 +400,10 @@ def boot(param):
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
                     qemu_cmd += " %s" % extrao
-            qemu_cmd += " -drive format=qcow2,file=$HOME/bbci/flash.bin"
+            if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
+                print("INFO: PMACZILOG console hack")
+                qemu_cmd = qemu_cmd.replace("console=ttyPZ0", "console=ttyS0")
+            #qemu_cmd += " -drive format=qcow2,file=$HOME/bbci/flash.bin"
             if "dtb" in device:
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
                 if not os.path.isfile(dtbfile):
@@ -406,9 +412,75 @@ def boot(param):
                 qemu_cmd += " -dtb %s" % dtbfile
             if "memory" in device["qemu"]:
                 qemu_cmd += " -m %s" % device["qemu"]["memory"]
+            # Add initrd
+            for lab in tlabs["labs"]:
+                if "disabled" in lab and lab["disabled"]:
+                    continue
+                datadir = lab["datadir"]
+                break
+            qemu_cmd += " -initrd %s/rootfs/%s/rootfs.cpio.gz" % (datadir, arch_endian)
             print(qemu_cmd)
-            subprocess.run(qemu_cmd, shell=True)
-            return 0
+            qp = subprocess.Popen(qemu_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+
+            flags = fcntl.fcntl(qp.stdout, fcntl.F_GETFL)
+            flags = flags | os.O_NONBLOCK
+            fcntl.fcntl(qp.stdout, fcntl.F_SETFL, flags)
+            flags = fcntl.fcntl(qp.stderr, fcntl.F_GETFL)
+            flags = flags | os.O_NONBLOCK
+            fcntl.fcntl(qp.stderr, fcntl.F_SETFL, flags)
+
+            poweroff_done = False
+            qtimeout = 0
+            while True:
+                try:
+                    line = "x"
+                    got_line = False
+                    while line != "":
+                        line = qp.stdout.readline().decode('UTF8').strip()
+                        if line != "":
+                            print(line)
+                            got_line = True
+                        if not got_line:
+                            qtimeout = qtimeout + 1
+                        if re.search("end Kernel panic - not syncing", line):
+                            qtimeout = 490
+                        if re.search("/ #", line) and not poweroff_done:
+                            qp.stdin.write(b'poweroff\r\n')
+                            qp.stdin.flush()
+                            poweroff_done = True
+                except ValueError:
+                    time.sleep(0.1)
+                    qtimeout = qtimeout + 1
+                try:
+                    line = "x"
+                    while line != "":
+                        line = qp.stderr.readline().decode('UTF8').strip()
+                        if line != "":
+                            print(line)
+                except ValueError:
+                    time.sleep(0.1)
+                time.sleep(0.2)
+                if qtimeout > 500:
+                    print("ERROR: QEMU TIMEOUT!")
+                    qp.terminate()
+                    ret = 1
+                    break
+                    qtimeout = 0
+                ret = qp.poll()
+                if ret is not None:
+                    ret = qp.returncode
+                    break
+            if "qemu" not in boots:
+                boots["qemu"] = {}
+            qemu_boot_id = qemu_boot_id + 1
+            boots["qemu"][qemu_boot_id] = {}
+            boots["qemu"][qemu_boot_id]["devicename"] = devicename
+            if ret == 0:
+                boots["qemu"][qemu_boot_id]["result"] = 'PASS'
+            else:
+                boots["qemu"][qemu_boot_id]["result"] = 'FAIL'
+            continue
+            return ret
 
         # now try to boot on LAVA
         for lab in tlabs["labs"]:
@@ -1056,6 +1128,7 @@ outputdir = "/tmp/joboutput/"
 boots = {}
 builds = {}
 templatedir = os.getcwd()
+qemu_boot_id = 0
 
 os.nice(19)
 # ionice need root priv
