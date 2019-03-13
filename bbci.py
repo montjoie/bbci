@@ -275,6 +275,9 @@ def boot(param):
                     continue
                 tagfound = False
                 for dtag in device["tags"]:
+                    if tag == "qemu":
+                        if "qemu" in device:
+                            tagfound = True
                     if args.debug:
                         print("DEBUG: found device tag %s" % dtag)
                     if dtag == tag:
