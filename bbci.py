@@ -470,9 +470,10 @@ def boot(param):
             if not args.noact:
                 jobid = server.scheduler.jobs.submit(jobt)
                 print(jobid)
-                boots[jobid] = {}
-                boots[jobid]["lab"] = lab["name"]
-                boots[jobid]["devicename"] = devicename
+                if lab["name"] not in boots:
+                    boots[lab["name"]] = {}
+                boots[lab["name"]][jobid] = {}
+                boots[lab["name"]][jobid]["devicename"] = devicename
             else:
                 print("\tSKIP: send job to %s" % lab["name"])
     return 0
@@ -1076,6 +1077,7 @@ parser.add_argument("--action", "-a", type=str, help="one of create,update,build
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
+parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
 args = parser.parse_args()
 
 tfile = open("all.yaml")
@@ -1087,5 +1089,8 @@ do_actions(args.source, args.target, args.action)
 
 print(builds)
 print(boots)
-
+if args.waitforjobsend:
+    for labname in boots:
+        for job in boots[labname]:
+            print(job)
 sys.exit(0)
