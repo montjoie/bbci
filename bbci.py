@@ -458,6 +458,10 @@ def boot(param):
             jobt = jobt.replace("__BOOT_FQDN__", lab["datahost_baseuri"])
             jobt = jobt.replace("__ROOT_FQDN__", lab["rootfs_baseuri"])
             jobf = open("%s/%s/job-%s.yaml" % (outputdir, lab["name"], devicename), 'w')
+            # HACK CONFIG_SERIAL_PMACZILOG=y CONFIG_SERIAL_PMACZILOG_TTYS=y
+            if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
+                print("INFO: PMACZILOG console hack")
+                jobt = jobt.replace("console=ttyPZ0", "console=ttyS0")
             jobf.write(jobt)
             jobf.close()
             if not args.noact:
