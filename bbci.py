@@ -862,7 +862,7 @@ def common(sourcename, targetname):
                 param["error"] = 1
             return param
         else:
-            print("No config, cannot do anything")
+            print("No config in %s, cannot do anything" % kdir)
             param["error"] = 1
             return param
     return param
@@ -902,8 +902,7 @@ def do_action(sourcename, targetname, action):
         if "error" in p:
             return p["error"]
         p["doqemu"] = True
-        boot(p)
-        return 0
+        return boot(p)
     if action == "update":
         do_source_update(sourcename)
         return 0
@@ -932,6 +931,8 @@ def do_source_create(sourcename):
         if "ltag" in t_source and t_source["ltag"] is not None:
             git_create_args += " --ltag %s" % t_source["ltag"]
         git_create_cmd = "%s %s" % (t_source["create_script"], git_create_args)
+        if args.debug:
+            print("DEBUG: Will do %s" % git_create_cmd)
         subprocess.run(git_create_cmd, shell=True)
         return 0
     if "gituri" not in t_source or t_source["gituri"] is None:
@@ -963,7 +964,7 @@ def do_source_update(sourcename):
 
         git_update_cmd = "%s %s" % (t_source["update_script"], git_update_args)
         if args.noact:
-            print("DEBUG: Will do %s" % git_update_cmd)
+            print("INFO: Will do %s" % git_update_cmd)
         else:
             subprocess.run(git_update_cmd, shell=True)
         return 0
@@ -1154,6 +1155,14 @@ def do_actions(all_sources, all_targets, all_actions):
             do_actions(all_sources, targetarg, all_actions)
         return 0
     # all_targets is now only one name
+    Found_target = False
+    for ft_target in t["targets"]:
+        if ft_target["name"] == all_targets:
+            Found_target = True
+            break
+    if not Found_target:
+        print("ERROR: Cannot found target %s" % all_targets)
+        return 1
 
     # validate toolchain against target
     ret = toolchain_validate(all_targets)
