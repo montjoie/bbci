@@ -111,6 +111,10 @@ def boot(param):
     sourcename = param["sourcename"]
     global qemu_boot_id
 
+    logdir = os.path.expandvars(t["config"]["logdir"])
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+
     arch_endian = None
     make_opts = param["make_opts"]
 
@@ -410,9 +414,13 @@ def boot(param):
         if "doqemu" in param:
             if "qemu" not in device:
                 return 0
+            failure = None
             qemu_cmd = "qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
+                    # TODO hack
+                    if re.search("lavatest", extrao):
+                        continue
                     qemu_cmd += " %s" % extrao
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
                 print("INFO: PMACZILOG console hack")
@@ -443,25 +451,37 @@ def boot(param):
             flags = flags | os.O_NONBLOCK
             fcntl.fcntl(qp.stderr, fcntl.F_SETFL, flags)
 
+            qlogfile = open("%s/%s.log" % (logdir, device["name"]), 'w')
             poweroff_done = False
             qtimeout = 0
+            lastline = ""
+            normal_halt = False
+            ret = 0
             while True:
                 try:
                     line = "x"
                     got_line = False
                     while line != "":
-                        line = qp.stdout.readline().decode('UTF8').strip()
+                        line = qp.stdout.readline().decode('UTF8')
                         if line != "":
-                            print(line)
+                            print(line, end='')
+                            qlogfile.write(line)
                             got_line = True
                         if not got_line:
                             qtimeout = qtimeout + 1
                         if re.search("end Kernel panic - not syncing", line):
                             qtimeout = 490
+                            failure = "panic"
                         if re.search("/ #", line) and not poweroff_done:
                             qp.stdin.write(b'poweroff\r\n')
                             qp.stdin.flush()
                             poweroff_done = True
+                        # System Halted, OK to turn off power
+                        if line == "Machine halt..." or re.search("reboot: System halted", line) or re.search("reboot: power down", line):
+                            if args.debug:
+                                print("DEBUG: detected machine halt")
+                            normal_halt = True
+                            qtimeout = 490
                 except ValueError:
                     time.sleep(0.1)
                     qtimeout = qtimeout + 1
@@ -475,15 +495,31 @@ def boot(param):
                     time.sleep(0.1)
                 time.sleep(0.2)
                 if qtimeout > 500:
-                    print("ERROR: QEMU TIMEOUT!")
                     qp.terminate()
+                    if normal_halt:
+                        ret = 0
+                        break
+                    print("ERROR: QEMU TIMEOUT!")
                     ret = 1
+                    if failure is None:
+                        failure = "timeout"
                     break
-                    qtimeout = 0
                 ret = qp.poll()
                 if ret is not None:
+                    # grab last stderr
+                    try:
+                        line = "x"
+                        while line != "":
+                            line = qp.stderr.readline().decode('UTF8').strip()
+                            if line != "":
+                                print(line)
+                    except ValueError:
+                        time.sleep(0.1)
                     ret = qp.returncode
+                    if ret != 0:
+                        failure = "Code: %d" % ret
                     break
+            qlogfile.close()
             if "qemu" not in boots:
                 boots["qemu"] = {}
             qemu_boot_id = qemu_boot_id + 1
@@ -493,6 +529,7 @@ def boot(param):
                 boots["qemu"][qemu_boot_id]["result"] = 'PASS'
             else:
                 boots["qemu"][qemu_boot_id]["result"] = 'FAIL'
+                boots["qemu"][qemu_boot_id]["failure"] = failure
             continue
             return ret
 
