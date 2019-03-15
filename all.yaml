@@ -492,10 +492,11 @@ templates:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
       - name: CONFIG_PATA_CMD64X
+        type: test
       - name: CONFIG_RTC_DRV_M48T59
-      - name: MOSTEK?
-      - name: SABRE?
-      - name: NE2K
+        type: test
+      - name: CONFIG_PCNET32
+        type: test
     tags:
       - ok
   - name: cubieboard
@@ -740,6 +741,8 @@ templates:
     configs:
       - name: CONFIG_PPC_PMAC=y
         type: mandatory
+      - name: CONFIG_SERIAL_PMACZILOG
+        type: mandatory
     tags:
       - ok
       - g3beige
@@ -826,6 +829,8 @@ templates:
         - '-append "console=ttyPZ0 root=/dev/ram0"'
     configs:
       - name: CONFIG_PPC_PMAC=y
+        type: mandatory
+      - name: CONFIG_SERIAL_PMACZILOG=y
         type: mandatory
     tags:
       - ok
