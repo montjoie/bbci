@@ -1,6 +1,8 @@
 # Build & Boot CI
 BBCI is a simple tool for building, booting and testing kernel.
 
+An extra goal is to have a reference of all possible QEMU machine bootable with Linux.
+
 BBCI is licensed under the GPL-v2
 
 ## External dependencies:
@@ -27,6 +29,35 @@ build all source with all targets and boot them
 ```
 ./bbci.py -s all -t all -a build,boot
 ```
+
+## Reference of all arguments
+### --source/-s sourcename[,sourcename]
+* One sourcename
+* A list of sourcename separated by ","
+* all
+### --target/-t targetname[,targetname]
+* Only one targetname
+* A list of targetname separated by ","
+* all
+* defconfig
+### --action/-a action[,action]
+* download: download toolchain for specified targets
+* build
+* boot
+* qemu
+### --dtag/-D devicetag[,devicetag]
+* A devicetag
+* qemu: Select only qemu machines
+### --ttag/-T sourcetag[;sourcetag]
+### -W
+Instead of exiting after ended the boot action (sending all jobs to LAVA server)
+bbci will wait for all jobs to end
+This is WIP.
+
+### --debug -d
+### --overlay -o
+### --randconfigseed SEED
+When using a randconfig target, use SEED as config seed.
 
 ## Quickstart
 ### build linux-next for x86
@@ -278,6 +309,11 @@ more documentation on buildroot and test
 </ul>
 
 # WIP
+## More boot method
+* NBD
+* NFS
+* PXE
+
 ## LAVA support
 LAVA miss some part for booting all qemu and run tests properly.
 patch will be sent upstream soon
