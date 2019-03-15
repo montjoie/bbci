@@ -683,6 +683,7 @@ templates:
     kernelfile: bzImage
     mach: x86_64
     qemu:
+        machine: pc
         cpu: qemu64
         netdevice: tap
         model: model=e1000
@@ -698,6 +699,7 @@ templates:
     kernelfile: bzImage
     mach: x86
     qemu:
+        machine: pc
         cpu: qemu32
         netdevice: tap
         model: model=e1000
