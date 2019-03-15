@@ -337,7 +337,7 @@ patch will be sent upstream soon
 * pica61: Probably the same as magnum
 
 ### SPARC
-* SS-10 and all other SS-XX: kernel crash with initrd (reported upstream, no answer yet)
+* SS-10 and all other SS-XX: kernel crash with initrd (need to send fix to upstream)
 
 ### SPARC64
 * niagara: need external firmware
