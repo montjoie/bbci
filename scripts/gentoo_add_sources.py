@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import yaml
+import argparse
 import os
 import subprocess
-import argparse
+import re
+import yaml
 
 # TODO gpg and other checks
 
@@ -89,7 +90,7 @@ for tag in tags.decode("UTF-8").split('\n'):
         if patch == "":
             continue
         print("Apply %s\n" % patch)
-        if patch == "/home/compile/bbci/cache//linux-patches/5011_enable-cpu-optimizations-for-gcc8.patch":
+        if re.search("5011_enable-cpu-optimizations-for-gcc8.patch", patch):
             continue
         ret = subprocess.check_output("cd %s && patch -p1 < %s" % (finaldir, patch), shell = True)
         print(ret)
