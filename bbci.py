@@ -190,6 +190,20 @@ def boot(param):
         arch = "powerpc64"
         arch_endian = "ppc64"
         qarch = "ppc64"
+    if re.search("CONFIG_OPENRISC=", kconfigs):
+        print("ARCH: OPENRISC")
+        arch = "openrisc"
+        arch_endian = "openrisc"
+        qarch = "or1k"
+    if re.search("CONFIG_MICROBLAZE=", kconfigs):
+        print("ARCH: MICROBLAZE")
+        arch = "microblaze"
+        if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
+            arch_endian = "microblaze"
+            qarch = "microblaze"
+        else:
+            arch_endian = "microblazeel"
+            qarch = "microblazeel"
     if re.search("CONFIG_X86_64=", kconfigs):
         print("X86_64")
         arch = "x86_64"
