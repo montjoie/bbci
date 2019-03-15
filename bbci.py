@@ -451,7 +451,7 @@ def boot(param):
             flags = flags | os.O_NONBLOCK
             fcntl.fcntl(qp.stderr, fcntl.F_SETFL, flags)
 
-            qlogfile = open("%s/%s.log" % (logdir, device["name"]), 'w')
+            qlogfile = open("%s/%s.log" % (logdir, device["name"].replace('/', '_')), 'w')
             poweroff_done = False
             qtimeout = 0
             lastline = ""
