@@ -475,7 +475,7 @@ templates:
     configs:
       - name: CONFIG_SUNLANCE
     tags:
-      - broken
+      - ok
   - name: sun4u
     arch: sparc64
     larch: sparc
