@@ -30,7 +30,7 @@ device_type: qemu
 job_name: __JOBNAME__
 timeouts:
   job:
-    minutes: 30
+    minutes: 40
   action:
    minutes: 10
   actions:
@@ -63,7 +63,7 @@ actions:
 
 - test:
     timeout:
-        minutes: 25
+        minutes: 40
     definitions:
         - repository:
             metadata:
