@@ -460,6 +460,7 @@ def boot(param):
             lastline = ""
             normal_halt = False
             ret = 0
+            last_error_line = ""
             while True:
                 try:
                     line = "x"
@@ -472,6 +473,10 @@ def boot(param):
                             got_line = True
                         if not got_line:
                             qtimeout = qtimeout + 1
+                        if re.search("^Kernel panic - not syncing", line):
+                            qtimeout = 490
+                            last_error_line = line
+                            failure = "panic"
                         if re.search("end Kernel panic - not syncing", line):
                             qtimeout = 490
                             failure = "panic"
@@ -494,6 +499,7 @@ def boot(param):
                         line = qp.stderr.readline().decode('UTF8').strip()
                         if line != "":
                             print(line)
+                            last_error_line = line
                 except ValueError:
                     time.sleep(0.1)
                 time.sleep(0.2)
@@ -516,6 +522,7 @@ def boot(param):
                             line = qp.stderr.readline().decode('UTF8').strip()
                             if line != "":
                                 print(line)
+                                last_error_line = line
                     except ValueError:
                         time.sleep(0.1)
                     ret = qp.returncode
@@ -533,6 +540,8 @@ def boot(param):
             else:
                 boots["qemu"][qemu_boot_id]["result"] = 'FAIL'
                 boots["qemu"][qemu_boot_id]["failure"] = failure
+                if last_error_line != "":
+                    boots["qemu"][qemu_boot_id]["error"] = last_error_line
             continue
             return ret
 
