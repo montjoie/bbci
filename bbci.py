@@ -240,13 +240,9 @@ def boot(param):
     # generate modules.tar.gz
     #TODO check error
     if args.quiet:
-        pbuild = subprocess.Popen("make %s modules_install > /dev/null" % make_opts, shell=True, stdout=subprocess.DEVNULL)
-        outs, err = pbuild.communicate()
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True, stdout=subprocess.DEVNULL)
         outs, err = pbuild.communicate()
     else:
-        pbuild = subprocess.Popen("make %s modules_install > /dev/null" % make_opts, shell=True)
-        outs, err = pbuild.communicate()
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True)
         outs, err = pbuild.communicate()
 
@@ -821,9 +817,10 @@ def common(sourcename, targetname):
         print("DEBUG: %s not exists" % modules_dir)
         os.mkdir(modules_dir)
     modules_dir = "%s/modules/%s" % (builddir, targetname)
-    if not os.path.isdir(modules_dir):
-        print("DEBUG: %s not exists" % modules_dir)
-        os.mkdir(modules_dir)
+    if os.path.isdir(modules_dir):
+        print("DEBUG: clean old %s" % modules_dir)
+        shutil.rmtree(modules_dir)
+    os.mkdir(modules_dir)
     if not os.path.isdir("%s/header" % builddir):
         print("DEBUG: %s/header not exists" % builddir)
         os.mkdir("%s/header" % builddir)
@@ -872,11 +869,22 @@ def common(sourcename, targetname):
             err = genconfig(sourcedir, param, target["defconfig"])
             if err:
                 param["error"] = 1
-            return param
+                return param
         else:
             print("No config in %s, cannot do anything" % kdir)
             param["error"] = 1
             return param
+
+    # add modules_install if CONFIG_MODULES
+    kconfig = open("%s/.config" % kdir)
+    kconfigs = kconfig.read()
+    kconfig.close()
+    if re.search("CONFIG_MODULES=y", kconfigs):
+        if args.debug:
+            print("DEBUG: add modules_install")
+        param["full_tgt"] = "%s modules_install" % (param["full_tgt"])
+    else:
+        print("WARNING: no MODULES")
     return param
 
 ###############################################################################
