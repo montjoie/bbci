@@ -107,7 +107,6 @@ def boot(param):
     subarch = param["subarch"]
     flavour = param["flavour"]
     kdir = param["kdir"]
-    modules_dir = param["modules_dir"]
     sourcename = param["sourcename"]
     global qemu_boot_id
 
@@ -239,6 +238,13 @@ def boot(param):
 
     # generate modules.tar.gz
     #TODO check error
+    if "modules_dir" in param:
+        modules_dir = param["modules_dir"]
+    else:
+        modules_dir = "%s/fake" % builddir
+        os.mkdir(modules_dir)
+        os.mkdir("%s/lib/" % modules_dir)
+        os.mkdir("%s/lib/modules" % modules_dir)
     if args.quiet:
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True, stdout=subprocess.DEVNULL)
         outs, err = pbuild.communicate()
@@ -812,15 +818,6 @@ def common(sourcename, targetname):
     if not os.path.isdir(builddir):
         print("DEBUG: %s not exists" % builddir)
         os.mkdir(builddir)
-    modules_dir = "%s/modules/" % builddir
-    if not os.path.isdir(modules_dir):
-        print("DEBUG: %s not exists" % modules_dir)
-        os.mkdir(modules_dir)
-    modules_dir = "%s/modules/%s" % (builddir, targetname)
-    if os.path.isdir(modules_dir):
-        print("DEBUG: clean old %s" % modules_dir)
-        shutil.rmtree(modules_dir)
-    os.mkdir(modules_dir)
     if not os.path.isdir("%s/header" % builddir):
         print("DEBUG: %s/header not exists" % builddir)
         os.mkdir("%s/header" % builddir)
@@ -844,7 +841,7 @@ def common(sourcename, targetname):
     make_opts = make_opts + " -j%d" % os.cpu_count()
     if "warnings" in target:
         make_opts = make_opts + " " + target["warnings"]
-    make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_MOD_PATH=%s INSTALL_HDR_PATH=%s" % (kdir, modules_dir, headers_dir)
+    make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_HDR_PATH=%s" % (kdir, headers_dir)
     if "full_tgt" not in target:
         print("ERROR: Missing full_tgt")
         sys.exit(1)
@@ -857,7 +854,6 @@ def common(sourcename, targetname):
     param["kdir"] = kdir
     param["targetname"] = targetname
     param["target"] = target
-    param["modules_dir"] = modules_dir
     param["sourcename"] = sourcename
 
     if "randconfig" in target:
@@ -880,9 +876,21 @@ def common(sourcename, targetname):
     kconfigs = kconfig.read()
     kconfig.close()
     if re.search("CONFIG_MODULES=y", kconfigs):
+        modules_dir = "%s/modules/" % builddir
+        if not os.path.isdir(modules_dir):
+            print("DEBUG: %s not exists" % modules_dir)
+            os.mkdir(modules_dir)
+        modules_dir = "%s/modules/%s" % (builddir, targetname)
+        if os.path.isdir(modules_dir):
+            print("DEBUG: clean old %s" % modules_dir)
+            shutil.rmtree(modules_dir)
+        os.mkdir(modules_dir)
         if args.debug:
             print("DEBUG: add modules_install")
         param["full_tgt"] = "%s modules_install" % (param["full_tgt"])
+        make_opts = make_opts + " INSTALL_MOD_PATH=%s" % modules_dir
+        param["modules_dir"] = modules_dir
+        param["make_opts"] = make_opts
     else:
         print("WARNING: no MODULES")
     return param
