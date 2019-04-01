@@ -83,6 +83,12 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/arcle-hs38/tarballs/arcle-hs38--uclibc--stable-2018.11-1.tar.bz2
     larch: arc
     prefix: arc-buildroot-linux-uclibc-
+  - name: Debian gcc-8-hppa64-linux-gnu
+    larch: parisc
+    prefix: hppa64-linux-gnu-
+  - name: Gentoo hppa-unknown-linux-gnu
+    larch: parisc
+    prefix: hppa-unknown-linux-gnu-
 targets:
   - name: arm_generic
     larch: arm
@@ -242,6 +248,13 @@ targets:
     cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules uImage dtbs
     warnings: "-W1"
+  - name: parisc_defconfig
+    larch: parisc
+    flavour: defconfig
+    cross_compile: hppa64-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+    defconfig: default_defconfig
   - name: pmac_generic
     larch: powerpc
     subarch: pmac
@@ -972,6 +985,25 @@ templates:
         - '-append "earlycon=uart8250,mmio32,0x18001600 root=/dev/ram0"'
     configs:
       - name: CONFIG_NIOS2=y
+        type: mandatory
+    tags:
+      - ok
+      - notests
+  - name: QEMU hppa
+    arch: parisc
+    devicetype: qemu
+    devicename: qemu-hppa
+    kernelfile: vmlinux
+    mach: parisc
+    qemu:
+        machine: hppa
+        netdevice: tap
+        memory: 512
+        guestfs_interface: none
+        extra_options:
+        - 'console=ttyS0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_PARISC=y
         type: mandatory
     tags:
       - ok
