@@ -744,6 +744,10 @@ def genconfig(sourcedir, param, defconfig):
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
+            if coverlay == "cpu_be":
+                enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
+            if coverlay == "cpu_el":
+                disable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
             if coverlay == "hack_drm_mxfsb":
                 disable_config(param, "CONFIG_DRM_MXSFB")
                 disable_config(param, "CONFIG_DRM_IMX")
