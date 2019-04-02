@@ -1077,6 +1077,19 @@ templates:
       - ok
       - h6
       - allwinner
+  - name: sun5i-a13-olinuxino-micro
+    arch: arm
+    devicetype: sun5i-a13-olinuxino-micro
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun5i-a13-olinuxino-micro.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a13
+      - allwinner
   - name: sun7i-a20-cubietruck
     arch: arm
     devicetype: cubietruck
