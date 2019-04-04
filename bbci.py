@@ -1041,7 +1041,7 @@ def toolchain_validate(targetname):
     if args.debug:
         print("DEBUG: Try to detect a toolchain")
     toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
-    for toolchain in t["toolchains"]:
+    for toolchain in yto["toolchains"]:
         if toolchain["larch"] != larch:
             if args.debug:
                 print("DEBUG: ignore %s due to larch %s" % (toolchain["name"], toolchain["larch"]))
@@ -1096,7 +1096,7 @@ def toolchain_download(targetname):
     cachedir = os.path.expandvars(t["config"]["cache"])
     if not os.path.isdir(cachedir):
         os.mkdir(cachedir)
-    for toolchain in t["toolchains"]:
+    for toolchain in yto["toolchains"]:
         if toolchain["larch"] != larch:
             continue
         if need64bits:
@@ -1249,6 +1249,9 @@ tfile = open("all.yaml")
 t = yaml.load(tfile)
 tlabsfile = open("labs.yaml")
 tlabs = yaml.load(tlabsfile)
+
+toolchainfile = open("toolchains.yaml")
+yto = yaml.load(toolchainfile)
 
 do_actions(args.source, args.target, args.action)
 
