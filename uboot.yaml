@@ -1,0 +1,43 @@
+config:
+    builddir: $HOME/crossbuild
+    toolchains: $HOME/data/toolchains
+    cache: $HOME/bbci/cache
+    logdir: $HOME/bbci/logs
+targets:
+  - name: A13-OLinuXinoM_defconfig
+    larch: arm
+    defconfig: A13-OLinuXinoM_defconfig
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+  - name: A33-OLinuXino_defconfig
+    larch: arm
+    defconfig: A33-OLinuXino_defconfig
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+  - name: h8_homlet_v2_defconfig
+    larch: arm
+    defconfig: h8_homlet_v2_defconfig
+  - name: orangepi_one_plus_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: orangepi_one_plus_defconfig
+    atf: sun50i_h6
+  - name: ATF-sun50i_a64
+    platform: sun50i_a64
+    larch: arm64
+    type: ATF
+  - name: ATF-sun50i_h6
+    platform: sun50i_h6
+    larch: arm64
+    type: ATF
+sources:
+  - name: uboot
+    directory: $HOME/uboot
+    gituri: http://git.denx.de/u-boot.git
+  - name: ATF
+    type: ATF
+    directory: $HOME/arm-trusted-firmware
+    gituri: https://github.com/ARM-software/arm-trusted-firmware
