@@ -84,14 +84,18 @@ def build(param):
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
-    logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
+    if args.nolog:
+        logfile = sys.stdout
+    else:
+        logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
 
     if args.quiet:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
     else:
         pbuild = subprocess.Popen("make %s 2>&1" % make_opts, shell=True, stdout=logfile)
     outs, err = pbuild.communicate()
-    logfile.close()
+    if not args.nolog:
+        logfile.close()
 
     builds[param["targetname"]] = {}
     if err is None and pbuild.returncode == 0:
@@ -1240,6 +1244,7 @@ parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags"
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
+parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
