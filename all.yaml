@@ -409,7 +409,7 @@ templates:
       - name: CONFIG_SUNLANCE
     tags:
       - ok
-  - name: sun4u
+  - name: QEMU sun4u
     arch: sparc64
     larch: sparc
     devicetype: qemu
@@ -432,7 +432,7 @@ templates:
         type: test
     tags:
       - ok
-  - name: cubieboard
+  - name: QEMU cubieboard
     arch: arm
     larch: arm
     devicetype: qemu
@@ -457,6 +457,8 @@ templates:
         type: test
     tags:
       - ok
+      - cubieboard
+      - a10
   - name: qemu-arm64
     arch: arm64
     devicetype: qemu
@@ -610,7 +612,7 @@ templates:
       - name: CONFIG_PIIX
     tags:
       - ok
-  - name: x86_64
+  - name: qemu x86_64
     arch: x86_64
     devicetype: qemu
     devicename: qemu-x86_64
@@ -626,7 +628,7 @@ templates:
     configs:
     tags:
       - ok
-  - name: x86
+  - name: qemu x86
     arch: x86
     devicetype: qemu
     devicename: qemu-x86
