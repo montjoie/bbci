@@ -108,6 +108,12 @@ targets:
     cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
+  - name: indigo2
+    larch: mips
+    subarch: ip28
+    cross_compile: mips-unknown-linux-gnu-
+    full_tgt: vmlinux modules
+    warnings: "-W1"
   - name: malta_defconfig
     larch: mips
     subarch: mips32
