@@ -84,6 +84,14 @@ def build(param):
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
+    if "modules_dir" in param:
+        modules_dir = param["modules_dir"]
+        if os.path.isdir(modules_dir):
+            print("DEBUG: clean old %s" % modules_dir)
+            if not args.noact:
+                shutil.rmtree(modules_dir)
+        os.mkdir(modules_dir)
+
     if args.nolog:
         logfile = sys.stdout
     else:
@@ -893,10 +901,6 @@ def common(sourcename, targetname):
             print("DEBUG: %s not exists" % modules_dir)
             os.mkdir(modules_dir)
         modules_dir = "%s/modules/%s" % (builddir, targetname)
-        if os.path.isdir(modules_dir):
-            print("DEBUG: clean old %s" % modules_dir)
-            shutil.rmtree(modules_dir)
-        os.mkdir(modules_dir)
         if args.debug:
             print("DEBUG: add modules_install")
         param["full_tgt"] = "%s modules_install" % (param["full_tgt"])
