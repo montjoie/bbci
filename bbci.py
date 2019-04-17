@@ -121,6 +121,7 @@ def boot(param):
     kdir = param["kdir"]
     sourcename = param["sourcename"]
     global qemu_boot_id
+    boot_method = "u-boot"
 
     logdir = os.path.expandvars(t["config"]["logdir"])
     if not os.path.exists(logdir):
@@ -329,6 +330,8 @@ def boot(param):
                     goodtag = False
         if not goodtag:
             continue
+        if "boot-method" in device:
+            boot_method = device["boot-method"]
         kerneltype = "image"
         kernelfile = device["kernelfile"]
         if kernelfile == "zImage":
@@ -372,6 +375,8 @@ def boot(param):
         jobt = jobt.replace("__KENDIAN__", endian)
         jobt = jobt.replace("__KERNELTYPE__", kerneltype)
         jobt = jobt.replace("__GIT_LASTCOMMIT__", git_lastcommit)
+        jobt = jobt.replace("__LAVA_BOOT_TYPE__", kerneltype)
+        jobt = jobt.replace("__LAVA_BOOT_METHOD__", boot_method)
         jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s" % (git_describe, sourcename, larch, subarch, flavour, devicename))
         # now convert to YAML
         ft = yaml.load(jobt)
