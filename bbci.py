@@ -255,6 +255,10 @@ def boot(param):
     else:
         pbuild = subprocess.Popen("cd %s && tar czf modules.tar.gz lib" % modules_dir, shell=True)
         outs, err = pbuild.communicate()
+    if err is not None and err != 0:
+        print("ERROR: fail to generate modules.tar.gz in %s (err=%d)" % (modules_dir, err))
+        print(outs)
+        return 1
 
     for device in t["templates"]:
         if "devicename" in device:
