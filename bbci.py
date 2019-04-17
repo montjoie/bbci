@@ -865,7 +865,10 @@ def common(sourcename, targetname):
     if "full_tgt" not in target:
         print("ERROR: Missing full_tgt")
         sys.exit(1)
-    param["full_tgt"] = target["full_tgt"]
+    if args.noclean:
+        param["full_tgt"] = "%s" % target["full_tgt"]
+    else:
+        param["full_tgt"] = "clean %s" % target["full_tgt"]
 
     param["make_opts"] = make_opts
     param["larch"] = larch
@@ -880,6 +883,8 @@ def common(sourcename, targetname):
         err = genconfig(sourcedir, param, "randconfig")
         if err:
             param["error"] = 1
+        # hack by adding clean
+        param["full_tgt"] = "clean %s" % target["full_tgt"]
     if not os.path.exists("%s/.config" % kdir) or "defconfig" in target:
         if "defconfig" in target:
             err = genconfig(sourcedir, param, target["defconfig"])
@@ -1253,6 +1258,7 @@ parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags"
 parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
+parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
