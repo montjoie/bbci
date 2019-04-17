@@ -274,18 +274,20 @@ def boot(param):
             devicename = device["devicename"]
         else:
             devicename = device["devicetype"]
-        print("==============================================")
-        print("CHECK: %s" % devicename)
         if "larch" in device:
             device_larch = device["larch"]
         else:
             device_larch = device["arch"]
         if device_larch != larch:
-            print("\tSKIP: larch")
+            if args.debug:
+                print("SKIP: %s (wrong larch)" % devicename)
             continue
         if device["arch"] != arch:
-            print("\tSKIP: arch: %s vs %s" % (device["arch"], arch))
+            if args.debug:
+                print("SKIP: %s arch: %s vs %s" % (devicename, device["arch"], arch))
             continue
+        print("==============================================")
+        print("CHECK: %s" % devicename)
         # check config requirements
         skip = False
         if "configs" in device and device["configs"] is not None:
