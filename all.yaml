@@ -390,6 +390,9 @@ configoverlays:
       - config: CONFIG_VIRTIO_PCI=y
       - config: CONFIG_VIRTIO_MMIO=y
       - config: CONFIG_SCSI_VIRTIO=y
+      - config: CONFIG_VIRTIO_NET=y
+      - config: CONFIG_ATA=y
+      - config: CONFIG_PATA_CMD64X=y
 templates:
   - name: SS-10
     arch: sparc
