@@ -404,6 +404,7 @@ templates:
     qemu:
         machine: SS-10
         model: model=lance
+        netdevice: tap
         memory: 256
         guestfs_interface: scsi
         extra_options:
@@ -447,6 +448,7 @@ templates:
         cpu: cortex-a7
         machine: cubieboard
         model: model=allwinner-emac
+        netdevice: tap
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
@@ -473,6 +475,7 @@ templates:
         memory: 1024
         cpu: cortex-a57
         guestfs_interface: virtio
+        netdevice: tap
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
     configs:
@@ -492,6 +495,7 @@ templates:
         machine: vexpress-a9
         cpu: cortex-a9
         model: model=lan9118
+        netdevice: tap
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
@@ -517,6 +521,7 @@ templates:
         machine: vexpress-a15
         cpu: cortex-a15
         model: model=lan9118
+        netdevice: tap
         guestfs_interface: none
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
@@ -541,6 +546,7 @@ templates:
         machine: sabrelite
         cpu: cortex-a9
         guestfs_interface: none
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -584,6 +590,7 @@ templates:
         machine: malta
         memory: 128
         model: model=pcnet
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -605,6 +612,7 @@ templates:
         machine: malta
         memory: 128
         model: model=pcnet
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -626,6 +634,7 @@ templates:
         cpu: qemu64
         netdevice: tap
         model: model=e1000
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -642,6 +651,7 @@ templates:
         cpu: qemu32
         netdevice: tap
         model: model=e1000
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -655,10 +665,10 @@ templates:
     mach: alpha
     qemu:
         machine: clipper
-        netdevice: tap
         smp: 4
         memory: 512
         model: model=pcnet
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
     configs:
@@ -672,8 +682,8 @@ templates:
     mach: powerpc
     qemu:
         machine: g3beige
-        netdevice: tap
         model: model=pcnet
+        netdevice: tap
         extra_options:
         - '-append "console=ttyPZ0 root=/dev/ram0"'
     configs:
@@ -695,8 +705,8 @@ templates:
         machine: virtex-ml507
         memory: 512
         guestfs_interface: none
-        netdevice: tap
         model: model=pcnet
+        netdevice: tap
         extra_options:
         - '-append "console=ttyS0 root=/dev/ram0"'
         - '-device virtio-scsi-pci'
@@ -808,8 +818,8 @@ templates:
     qemu:
         machine: pseries
         cpu: POWER8
-        netdevice: tap
         model: model=pcnet
+        netdevice: tap
         guestfs_interface: scsi
         extra_options:
         - '-append "console=hvc0 root=/dev/ram0"'
