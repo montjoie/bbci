@@ -513,7 +513,7 @@ templates:
   - name: qemu-vexpress-a15
     arch: arm
     devicetype: qemu
-    devicename: qemu-vexpress-a115
+    devicename: qemu-vexpress-a15
     kernelfile: zImage
     dtb: vexpress-v2p-ca15-tc1.dtb
     mach: qemu
