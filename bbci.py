@@ -1143,6 +1143,8 @@ def toolchain_download(targetname):
         tarcmd = "tar xjf"
         if re.search(".xz", toolchain_file):
             tarcmd = "tar xJf"
+        if re.search(".gz", toolchain_file):
+            tarcmd = "tar xzf"
         toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
         if not os.path.isdir(toolchain_dir):
             os.mkdir(toolchain_dir)
