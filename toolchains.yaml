@@ -1,4 +1,7 @@
 toolchains:
+  - name: Gentoo armv7a-hf
+    larch: arm
+    prefix: armv7a-hardfloat-linux-gnueabi-
   - name: Bootlin armv7-eabihf
     larch: arm
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/armv7-eabihf/tarballs/armv7-eabihf--glibc--stable-2018.11-1.tar.bz2
@@ -24,11 +27,18 @@ toolchains:
     larch: mips
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/mips32/tarballs/mips32--uclibc--stable-2018.11-1.tar.bz2
     prefix: mips-buildroot-linux-uclibc-
+  - name: Gentoo crossdev MIPS64
+    larch: mips
+    prefix: mips64-unknown-linux-gnu-
+    bits: {32,64}
   - name: Bootlin MIPS64
     larch: mips
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/mips64-n32/tarballs/mips64-n32--uclibc--stable-2018.11-1.tar.bz2
     prefix: mips64-buildroot-linux-uclibc-
     bits: {32,64}
+  - name: Gentoo PPC
+    larch: powerpc
+    prefix: powerpc-unknown-linux-gnu-
   - name: Bootlin PPC
     larch: powerpc
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/powerpc-e500mc/tarballs/powerpc-e500mc--uclibc--stable-2018.11-1.tar.bz2
@@ -45,6 +55,9 @@ toolchains:
     larch: powerpc
     prefix: powerpc64-unknown-linux-gnu-
     bits: {32,64}
+  - name: Gentoo sparc
+    larch: sparc
+    prefix: sparc-unknown-linux-gnu-
   - name: Bootlin sparc
     larch: sparc
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparcv8/tarballs/sparcv8--uclibc--stable-2018.11-1.tar.bz2
@@ -70,6 +83,9 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--uclibc--stable-2018.11-1.tar.bz2
     larch: openrisc
     prefix: or1k-buildroot-linux-uclibc-
+  - name: Gentoo alpha
+    larch: alpha
+    prefix: alpha-unknown-linux-gnu-
   - name: xtool alpha
     larch: alpha
     path: $HOME/data/toolchains/alphaev4-unknown-linux-gnu
@@ -78,6 +94,10 @@ toolchains:
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/arcle-hs38/tarballs/arcle-hs38--uclibc--stable-2018.11-1.tar.bz2
     larch: arc
     prefix: arc-buildroot-linux-uclibc-
+  - name: Sinopsys ARC
+    url: https://github.com/foss-for-synopsys-dwc-arc-processors/toolchain/releases/download/arc-2019.03-rc1/arc_gnu_2019.03-rc1_prebuilt_elf32_le_linux_install.tar.gz
+    larch: arc
+    prefix: arc-elf32-
   - name: Debian gcc-8-hppa64-linux-gnu
     larch: parisc
     prefix: hppa64-linux-gnu-
