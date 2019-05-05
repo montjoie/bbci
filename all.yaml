@@ -426,10 +426,10 @@ templates:
       - ok
       - cubieboard
       - a10
-  - name: qemu-arm64
+  - name: qemu-arm64-virt
     arch: arm64
     devicetype: qemu
-    devicename: qemu-arm64
+    devicename: qemu-arm64-virt
     kernelfile: Image
     mach: qemu
     qemu:
@@ -441,8 +441,35 @@ templates:
         extra_options:
         - '-append "console=ttyAMA0 root=/dev/ram0"'
     configs:
-      - name: RTC_DRV_PL031?
-      - name: PCIE?
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - virt
+# Cannot use virt due to https://bugzilla.redhat.com/show_bug.cgi?id=1633328
+# a virt can be created and depend on ARM_LPAE
+  - name: qemu-arm-virt-2.11
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-arm-virt-2.11
+    kernelfile: zImage
+    mach: qemu
+    qemu:
+        machine: virt-2.11
+        memory: 1024
+        cpu: cortex-a15
+        netdevice: tap
+        guestfs_interface: virtio
+        extra_options:
+        - '-append "console=ttyAMA0 root=/dev/ram0"'
+    configs:
+      - name: CONFIG_SERIAL_AMBA_PL011=y
+        type: mandatory
+      - name: CONFIG_PCI_HOST_GENERIC=
+        type: test
+      - name: CONFIG_RTC_DRV_PL031=
+        type: test
+      - name: CONFIG_GPIO_PL061=
     tags:
       - ok
       - virt
