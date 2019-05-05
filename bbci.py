@@ -1044,17 +1044,6 @@ def toolchain_validate(targetname):
         need64bits = True
         if args.debug:
             print("DEBUG: target need 64 bits")
-    if "cross_compile" in target:
-        if target["cross_compile"] == "None":
-            if args.debug:
-                print("DEBUG: no need for cross_compile")
-            return 0
-        ret = subprocess.run("%sgcc --version > /dev/null" % target["cross_compile"], shell=True)
-        if ret.returncode == 0:
-            if args.debug:
-                print("DEBUG: cross_compile prefix is valid")
-            return 0
-        print("ERROR: Current cross_compile settings is wrong")
 
     #detect native build
     local_arch = platform.machine()

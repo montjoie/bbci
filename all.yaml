@@ -6,37 +6,31 @@ config:
 targets:
   - name: arm_generic
     larch: arm
-    cross_compile: armv7a-hardfloat-linux-gnueabi-
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: multi_v7_defconfig
     larch: arm
     flavour: defconfig
-    cross_compile: armv7a-hardfloat-linux-gnueabi-
     defconfig: multi_v7_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
     tags: { defconfig }
   - name: arm64_generic
     larch: arm64
-    cross_compile: aarch64-unknown-linux-gnu-
     full_tgt: dtbs Image modules
     warnings: "-W1"
   - name: amlogic_generic
     larch: arm64
     subarch: amlogic
-    cross_compile: aarch64-unknown-linux-gnu-
     full_tgt: dtbs Image modules
     warnings: "-W1"
   - name: rpi3_bcm2837_generic
     larch: arm64
-    cross_compile: aarch64-unknown-linux-gnu-
     full_tgt: dtbs Image modules
     warnings: "-W1"
   - name: alpha_clipper
     larch: alpha
     subarch: clipper
-    cross_compile: alpha-unknown-linux-gnu-
     full_tgt: boot vmlinux modules
     warnings: "-W1"
   - name: bamboo_defconfig
@@ -44,7 +38,6 @@ targets:
     subarch: 44x
     flavour: bamboo_defconfig
     defconfig: 44x/bamboo_defconfig
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs
     warnings: "-W1"
   - name: canyonlands_defconfig
@@ -52,14 +45,12 @@ targets:
     subarch: 44x
     flavour: canyonlands_defconfig
     defconfig: 44x/canyonlands_defconfig
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs zImage
     warnings: "-W1"
   - name: 44x_generic
     larch: powerpc
     subarch: 44x
     flavour: default
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs zImage
     warnings: "-W1"
   - name: alpha_defconfig
@@ -67,7 +58,6 @@ targets:
     subarch: default
     flavour: defconfig
     defconfig: defconfig
-    cross_compile: alpha-unknown-linux-gnu-
     full_tgt: boot vmlinux modules
     warnings: "-W1"
   - name: arm64_defconfig
@@ -75,7 +65,6 @@ targets:
     subarch: default
     flavour: defconfig
     defconfig: defconfig
-    cross_compile: aarch64-unknown-linux-gnu-
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: hsdk_defconfig
@@ -89,7 +78,6 @@ targets:
     larch: arm
     subarch: imx
     flavour: default
-    cross_compile: armv7a-hardfloat-linux-gnueabi-
     full_tgt: dtbs zImage modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: imx_defconfig
@@ -97,7 +85,6 @@ targets:
     subarch: imx
     flavour: defconfig
     defconfig: imx_v6_v7_defconfig
-    cross_compile: armv7a-hardfloat-linux-gnueabi-
     full_tgt: dtbs zImage modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: malta_kvm_defconfig
@@ -105,13 +92,11 @@ targets:
     subarch: default
     flavour: defconfig
     defconfig: malta_kvm_defconfig
-    cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: indigo2
     larch: mips
     subarch: ip28
-    cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: malta_defconfig
@@ -119,14 +104,12 @@ targets:
     subarch: mips32
     flavour: defconfig
     defconfig: malta_kvm_guest_defconfig
-    cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: mips_generic
     larch: mips
     subarch: mips32
     flavour: default
-    cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: mips_jazz_defconfig
@@ -134,7 +117,6 @@ targets:
     subarch: mips64
     flavour: defconfig
     defconfig: jazz_defconfig
-    cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
     bits: 64
@@ -142,21 +124,18 @@ targets:
     larch: mips
     subarch: mips32
     flavour: malta
-    cross_compile: mips-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: mips64_generic
     larch: mips
     subarch: mips64
     flavour: default
-    cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     bits: 64
   - name: mips64_malta
     larch: mips
     subarch: mips64
     flavour: malta
-    cross_compile: mips64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
     bits: 64
@@ -165,13 +144,11 @@ targets:
     subarch: 85xx
     flavour: defconfig
     defconfig: 85xx/mpc85xx_cds_defconfig
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules uImage dtbs
     warnings: "-W1"
   - name: parisc_defconfig
     larch: parisc
     flavour: defconfig
-    cross_compile: hppa64-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
     defconfig: default_defconfig
@@ -179,7 +156,6 @@ targets:
     larch: powerpc
     subarch: pmac
     flavour: default
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs
     warnings: "-W1"
   - name: pmac32_defconfig
@@ -187,52 +163,44 @@ targets:
     subarch: pmac
     flavour: defconfig
     defconfig: pmac32_defconfig
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: ppc64_pseries
     larch: powerpc
     subarch: pseries
-    cross_compile: powerpc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     bits: 64
   - name: powerpc_generic
     larch: powerpc
     subarch: ppc32
     flavour: default
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs
   - name: pseries_defconfig
     larch: powerpc
     subarch: pseries
     flavour: defconfig
     defconfig: pseries_defconfig
-    cross_compile: powerpc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     warnings: "-W1"
     bits: 64
   - name: sparc_generic
     larch: sparc
-    cross_compile: sparc-unknown-linux-gnu-
     full_tgt: vmlinux modules zImage
   - name: sparc64_generic
     larch: sparc
     subarch: sparc64
-    cross_compile: sparc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     bits: 64
   - name: sparc_defconfig
     larch: sparc
     subarch: sparc32
     flavour: defconfig
-    cross_compile: sparc-unknown-linux-gnu-
     full_tgt: vmlinux modules zImage
     defconfig: sparc32_defconfig
   - name: sparc64_defconfig
     larch: sparc
     subarch: sparc64
     flavour: defconfig
-    cross_compile: sparc64-unknown-linux-gnu-
     full_tgt: vmlinux modules
     defconfig: sparc64_defconfig
     bits: 64
@@ -241,7 +209,6 @@ targets:
     subarch: sunxi
     flavour: defconfig
     defconfig: sunxi_defconfig
-    cross_compile: armv7a-hardfloat-linux-gnueabi-
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
   - name: virtex5_defconfig
@@ -249,31 +216,26 @@ targets:
     subarch: 44x
     flavour: virtex5_defconfig
     defconfig: 44x/virtex5_defconfig
-    cross_compile: powerpc-unknown-linux-gnu-
     full_tgt: vmlinux modules dtbs zImage
     warnings: "-W1"
   - name: x86_64_generic
     larch: x86_64
-    cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
   - name: x86_64_defconfig
     larch: x86_64
     flavour: defconfig
     defconfig: x86_64_defconfig
-    cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
   - name: x86_defconfig
     larch: x86
     flavour: defconfig
     defconfig: i386_defconfig
-    cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
   - name: x86_generic
     larch: x86
-    cross_compile: None
     full_tgt: bzImage modules
     warnings: "-W1"
   - name: generic_kc705_defconfig
