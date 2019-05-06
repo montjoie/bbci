@@ -17,6 +17,9 @@ targets:
       - name: "CONFIG_USB_HOST_ETHER=y"
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
+  - name: Cubieboard2_defconfig
+    larch: arm
+    defconfig: Cubieboard2_defconfig
   - name: h8_homlet_v2_defconfig
     larch: arm
     defconfig: h8_homlet_v2_defconfig
