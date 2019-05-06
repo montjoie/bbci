@@ -67,11 +67,12 @@ actions:
     definitions:
         - repository:
             metadata:
-              format: Lava-Test Test Definition 1.0u
+              format: Lava-Test Test Definition 1.0
               name: download_modules
               description: "Download modules"
             run:
               steps:
+              - /bin/sh -c 'grep -q ^name /etc/resolv.conf || sleep 15'
               - wget __BOOT_FQDN__/__PATH__/modules.tar.gz
               - tar xvzf modules.tar.gz -C /
           from: inline
