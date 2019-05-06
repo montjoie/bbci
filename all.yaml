@@ -577,7 +577,7 @@ templates:
     mach: mips
     qemu:
         machine: malta
-        memory: 128
+        memory: 256
         model: model=pcnet
         netdevice: tap
         extra_options:
@@ -599,7 +599,7 @@ templates:
     mach: mips64
     qemu:
         machine: malta
-        memory: 128
+        memory: 256
         model: model=pcnet
         netdevice: tap
         extra_options:
