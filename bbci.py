@@ -379,7 +379,10 @@ def boot(param):
         jobt = jobt.replace("__GIT_LASTCOMMIT__", git_lastcommit)
         jobt = jobt.replace("__LAVA_BOOT_TYPE__", kerneltype)
         jobt = jobt.replace("__LAVA_BOOT_METHOD__", boot_method)
-        jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s" % (git_describe, sourcename, larch, subarch, flavour, devicename))
+        spetial = param["toolchaininuse"]
+        if args.configoverlay:
+            spetial += "+%s" % args.configoverlay
+        jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s (%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial))
         # now convert to YAML
         ft = yaml.load(jobt)
         for dtag in device["tags"]:
@@ -826,6 +829,8 @@ def common(sourcename, targetname):
         print("ERROR: target %s not found" % targetname)
         sys.exit(1)
 
+    param["toolchaininuse"] = target["toolchaininuse"]
+
     for t_source in t["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
@@ -1047,8 +1052,10 @@ def toolchain_validate(targetname):
 
     #detect native build
     local_arch = platform.machine()
-    if local_arch == target["larch"]:
-        print("DEBUG: no need of cross compiler")
+    if local_arch == target["larch"] or (local_arch == 'x86_64' and target["larch"] == 'x86'):
+        if args.debug:
+            print("DEBUG: no need of cross compiler")
+        target["toolchaininuse"] = "Native"
         return 0
 
     if args.debug:
@@ -1084,6 +1091,7 @@ def toolchain_validate(targetname):
             if ret.returncode == 0:
                 print("INFO: Will use %s as toolchain" % toolchain["name"])
                 target["cross_compile"] = toolchain["prefix"]
+                target["toolchaininuse"] = toolchain["name"]
                 return 0
     return 1
 
