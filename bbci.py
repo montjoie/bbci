@@ -84,13 +84,10 @@ def build(param):
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
-    if "modules_dir" in param:
-        modules_dir = param["modules_dir"]
-        if os.path.isdir(modules_dir):
-            print("DEBUG: clean old %s" % modules_dir)
-            if not args.noact:
-                shutil.rmtree(modules_dir)
-        os.mkdir(modules_dir)
+    if not args.noclean:
+        err = linux_clean(param)
+        if err != 0:
+            print("WARNING: make clean fail")
 
     if args.nolog:
         logfile = sys.stdout
@@ -102,10 +99,35 @@ def build(param):
     else:
         pbuild = subprocess.Popen("make %s 2>&1" % make_opts, shell=True, stdout=logfile)
     outs, err = pbuild.communicate()
+
+    builds[param["targetname"]] = {}
+    if err is None and pbuild.returncode == 0:
+        if args.debug:
+            print("DEBUG: build success")
+    else:
+        builds[param["targetname"]]["result"] = 'FAIL'
+        if not args.nolog:
+            logfile.close()
+        return err
+
+    if "modules_dir" in param:
+        modules_dir = param["modules_dir"]
+        if os.path.isdir(modules_dir):
+            if args.debug:
+                print("DEBUG: clean old %s" % modules_dir)
+            if not args.noact:
+                shutil.rmtree(modules_dir)
+        os.mkdir(modules_dir)
+        if args.debug:
+            print("DEBUG: do modules_install")
+        if args.quiet:
+            pbuild = subprocess.Popen("make %s modules_install" % make_opts, shell=True, stdout=subprocess.DEVNULL)
+        else:
+            pbuild = subprocess.Popen("make %s modules_install 2>&1" % make_opts, shell=True, stdout=logfile)
+        outs, err = pbuild.communicate()
     if not args.nolog:
         logfile.close()
 
-    builds[param["targetname"]] = {}
     if err is None and pbuild.returncode == 0:
         builds[param["targetname"]]["result"] = 'PASS'
     else:
@@ -877,11 +899,8 @@ def common(sourcename, targetname):
     if "full_tgt" not in target:
         print("ERROR: Missing full_tgt")
         sys.exit(1)
-    if args.noclean:
-        param["full_tgt"] = "%s" % target["full_tgt"]
-    else:
-        param["full_tgt"] = "clean %s" % target["full_tgt"]
 
+    param["full_tgt"] = target["full_tgt"]
     param["make_opts"] = make_opts
     param["larch"] = larch
     param["subarch"] = subarch
@@ -895,8 +914,6 @@ def common(sourcename, targetname):
         err = genconfig(sourcedir, param, "randconfig")
         if err:
             param["error"] = 1
-        # hack by adding clean
-        param["full_tgt"] = "clean %s" % target["full_tgt"]
     if not os.path.exists("%s/.config" % kdir) or "defconfig" in target:
         if "defconfig" in target:
             err = genconfig(sourcedir, param, target["defconfig"])
@@ -918,9 +935,6 @@ def common(sourcename, targetname):
             print("DEBUG: %s not exists" % modules_dir)
             os.mkdir(modules_dir)
         modules_dir = "%s/modules/%s" % (builddir, targetname)
-        if args.debug:
-            print("DEBUG: add modules_install")
-        param["full_tgt"] = "%s modules_install" % (param["full_tgt"])
         make_opts = make_opts + " INSTALL_MOD_PATH=%s" % modules_dir
         param["modules_dir"] = modules_dir
         param["make_opts"] = make_opts
