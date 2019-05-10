@@ -719,24 +719,28 @@ templates:
         machine: sam460ex
         memory: 512
         guestfs_interface: none
+        model: model=virtio-net-pci
         netdevice: tap
-        model: model=pcnet
         append: "console=ttyS0 root=/dev/ram0"
         extra_options:
         - '-device virtio-scsi-pci,id=scsi'
         - '-device scsi-hd,drive=lavatest'
+        - '-device virtio-net-pci'
+    comment: "The presence of virtio-net-pci in model need to be removed"
     configs:
       - name: CONFIG_44x=y
         type: mandatory
       - name: CONFIG_CANYONLANDS=y
         type: mandatory
       - name: CONFIG_IBM_EMAC=y
+        type: test
       - name: CONFIG_SATA_SIL=y
         type: test
     tags:
       - ok
       - sam460ex
       - sil_not_working
+      - emac_not_implemented
   - name: QEMU PPC 40p
     arch: powerpc
     devicetype: qemu
