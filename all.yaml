@@ -143,9 +143,24 @@ targets:
     larch: powerpc
     subarch: 85xx
     flavour: defconfig
-    defconfig: 85xx/mpc85xx_cds_defconfig
+    defconfig: mpc85xx_defconfig
     full_tgt: vmlinux modules uImage dtbs
     warnings: "-W1"
+    configs:
+     - name: "CONFIG_SERIAL_OF_PLATFORM=y"
+     - name: "CONFIG_SERIAL_FSL_LPUART=y"
+     - name: "CONFIG_PCI_HOST_GENERIC=y"
+     - name: "CONFIG_C293_PCIE=y"
+     - name: "CONFIG_PCI_MSI=y"
+     - name: "CONFIG_SERIAL_8250_MANY_PORTS=y"
+     - name: "CONFIG_SERIAL_8250_NR_UARTS=6"
+     - name: "CONFIG_SERIAL_8250_DETECT_IRQ=y"
+     - name: "CONFIG_SERIAL_8250_RSA=y"
+     - name: "CONFIG_FSL_ULI1575=y"
+     - name: "CONFIG_MPC8540_ADS=y"
+     - name: "CONFIG_MPC85xx_DS=y"
+     - name: "CONFIG_PHYS_64BIT=y"
+     - name: "CONFIG_E1000=y"
   - name: parisc_defconfig
     larch: parisc
     flavour: defconfig
@@ -813,7 +828,9 @@ templates:
         guestfs_interface: none
         append: "console=ttyS0 root=/dev/ram0"
     configs:
-      - name: CONFIG_PPC_85xx=y
+      - name: CONFIG_MPC85x
+        type: mandatory
+      - name: CONFIG_MPC85xx_DS=y
         type: mandatory
     tags:
       - ok
