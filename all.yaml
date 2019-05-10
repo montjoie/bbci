@@ -958,6 +958,20 @@ templates:
       - ok
       - a64
       - allwinner
+  - name: sun50i-a64-pine64-plus
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-a64-pine64-plus
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-a64-pine64-plus.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a64
+      - allwinner
   - name: sun50i-h5-libretech-all-h3-cc
     arch: arm64
     larch: arm64
