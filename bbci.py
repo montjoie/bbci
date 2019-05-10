@@ -445,6 +445,9 @@ def boot(param):
                 ft["context"]["guestfs_driveid"] = device["qemu"]["guestfs_driveid"]
             if "extra_options" in device["qemu"]:
                 ft["context"]["extra_options"] = device["qemu"]["extra_options"]
+            if "extra_options" not in ft["context"]:
+                ft["context"]["extra_options"] = []
+            ft["context"]["extra_options"].append("-append '%s ip=dhcp'" % device["qemu"]["append"])
             for action in ft["actions"]:
     #            if "boot" in action:
     #                action["boot"]["method"] = "qemu"
@@ -475,6 +478,7 @@ def boot(param):
                     if re.search("lavatest", extrao):
                         continue
                     qemu_cmd += " %s" % extrao
+            qemu_cmd += " -append '%s'" % device["qemu"]["append"]
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
                 print("INFO: PMACZILOG console hack")
                 qemu_cmd = qemu_cmd.replace("console=ttyPZ0", "console=ttyS0")

@@ -369,8 +369,7 @@ templates:
         netdevice: tap
         memory: 256
         guestfs_interface: scsi
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_SUNLANCE
     tags:
@@ -387,8 +386,7 @@ templates:
         memory: 384
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_PATA_CMD64X=
         type: test
@@ -412,8 +410,8 @@ templates:
         model: model=allwinner-emac
         netdevice: tap
         guestfs_interface: none
+        append: "console=ttyS0 root=/dev/ram0"
         extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
         - "-device ide-hd,drive=lavatest"
     configs:
       - name: CONFIG_ARCH_SUNXI=y
@@ -438,8 +436,7 @@ templates:
         cpu: cortex-a57
         guestfs_interface: virtio
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyAMA0 root=/dev/ram0"'
+        append: "console=ttyAMA0 root=/dev/ram0"
     configs:
       - name: RTC_DRV_PL031
         type: test
@@ -460,8 +457,7 @@ templates:
         cpu: cortex-a15
         netdevice: tap
         guestfs_interface: virtio
-        extra_options:
-        - '-append "console=ttyAMA0 root=/dev/ram0"'
+        append: "console=ttyAMA0 root=/dev/ram0"
     configs:
       - name: CONFIG_SERIAL_AMBA_PL011=y
         type: mandatory
@@ -486,8 +482,8 @@ templates:
         model: model=lan9118
         netdevice: tap
         guestfs_interface: none
+        append: "console=ttyAMA0 root=/dev/ram0"
         extra_options:
-        - '-append "console=ttyAMA0 root=/dev/ram0"'
         - '-device virtio-blk-device,drive=lavatest'
     configs:
       - name: CONFIG_ARCH_VEXPRESS
@@ -512,8 +508,8 @@ templates:
         model: model=lan9118
         netdevice: tap
         guestfs_interface: none
+        append: "console=ttyAMA0 root=/dev/ram0"
         extra_options:
-        - '-append "console=ttyAMA0 root=/dev/ram0"'
         - '-device virtio-blk-device,drive=lavatest'
     configs:
       - name: CONFIG_ARCH_VEXPRESS
@@ -536,8 +532,7 @@ templates:
         cpu: cortex-a9
         guestfs_interface: none
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
@@ -557,8 +552,7 @@ templates:
         cpu: cortex-a9
         memory: 256
         guestfs_interface: none
-        extra_options:
-        - '-append "console=ttymxc0 root=/dev/ram0"'
+        append: "console=ttymxc0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
@@ -580,8 +574,7 @@ templates:
         memory: 256
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
@@ -602,8 +595,7 @@ templates:
         memory: 256
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
@@ -624,8 +616,7 @@ templates:
         netdevice: tap
         model: model=e1000
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
     tags:
       - ok
@@ -641,8 +632,7 @@ templates:
         netdevice: tap
         model: model=e1000
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
     tags:
       - ok
@@ -658,8 +648,7 @@ templates:
         memory: 512
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
     tags:
       - ok
@@ -673,8 +662,7 @@ templates:
         machine: g3beige
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyPZ0 root=/dev/ram0"'
+        append: "console=ttyPZ0 root=/dev/ram0"
     configs:
       - name: CONFIG_PPC_PMAC=y
         type: mandatory
@@ -696,9 +684,7 @@ templates:
         guestfs_interface: none
         model: model=pcnet
         netdevice: tap
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
-        - '-device virtio-scsi-pci'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_44x=y
         type: mandatory
@@ -720,8 +706,8 @@ templates:
         guestfs_interface: none
         netdevice: tap
         model: model=pcnet
+        append: "console=ttyS0 root=/dev/ram0"
         extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
         - '-device virtio-scsi-pci,id=scsi'
         - '-device scsi-hd,drive=lavatest'
     configs:
@@ -747,8 +733,7 @@ templates:
         netdevice: tap
         guestfs_interface: none
         memory: 192
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
     tags:
       - broken
@@ -762,8 +747,7 @@ templates:
         machine: mac99,via=pmu
         netdevice: tap
         model: model=sungem
-        extra_options:
-        - '-append "console=ttyPZ0 root=/dev/ram0"'
+        append: "console=ttyPZ0 root=/dev/ram0"
     configs:
       - name: CONFIG_PPC_PMAC=y
         type: mandatory
@@ -782,8 +766,8 @@ templates:
         machine: bamboo
         netdevice: tap
         guestfs_interface: none
+        append: "console=ttyS0 root=/dev/ram0"
         extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
         - '-device virtio-scsi-pci,id=scsi'
         - '-device scsi-hd,drive=lavatest'
     configs:
@@ -810,8 +794,7 @@ templates:
         model: model=pcnet
         netdevice: tap
         guestfs_interface: scsi
-        extra_options:
-        - '-append "console=hvc0 root=/dev/ram0"'
+        append: "console=hvc0 root=/dev/ram0"
     configs:
       - name: CONFIG_PPC_PSERIES=y
         type: mandatory
@@ -828,8 +811,7 @@ templates:
         machine: mpc8544ds
         netdevice: tap
         guestfs_interface: none
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_PPC_85xx=y
         type: mandatory
@@ -847,8 +829,7 @@ templates:
         machine: ppce500
         netdevice: tap
         guestfs_interface: none
-        extra_options:
-        - '-append "console=ttyS0 root=/dev/ram0"'
+        append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_E500=y
         type: mandatory
@@ -868,8 +849,7 @@ templates:
         netdevice: tap
         memory: 512
         guestfs_interface: none
-        extra_options:
-        - '-append "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"'
+        append: "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"
     configs:
       - name: CONFIG_XTENSA_VARIANT_DC232B=y
         type: mandatory
@@ -887,8 +867,7 @@ templates:
         netdevice: tap
         memory: 512
         guestfs_interface: none
-        extra_options:
-        - '-append "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"'
+        append: "earlycon=uart8250,mmio32,0xfd050020,115200n8 console=uart8250,mmio32,0xfd050020,115200n8 root=/dev/ram0"
     configs:
       - name: CONFIG_XTENSA_VARIANT_DC232B=y
         type: mandatory
@@ -905,8 +884,7 @@ templates:
         netdevice: tap
         memory: 512
         guestfs_interface: none
-        extra_options:
-        - '-append "earlycon=uart8250,mmio32,0x18001600 root=/dev/ram0"'
+        append: "earlycon=uart8250,mmio32,0x18001600 root=/dev/ram0"
     configs:
       - name: CONFIG_NIOS2=y
         type: mandatory
