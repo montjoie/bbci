@@ -1166,7 +1166,7 @@ def toolchain_download(targetname):
         toolchain_subdir = toolchain_file.split(".tar")[0]
         subprocess.run("cd %s && %s %s/%s" % (toolchain_dir, tarcmd, cachedir, toolchain_file), shell=True)
         # fix bootlin toolchain TODO HACK
-        subprocess.run("cd %s && find %s -iname bison -type f | xargs rm" % (toolchain_dir, toolchain_dir))
+        subprocess.run("cd %s && find %s -iname bison -type f | xargs --no-run-if-empty rm" % (toolchain_dir, toolchain_dir), shell = True)
         if "url" in toolchain:
             toolchain_file = os.path.basename(toolchain["url"])
             toolchain_subdir = toolchain_file.split(".tar")[0]
