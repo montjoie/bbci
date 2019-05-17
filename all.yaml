@@ -541,20 +541,31 @@ templates:
     devicetype: qemu
     devicename: qemu-sabrelite
     kernelfile: zImage
+    dtb: imx6dl-sabrelite.dtb
     mach: qemu
     qemu:
         machine: sabrelite
         cpu: cortex-a9
         guestfs_interface: none
+        model: model=fec
         netdevice: tap
-        append: "console=ttyS0 root=/dev/ram0"
+        append: "console=ttymxc0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
-      - name: IMX_SATA?
-      - name: SERIAL?
+      - name: CONFIG_AHCI_IMX=
+      - name: CONFIG_SERIAL_IMX=y
+        type: mandatory
+      - name: CONFIG_SERIAL_IMX_CONSOLE=y
+        type: mandatory
+      - name: CONFIG_DRM_MXSFB=
+        type: blacklist
+      - name: CONFIG_FEC=y
+        type: test
     tags:
-      - broken
+      - ok
+      - sabrelite
+      - nostorage
   - name: qemu-imx-mcimx6ul-evk
     arch: arm
     devicetype: qemu
@@ -566,18 +577,27 @@ templates:
         machine: mcimx6ul-evk
         cpu: cortex-a9
         memory: 256
+        model: model=fec
+        netdevice: tap
         guestfs_interface: none
         append: "console=ttymxc0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
-      - name: IMX_SATA?
-      - name: SERIAL?
+      - name: CONFIG_AHCI_IMX=
+      - name: CONFIG_SERIAL_IMX=y
+        type: mandatory
+      - name: CONFIG_SERIAL_IMX_CONSOLE=y
+        type: mandatory
       - name: CONFIG_DRM_MXSFB=
         type: blacklist
+      - name: CONFIG_FEC=y
+        type: test
     tags:
       - ok
-      - notests
+      - imx
+      - nostorage
+      - nonetwork
   - name: MIPS malta
     arch: mips
     devicetype: qemu
