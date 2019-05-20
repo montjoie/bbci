@@ -407,8 +407,11 @@ def boot(param):
         jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s (%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial))
         # now convert to YAML
         ft = yaml.load(jobt)
+        nonetwork = False
         for dtag in device["tags"]:
-            if dtag == "notests":
+            if dtag == "nonetwork":
+                nonetwork = True
+            if dtag == "notests" or dtag == "nostorage":
                 if args.debug:
                     print("DEBUG: Remove test from job")
                 newaction = []
@@ -447,7 +450,10 @@ def boot(param):
                 ft["context"]["extra_options"] = device["qemu"]["extra_options"]
             if "extra_options" not in ft["context"]:
                 ft["context"]["extra_options"] = []
-            ft["context"]["extra_options"].append("-append '%s ip=dhcp'" % device["qemu"]["append"])
+            netoptions = "ip=dhcp"
+            if nonetwork:
+                netoptions = ""
+            ft["context"]["extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
             for action in ft["actions"]:
     #            if "boot" in action:
     #                action["boot"]["method"] = "qemu"
@@ -471,7 +477,10 @@ def boot(param):
             if "qemu" not in device:
                 return 0
             failure = None
-            qemu_cmd = "qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
+            # The exec here permits a working qp.terminate()
+            qemu_cmd = "exec qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
+            if "qemu_bios_path" in t["config"]:
+                qemu_cmd += " -L %s" % os.path.expandvars(t["config"]["qemu_bios_path"])
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
                     # TODO hack
@@ -491,6 +500,16 @@ def boot(param):
                 qemu_cmd += " -dtb %s" % dtbfile
             if "memory" in device["qemu"]:
                 qemu_cmd += " -m %s" % device["qemu"]["memory"]
+            if "cpu" in device["qemu"]:
+                qemu_cmd += " -cpu %s" % device["qemu"]["cpu"]
+            if "model" in device["qemu"]:
+                qemu_cmd += " -net nic,%s,macaddr=52:54:00:12:34:58 -net user" % device["qemu"]["model"]
+            if not os.path.isfile("%s/disk.img" % cachedir):
+                subprocess.run("qemu-img create -f qcow2 %s/disk.img 10M" % cachedir, shell=True)
+            guestfs_interface = 'ide'
+            if "guestfs_interface" in device["qemu"]:
+                guestfs_interface = device["qemu"]["guestfs_interface"]
+            qemu_cmd += " -drive format=qcow2,file=%s/disk.img,if=%s,id=lavatest" % (cachedir, guestfs_interface)
             # Add initrd
             for lab in tlabs["labs"]:
                 if "disabled" in lab and lab["disabled"]:
