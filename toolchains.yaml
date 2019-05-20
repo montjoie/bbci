@@ -62,6 +62,10 @@ toolchains:
     larch: sparc
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparcv8/tarballs/sparcv8--uclibc--stable-2018.11-1.tar.bz2
     prefix: sparc-buildroot-linux-uclibc-
+  - name: Gentoo sparc64
+    larch: sparc
+    prefix: sparc64-unknown-linux-gnu-
+    bits: {32,64}
   - name: Bootlin sparc64
     larch: sparc
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparc64/tarballs/sparc64--glibc--stable-2018.11-1.tar.bz2
