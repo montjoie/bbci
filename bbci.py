@@ -80,7 +80,7 @@ def build(param):
         print("Will run make %s" % make_opts)
         return 0
 
-    logdir = os.path.expandvars(t["config"]["logdir"])
+    logdir = os.path.expandvars(tc["config"]["logdir"])
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
@@ -145,7 +145,7 @@ def boot(param):
     global qemu_boot_id
     boot_method = "u-boot"
 
-    logdir = os.path.expandvars(t["config"]["logdir"])
+    logdir = os.path.expandvars(tc["config"]["logdir"])
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
@@ -468,7 +468,7 @@ def boot(param):
     #        for action in ft["actions"]:
     #            if "boot" in action:
     #                action["boot"]["commands"] = "ramdisk"
-        cachedir = os.path.expandvars(t["config"]["cache"])
+        cachedir = os.path.expandvars(tc["config"]["cache"])
         fw = open("%s/job-%s.yaml" % (cachedir, devicename), "w")
         yaml.dump(ft, fw, default_flow_style=False)
         fw.close()
@@ -479,8 +479,8 @@ def boot(param):
             failure = None
             # The exec here permits a working qp.terminate()
             qemu_cmd = "exec qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
-            if "qemu_bios_path" in t["config"]:
-                qemu_cmd += " -L %s" % os.path.expandvars(t["config"]["qemu_bios_path"])
+            if "qemu_bios_path" in tc["config"]:
+                qemu_cmd += " -L %s" % os.path.expandvars(tc["config"]["qemu_bios_path"])
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
                     # TODO hack
@@ -886,7 +886,7 @@ def common(sourcename, targetname):
         sys.exit(1)
     os.chdir(sourcedir)
 
-    builddir = os.path.expandvars(t["config"]["builddir"])
+    builddir = os.path.expandvars(tc["config"]["builddir"])
 
     kdir = "%s/%s/%s/%s/%s" % (builddir, sourcename, larch, subarch, flavour)
     if args.debug:
@@ -1097,7 +1097,7 @@ def toolchain_validate(targetname):
 
     if args.debug:
         print("DEBUG: Try to detect a toolchain")
-    toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
+    toolchain_dir = os.path.expandvars(tc["config"]["toolchains"])
     for toolchain in yto["toolchains"]:
         if toolchain["larch"] != larch:
             if args.debug:
@@ -1151,7 +1151,7 @@ def toolchain_download(targetname):
             print("DEBUG: target need 64 bits")
 
     print("DEBUG: try to download a toolchain for %s" % larch)
-    cachedir = os.path.expandvars(t["config"]["cache"])
+    cachedir = os.path.expandvars(tc["config"]["cache"])
     if not os.path.isdir(cachedir):
         os.mkdir(cachedir)
     for toolchain in yto["toolchains"]:
@@ -1179,7 +1179,7 @@ def toolchain_download(targetname):
             tarcmd = "tar xJf"
         if re.search(".gz", toolchain_file):
             tarcmd = "tar xzf"
-        toolchain_dir = os.path.expandvars(t["config"]["toolchains"])
+        toolchain_dir = os.path.expandvars(tc["config"]["toolchains"])
         if not os.path.isdir(toolchain_dir):
             os.mkdir(toolchain_dir)
         toolchain_subdir = toolchain_file.split(".tar")[0]
@@ -1311,6 +1311,8 @@ tfile = open("all.yaml")
 t = yaml.load(tfile)
 tlabsfile = open("labs.yaml")
 tlabs = yaml.load(tlabsfile)
+tcfile = open("config.yaml")
+tc = yaml.load(tcfile)
 
 toolchainfile = open("toolchains.yaml")
 yto = yaml.load(toolchainfile)

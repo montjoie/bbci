@@ -1,0 +1,5 @@
+config:
+    builddir: $HOME/crossbuild
+    toolchains: $HOME/data/toolchains
+    cache: $HOME/bbci/cache
+    logdir: $HOME/bbci/logs
