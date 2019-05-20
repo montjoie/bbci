@@ -55,7 +55,9 @@ bbci will wait for all jobs to end
 This is WIP.
 
 ### --debug -d
-### --overlay -o
+### --overlay -o overlayname[,overlayname]
+See config overlay below
+
 ### --randconfigseed SEED
 When using a randconfig target, use SEED as config seed.
 
@@ -140,7 +142,7 @@ Then boot it
 ```
 
 
-## all.yaml documentation
+## config.yaml documentation
 ### config section
 This section configure general bbci options
 ```
@@ -186,6 +188,7 @@ Example:
 "./bbci.py -s next -a create" Will checkout linux-next in $HOME/linux-next
 "./bbci.py -s next -a update" Will update linux-next in $HOME/linux-next
 
+## all.yaml documentation
 ### Target triplet section
 Target triplet are arch/subarch/flavour:
 * Arch need to be set to arch as used by Linux.
@@ -310,20 +313,137 @@ more documentation on buildroot and test
 
 # WIP
 ## More boot method
+* change boot-method
 * NBD
 * NFS
 * PXE
 
-## LAVA support
-LAVA miss some part for booting all qemu and run tests properly.
-patch will be sent upstream soon
+## QEMU status matrix
+<table>
+  <tr>
+    <td rowspan="2">Arch</td>
+    <td rowspan="2">board</td>
+    <td rowspan="2">Boot</td>
+    <td colspan="3">Tests</td>
+  </tr>
+  <tr>
+    <td>HDD</td>
+    <td>NFS</td>
+    <td>NBD</td>
+  </tr>
+  <tr>
+    <td>alpha</td>
+    <td>clipper</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td rowspan="6">ARM</td>
+    <td>Cubieboard</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>Sabrelite</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>virt</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>vexpress-a9</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>vexpress-a15</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>imx-mcimx6ul-evk</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>ARM64</td>
+    <td>virt</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>MIPS</td>
+    <td>malta</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>MIPS64</td>
+    <td>malta</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td rowspan="6">PowerPC</td>
+    <td>G3beige</td>
+    <td>OK</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>virtex-ml507</td>
+    <td>OK</td>
+    <td>KO</td>
+  </tr>
+  <tr>
+    <td>Sam460ex</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>mac99</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>bamboo</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>mpc8544ds</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>PPC64</td>
+    <td>pseries</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>x86</td>
+    <td>pc</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>x86_64</td>
+    <td>pc</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>SPARC</td>
+    <td>SS-10</td>
+    <td>OK</td>
+  </tr>
+  <tr>
+    <td>SPARC64</td>
+    <td>sun4u</td>
+    <td>OK</td>
+  </tr>
+</table>
 
 ## unbootable or problematic boards
 ### PPC
 * taihu: uboot support removed 2/3 years ago
-* virtex-ml507: Cannot do test due to missing storage
 * 40p: Cannot boot it
-* mpc8544ds: kernel crash, need to investigate
 * ppce500: need -bios uboot
 * ref405ep: TODO
 
