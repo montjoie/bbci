@@ -11,6 +11,7 @@ import xmlrpc.client
 import shutil
 import time
 import fcntl
+import pprint
 
 ###############################################################################
 ###############################################################################
@@ -1319,8 +1320,8 @@ yto = yaml.load(toolchainfile)
 
 do_actions(args.source, args.target, args.action)
 
-print(builds)
-print(boots)
+pprint.pprint(builds)
+pprint.pprint(boots)
 if args.waitforjobsend:
     for labname in boots:
         for job in boots[labname]:
