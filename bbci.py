@@ -482,6 +482,8 @@ def boot(param):
             qemu_cmd = "exec qemu-system-%s -kernel %s -nographic -machine %s" % (qarch, kfile, device["qemu"]["machine"])
             if "qemu_bios_path" in tc["config"]:
                 qemu_cmd += " -L %s" % os.path.expandvars(tc["config"]["qemu_bios_path"])
+            if "qemu_bin_path" in tc["config"]:
+                os.environ["PATH"] = "%s:%s" % (os.path.expandvars(tc["config"]["qemu_bin_path"]), os.environ["PATH"])
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
                     # TODO hack
