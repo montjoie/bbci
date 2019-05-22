@@ -189,7 +189,7 @@ def boot(param):
         print("ARM64")
         arch = "arm64"
         arch_endian = "arm64"
-        qarch = "arm64"
+        qarch = "aarch64"
     if re.search("CONFIG_ARC=", kconfigs):
         print("ARC")
         arch = "arc"
