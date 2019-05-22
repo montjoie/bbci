@@ -221,6 +221,17 @@ targets:
     defconfig: sunxi_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
+  - name: versatile_defconfig
+    larch: arm
+    subarch: versatile
+    flavour: defconfig
+    defconfig: versatile_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "-W1"
+    configs:
+      - name: "CONFIG_PCI=y"
+      - name: "CONFIG_PCI_VERSATILE=y"
+      - name: "CONFIG_SCSI_SYM53C8XX_2=y"
   - name: virtex5_defconfig
     larch: powerpc
     subarch: 44x
@@ -531,6 +542,29 @@ templates:
     tags:
       - ok
       - vexpress
+  - name: qemu-versatilepb
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-versatilepb
+    kernelfile: zImage
+    dtb: versatile-pb.dtb
+    mach: qemu
+    qemu:
+        machine: versatilepb
+        model: model=smc91c111
+        netdevice: tap
+        guestfs_interface: scsi
+        append: "console=ttyAMA0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_VERSATILE
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - versatile
   - name: qemu-sabrelite
     arch: arm
     devicetype: qemu
