@@ -338,7 +338,7 @@ more documentation on buildroot and test
     <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
-    <td rowspan="14">ARM</td>
+    <td rowspan="15">ARM</td>
     <td>Cubieboard</td>
     <td style="background-color: green; text-align: center">OK</td>
     <td style="background-color: green; text-align: center">OK</td>
@@ -360,6 +360,11 @@ more documentation on buildroot and test
   </tr>
   <tr>
     <td>vexpress-a15</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>versatile</td>
     <td style="background-color: green; text-align: center">OK</td>
     <td style="background-color: green; text-align: center">OK</td>
   </tr>
@@ -401,10 +406,22 @@ more documentation on buildroot and test
     <td>WIP</td>
   </tr>
   <tr>
-    <td>ARM64</td>
+    <td rowspan="4">ARM64</td>
     <td>virt</td>
     <td style="background-color: green; text-align: center">OK</td>
     <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>xlnx-versal-virt</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>xlnx-zcu102</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>raspi3</td>
+    <td style="background-color: red; text-align: center">KO</td>
   </tr>
   <tr>
     <td>MIPS</td>
