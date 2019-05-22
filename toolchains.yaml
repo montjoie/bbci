@@ -18,7 +18,7 @@ toolchains:
     prefix: aarch64-unknown-linux-gnu-
   - name: Linaro ARM64
     larch: arm64
-    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu.tar.xz
+    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
     prefix: aarch64-linux-gnu-
   - name: Gentoo crossdev MIPS
     larch: mips
