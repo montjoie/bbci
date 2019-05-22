@@ -334,109 +334,141 @@ more documentation on buildroot and test
   <tr>
     <td>alpha</td>
     <td>clipper</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
-    <td rowspan="6">ARM</td>
+    <td rowspan="14">ARM</td>
     <td>Cubieboard</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>Sabrelite</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>virt</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>vexpress-a9</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>vexpress-a15</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>imx-mcimx6ul-evk</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>versatilepb</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>cheetah</td>
+    <td>WIP</td>
+  </tr>
+  <tr>
+    <td>smdkc210</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>nuri</td>
+    <td style="background-color: green; text-align: center">OK</td>
+  </tr>
+  <tr>
+    <td>xilinx-zynq-a9</td>
+    <td style="background-color: red; text-align: center">KO</td>
+  </tr>
+  <tr>
+    <td>n800</td>
+    <td style="background-color: red; text-align: center">KO</td>
+  </tr>
+  <tr>
+    <td>n810</td>
+    <td style="background-color: red; text-align: center">KO</td>
+  </tr>
+  <tr>
+    <td>sx1</td>
+    <td>WIP</td>
   </tr>
   <tr>
     <td>ARM64</td>
     <td>virt</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>MIPS</td>
     <td>malta</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>MIPS64</td>
     <td>malta</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td rowspan="6">PowerPC</td>
     <td>G3beige</td>
-    <td>OK</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>virtex-ml507</td>
-    <td>OK</td>
-    <td>KO</td>
+    <td style="background-color: green; text-align: center">OK</td>
+    <td style="background-color: red; text-align: center">KO</td>
   </tr>
   <tr>
     <td>Sam460ex</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>mac99</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>bamboo</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>mpc8544ds</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>PPC64</td>
     <td>pseries</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>x86</td>
     <td>pc</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>x86_64</td>
     <td>pc</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>SPARC</td>
     <td>SS-10</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
   <tr>
     <td>SPARC64</td>
     <td>sun4u</td>
-    <td>OK</td>
+    <td style="background-color: green; text-align: center">OK</td>
   </tr>
 </table>
 
@@ -447,8 +479,6 @@ more documentation on buildroot and test
 * ppce500: need -bios uboot
 * ref405ep: TODO
 
-### ARM
-* sx1: Cannot boot it
 
 ### MIPS/MIPS64
 * mips: Cannot boot it
