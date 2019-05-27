@@ -831,6 +831,37 @@ templates:
       - imx
       - nostorage
       - nonetwork
+  - name: qemu-mcimx7d-sabre
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-mcimx7d-sabre
+    kernelfile: zImage
+    dtb: imx7d-sdb.dtb
+    mach: qemu
+    qemu:
+        machine: mcimx7d-sabre
+        cpu: cortex-a9
+        guestfs_interface: none
+        model: model=fec
+        netdevice: tap
+        append: "console=ttymxc0 root=/dev/ram0 earlycon=ec_imx6q,mmio,0x30860000,115200n8"
+        extra_options:
+        - '-display none'
+    configs:
+      - name: CONFIG_SOC_IMX6=y
+        type: mandatory
+      - name: CONFIG_AHCI_IMX=
+      - name: CONFIG_SERIAL_IMX=y
+        type: mandatory
+      - name: CONFIG_SERIAL_IMX_CONSOLE=y
+        type: mandatory
+      - name: CONFIG_DRM_MXSFB=
+        type: blacklist
+      - name: CONFIG_FEC=y
+        type: test
+    tags:
+      - ok
+      - imx
   - name: qemu-smdkc210
     arch: arm
     devicetype: qemu
@@ -879,6 +910,48 @@ templates:
     tags:
       - ok
       - exynos
+  - name: qemu-xilinx-zynq-a9
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-xilinx-zynq-a9
+    kernelfile: zImage
+    dtb: zynq-zc702.dtb
+    mach: qemu
+    qemu:
+        machine: xilinx-zynq-a9
+        cpu: cortex-a9
+        memory: 128
+        guestfs_interface: none
+        model: model=cadence_gem
+        netdevice: tap
+        append: "console=ttyPS0 root=/dev/ram0"
+        extra_options:
+        - '-serial null -monitor none'
+    configs:
+      - name: CONFIG_ARCH_ZYNQ=y
+        type: mandatory
+    tags:
+      - broken
+      - zynq
+  - name: qemu-midway
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-midway
+    kernelfile: zImage
+    dtb: ecx-2000.dtb
+    mach: qemu
+    qemu:
+        machine: midway
+        guestfs_interface: none
+        netdevice: tap
+        append: "console=ttyAMA0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_HIGHBANK=y
+        type: mandatory
+    tags:
+      - broken
+      - needqemu3.0.0
+      - highbank
   - name: MIPS malta
     arch: mips
     devicetype: qemu
