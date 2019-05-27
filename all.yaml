@@ -753,6 +753,8 @@ templates:
     mach: qemu
     qemu:
         machine: versatilepb
+        cpu: arm926
+        memory: 256
         model: model=smc91c111
         netdevice: tap
         guestfs_interface: scsi
@@ -806,7 +808,7 @@ templates:
     mach: qemu
     qemu:
         machine: mcimx6ul-evk
-        cpu: cortex-a9
+        cpu: cortex-a7
         memory: 256
         model: model=fec
         netdevice: tap
