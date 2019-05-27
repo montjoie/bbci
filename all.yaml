@@ -558,6 +558,7 @@ templates:
         cpu: cortex-a7
         machine: cubieboard
         model: model=allwinner-emac
+        memory: 512
         netdevice: tap
         guestfs_interface: none
         append: "console=ttyS0 root=/dev/ram0"
