@@ -1,0 +1,150 @@
+{%- set boot_method = boot_method|default("qemu") %}
+{%- set boot_media= boot_media|default("tmpfs") %}
+
+metadata:
+  image.type: 'montjoie-ci'
+  image.url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  kernel.tree: mainline
+  kernel.version: {{ KVERSION }}
+  kernel.endian: {{ ARCHENDIAN }}
+  kernel.defconfig: x86_64_defconfig
+  kernel.defconfig_base: x86_64_defconfig
+  kernel.arch_defconfig: x86-x86_64_defconfig
+  platform.fastboot: false
+  platform.name: qemu
+  platform.mach: {{ MACH }}
+  test.plan: boot
+  git.commit: {{ GIT_LASTCOMMIT }}
+  git.describe: {{ GIT_DESCRIBE }}
+  git.branch: master
+  git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+  device.type: {{ DEVICETYPE }}
+  job.arch: arm
+  job.name: {{ JOBNAME }}
+  job.kernel_url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  job.kernel_image: bzImage
+  job.modules_url: http://{{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+  job.initrd_url: http://{{ ROOT_FQDN }}/{{ initrd_path }}
+  job.nfsrootfs_url: None
+  job.dtb_url: None
+
+device_type: {{ DEVICETYPE }}
+
+job_name: {{ JOBNAME }}
+timeouts:
+  job:
+    minutes: 70
+  action:
+   minutes: 10
+  actions:
+    power-off:
+      seconds: 30
+priority: high
+visibility: public
+
+{%- if DEVICETYPE == "qemu" %}
+context:
+    arch: {{ qemu_arch }}
+{%- if qemu_cpu is defined %}
+    cpu: {{ qemu_cpu }}
+{%- endif %}
+{%- if qemu_machine is defined %}
+    machine: {{ qemu_machine }}
+{%- endif %}
+{%- if qemu_memory is defined %}
+    memory: {{ qemu_memory }}
+{%- endif %}
+{%- if qemu_netdevice is defined %}
+    netdevice: {{ qemu_netdevice }}
+{%- endif %}
+{%- if qemu_model is defined %}
+    model: {{ qemu_model }}
+{%- endif %}
+{%- if guestfs_interface is defined %}
+    guestfs_interface: {{ guestfs_interface }}
+{%- endif %}
+{%- if guestfs_driveid is defined %}
+    guestfs_driveid: {{ guestfs_driveid }}
+{%- endif %}
+{%- if qemu_extra_options is defined %}
+    extra_options: {{ qemu_extra_options }}
+{%- endif %}
+{%- endif %}
+
+actions:
+- deploy:
+    timeout:
+      minutes: 3
+    to: {{ boot_media }}
+    os: oe
+    images:
+      kernel:
+        image_arg: '-kernel {kernel}'
+        url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+{%- if initrd_path is defined %}
+      ramdisk:
+{%- if DEVICETYPE == "qemu" %}
+{%- if image_arg is defined %}
+        image_arg: '{{ image_arg }}'
+{% else %}
+        image_arg: '-initrd {ramdisk}'
+{% endif %}
+{% endif %}
+        url: {{ ROOT_FQDN }}{{ initrd_path }}
+{% endif %}
+{%- if dtb_path is defined %}
+      dtb:
+{%- if DEVICETYPE == "qemu" %}
+        image_arg: '-dtb {dtb}'
+{% endif %}
+        url: {{ BOOT_FQDN }}{{ dtb_path }}
+{% endif %}
+
+- boot:
+    timeout:
+      minutes: 5
+    method: {{ boot_method }}
+    media: {{ boot_media }}
+    prompts:
+      - '/ #'
+
+{%- if test == 'True' %}
+- test:
+    timeout:
+        minutes: 70
+    definitions:
+        - repository:
+            metadata:
+              format: Lava-Test Test Definition 1.0
+              name: download_modules
+              description: "Download modules"
+            run:
+              steps:
+              - if [ -e /proc/pnp ];then grep nameserver /proc/pnp >> /etc/resolv.conf;fi
+              - /bin/sh -c 'grep -q ^name /etc/resolv.conf || sleep 15'
+              - wget {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+              - tar xvzf modules.tar.gz -C /
+          from: inline
+          name: downloadmodule
+          path: inline/dm.yaml
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/boot.yaml
+          name: Boot
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/network.yaml
+          name: Network
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/hardware.yaml
+          name: Hardware
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/crypto.yaml
+          name: Crypto
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/misc.yaml
+          name: Misc
+{%- endif %}

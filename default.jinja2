@@ -1,0 +1,141 @@
+{%- set boot_method = boot_method|default("u-boot") %}
+{%- set boot_commands = boot_commands|default("ramdisk") %}
+{%- set boot_to = boot_to|default("tftp") %}
+
+metadata:
+  image.type: 'montjoie-ci'
+  image.url: https://{{ BOOT_FQDN }}/result/{{ PATCH }}
+  kernel.tree: mainline
+  kernel.version: {{ KVERSION }}
+  kernel.endian: {{ KENDIAN }}
+  kernel.defconfig: montjoie_defconfig
+  kernel.defconfig_base: montjoie_defconfig
+  kernel.arch_defconfig: {{ ARCH }}-montjoie_defconfig
+{%- if dtb_path is defined %}
+  platform.dtb: {{ DTB }}
+  platform.dtb_short: {{ DTB }}
+  job.dtb_url: http://{{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
+{%- endif %}
+  platform.fastboot: false
+  platform.name: {{ DEVICETYPE }}
+  platform.mach: {{ MACH }}
+  test.plan: boot
+  git.commit: {{ GIT_LASTCOMMIT }}
+  git.describe: {{ GIT_DESCRIBE }}
+  git.branch: master
+  git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+  device.type: {{ DEVICETYPE }}
+  job.arch: {{ ARCH }}
+  job.name: {{ JOBNAME }}
+  job.kernel_url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  job.kernel_image: {{ KERNELFILE }}
+  job.modules_url: http://{{ BOOT_FQDN }}/{{ PATH }}/module.tar.gz
+  job.initrd_url: http://kernel.montjoie.ovh/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
+  job.nfsrootfs_url: None
+
+device_type: {{ DEVICETYPE }}
+
+notify:
+  criteria:
+    status: finished
+
+job_name: {{ JOBNAME }}
+timeouts:
+  job:
+    minutes: 20
+  action:
+   minutes: 20
+  actions:
+    power-off:
+      seconds: 30
+priority: high
+visibility: public
+
+{%- if rootfs_method == "nbd" %}
+protocols:
+  lava-xnbd:
+    port: auto
+{%- endif %}
+
+actions:
+- deploy:
+    timeout:
+      minutes: 10
+{%- if rootfs_method == "nbd" %}
+    protocols:
+      lava-xnbd:
+      - action: nbd-deploy
+        request: set_port
+{%- endif %}
+    to: {{ boot_to }}
+    kernel:
+      url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+      type: {{ KERNELTYPE }}
+{%- if rootfs_method == "ram" %}
+    ramdisk:
+      url: {{ ROOT_FQDN }}/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
+      compression: gz
+{% endif %}
+    modules:
+      url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+      compression: gz
+{%- if dtb_path is defined %}
+    dtb:
+      url: {{ BOOT_FQDN }}/{{ dtb_path }}
+    os: oe
+{%- endif %}
+{%- if rootfs_method == "nbd" %}
+    nbdroot:
+      url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+      compression: gz
+{% endif %}
+{%- if rootfs_method == "nfs" %}
+    ramdisk:
+      url: {{ ROOT_FQDN }}/initrd/{{ ARCHENDIAN }}/rootfs.cpio.gz
+      compression: gz
+    nfsrootfs:
+      url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+      compression: xz
+{% endif %}
+
+- boot:
+    timeout:
+      minutes: 5
+    method: {{ boot_method }}
+    commands: {{ boot_commands }}
+    prompts:
+      - '/ #'
+{%- if rootfs_method == "nbd" %}
+    transfer_overlay:
+      download_command: ifconfig; wget
+      unpack_command: tar -C / -zxf
+{% endif %}
+
+{%- if test == 'True' %}
+- test:
+    timeout:
+        minutes: 20
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/boot.yaml
+          name: Boot
+{%- if rootfs_method != "nbd" and rootfs_method != "nfs" %}
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/network.yaml
+          name: Network
+{% endif %}
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/hardware.yaml
+          name: Hardware
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/crypto.yaml
+          name: Crypto
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/misc.yaml
+          name: Misc
+{% endif %}

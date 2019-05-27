@@ -12,6 +12,7 @@ import shutil
 import time
 import fcntl
 import pprint
+import jinja2
 
 ###############################################################################
 ###############################################################################
@@ -144,7 +145,6 @@ def boot(param):
     kdir = param["kdir"]
     sourcename = param["sourcename"]
     global qemu_boot_id
-    boot_method = "u-boot"
 
     logdir = os.path.expandvars(tc["config"]["logdir"])
     if not os.path.exists(logdir):
@@ -355,19 +355,12 @@ def boot(param):
                     goodtag = False
         if not goodtag:
             continue
-        if "boot-method" in device:
-            boot_method = device["boot-method"]
         kerneltype = "image"
         kernelfile = device["kernelfile"]
         if kernelfile == "zImage":
             kerneltype = "zimage"
         if kernelfile == "uImage":
             kerneltype = "uimage"
-        if "qemu" in device:
-            jobf = open("%s/defaultqemu.yaml" % templatedir)
-        else:
-            jobf = open("%s/default.yaml" % templatedir)
-        jobt = jobf.read()
         # check needed files
         if "kernelfile" not in device:
             print("ERROR: missing kernelfile")
@@ -389,91 +382,94 @@ def boot(param):
                 print("SKIP: no kernelfile")
                 continue
         # Fill lab indepedant data
-        jobt = jobt.replace("__KERNELFILE__", kernelfile)
-        jobt = jobt.replace("__DEVICETYPE__", device["devicetype"])
-        jobt = jobt.replace("__MACH__", device["mach"])
-        jobt = jobt.replace("__ARCH__", device["arch"])
-        jobt = jobt.replace("__PATH__", "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour))
-        jobt = jobt.replace("__ARCHENDIAN__", arch_endian)
-        jobt = jobt.replace("__GIT_DESCRIBE__", git_describe)
-        jobt = jobt.replace("__KVERSION__", git_describe)
-        jobt = jobt.replace("__KENDIAN__", endian)
-        jobt = jobt.replace("__KERNELTYPE__", kerneltype)
-        jobt = jobt.replace("__GIT_LASTCOMMIT__", git_lastcommit)
-        jobt = jobt.replace("__LAVA_BOOT_TYPE__", kerneltype)
-        jobt = jobt.replace("__LAVA_BOOT_METHOD__", boot_method)
+        jobdict = {}
+        jobdict["KERNELFILE"] = kernelfile
+        jobdict["DEVICETYPE"] = device["devicetype"]
+        jobdict["MACH"] = device["mach"]
+        jobdict["ARCH"] = device["arch"]
+        jobdict["PATH"] = "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour)
+        jobdict["ARCHENDIAN"] = arch_endian
+        jobdict["GIT_DESCRIBE"] = git_describe
+        jobdict["KVERSION"] = git_describe
+        jobdict["KENDIAN"] = endian
+        jobdict["KERNELTYPE"] = kerneltype
+        jobdict["GIT_LASTCOMMIT"] = git_lastcommit
+        jobdict["LAVA_BOOT_TYPE"] = kerneltype
+        jobdict["initrd_path"] = "/rootfs/%s/rootfs.cpio.gz" % arch_endian
+        jobdict["test"] = "True"
+        jobdict["rootfs_method"] = "ramdisk"
+        if "boot-method" in device:
+            jobdict["boot_method"] = device["boot-method"]
+        # ROOTFS cpio.gz are for ramdisk, tar.xz for nfs, ext4.gz for NBD
+        if args.rootfs == "nfs":
+            jobdict["rootfs_method"] = "nfs"
+            jobdict["boot_commands"] = "nfs"
+            jobdict["initrd_path"] = "/rootfs/nfs-%s/rootfs.cpio.gz" % arch_endian
+            if "qemu" in device:
+                jobdict["boot_method"] = "qemu-nfs"
+                jobdict["boot_media"] = "nfs"
+            else:
+                # default
+                #jobdict["boot_method"] = "u-boot"
+                #jobdict["boot_to"] = "tftp"
+                jobdict["boot_media"] = "nfs"
+                jobdict["rootfs_path"] = "/rootfs/%s/rootfs.tar.xz" % arch_endian
+        elif args.rootfs == "nbd":
+            jobdict["rootfs_method"] = "nbd"
+            if "qemu" in device:
+                print("ERROR: NBD for qemu is unsupported")
+                continue
+            jobdict["boot_commands"] = "nbd"
+            jobdict["boot_to"] = "nbd"
+            jobdict["rootfs_path"] = "/rootfs/%s/rootfs.ext4.gz" % arch_endian
+
         spetial = param["toolchaininuse"]
         if args.configoverlay:
             spetial += "+%s" % args.configoverlay
-        jobt = jobt.replace("__JOBNAME__", "AUTOTEST %s %s/%s/%s/%s on %s (%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial))
-        # now convert to YAML
-        ft = yaml.load(jobt)
+        jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial)
         nonetwork = False
         for dtag in device["tags"]:
             if dtag == "nonetwork":
                 nonetwork = True
+            if dtag == "noinitrd" or dtag == 'rootonsd':
+                jobdict["image_arg"] = '-drive format=raw,if=sd,file={ramdisk}'
+                jobdict["initrd_path"] = "/rootfs/%s/rootfs.ext2" % arch_endian
             if dtag == "notests" or dtag == "nostorage":
+                jobdict["test"] = "False"
                 if args.debug:
                     print("DEBUG: Remove test from job")
-                newaction = []
-                for action in ft["actions"]:
-                    if "test" not in action:
-                        newaction.append(action)
-                ft["actions"] = newaction
-        if "dtb" in device:
-            for action in ft["actions"]:
-                if "deploy" in action:
-                    if "qemu" in device:
-                        action["deploy"]["images"]["dtb"] = {}
-                        action["deploy"]["images"]["dtb"]["url"] = "__BOOT_FQDN__/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
-                    else:
-                        action["deploy"]["dtb"] = {}
-                        action["deploy"]["dtb"]["url"] = "__BOOT_FQDN__/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
         if "qemu" in device:
             print("\tQEMU")
-            ft["context"] = {}
-            ft["context"]["arch"] = qarch
+            jobdict["qemu_arch"] = qarch
             if "netdevice" in device["qemu"]:
-                ft["context"]["netdevice"] = "tap"
+                jobdict["qemu_netdevice"] = "tap"
             if "model" in device["qemu"]:
-                ft["context"]["model"] = device["qemu"]["model"]
+                jobdict["qemu_model"] = device["qemu"]["model"]
             if "machine" in device["qemu"]:
-                ft["context"]["machine"] = device["qemu"]["machine"]
+                jobdict["qemu_machine"] = device["qemu"]["machine"]
             if "cpu" in device["qemu"]:
-                ft["context"]["cpu"] = device["qemu"]["cpu"]
+                jobdict["qemu_cpu"] = device["qemu"]["cpu"]
             if "memory" in device["qemu"]:
-                ft["context"]["memory"] = device["qemu"]["memory"]
+                jobdict["qemu_memory"] = device["qemu"]["memory"]
             if "guestfs_interface" in device["qemu"]:
-                ft["context"]["guestfs_interface"] = device["qemu"]["guestfs_interface"]
+                jobdict["guestfs_interface"] = device["qemu"]["guestfs_interface"]
             if "guestfs_driveid" in device["qemu"]:
-                ft["context"]["guestfs_driveid"] = device["qemu"]["guestfs_driveid"]
+                jobdict["guestfs_driveid"] = device["qemu"]["guestfs_driveid"]
             if "extra_options" in device["qemu"]:
-                ft["context"]["extra_options"] = device["qemu"]["extra_options"]
-            if "extra_options" not in ft["context"]:
-                ft["context"]["extra_options"] = []
+                jobdict["qemu_extra_options"] = device["qemu"]["extra_options"]
+            if "extra_options" not in device["qemu"]:
+                jobdict["qemu_extra_options"] = []
             netoptions = "ip=dhcp"
             if nonetwork:
                 netoptions = ""
-            ft["context"]["extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
-            for action in ft["actions"]:
-    #            if "boot" in action:
-    #                action["boot"]["method"] = "qemu"
-    #                action["boot"]["media"] = "tmpfs"
-                if "deploy" in action:
-    #                action["deploy"]["to"] = "tmpfs"
-    #                action["deploy"]["kernel"]["image_arg"] = '-kernel {dtb}'
-    #                action["deploy"]["ramdisk"]["image_arg"] = '-initrd {dtb}'
-                    if "dtb" in device:
-                        action["deploy"]["images"]["dtb"]["image_arg"] = '-dtb {dtb}'
-    #    else:
-    #        for action in ft["actions"]:
-    #            if "boot" in action:
-    #                action["boot"]["commands"] = "ramdisk"
+            jobdict["qemu_extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
         cachedir = os.path.expandvars(tc["config"]["cache"])
-        fw = open("%s/job-%s.yaml" % (cachedir, devicename), "w")
-        yaml.dump(ft, fw, default_flow_style=False)
-        fw.close()
-        jobf.close()
+        templateLoader = jinja2.FileSystemLoader(searchpath=templatedir)
+        templateEnv = jinja2.Environment(loader=templateLoader)
+        if "qemu" in device:
+            template = templateEnv.get_template("defaultqemu.jinja2")
+        else:
+            template = templateEnv.get_template("default.jinja2")
         if "doqemu" in param:
             if "qemu" not in device:
                 return 0
@@ -486,9 +482,6 @@ def boot(param):
                 os.environ["PATH"] = "%s:%s" % (os.path.expandvars(tc["config"]["qemu_bin_path"]), os.environ["PATH"])
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
-                    # TODO hack
-                    if re.search("lavatest", extrao):
-                        continue
                     qemu_cmd += " %s" % extrao
             qemu_cmd += " -append '%s'" % device["qemu"]["append"]
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
@@ -648,6 +641,8 @@ def boot(param):
             # copy dtb
             # TODO dtb metadata
             if "dtb" in device:
+                jobdict["dtb_path"] = "/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
+                jobdict["DTB"] = device["dtb"]
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
                 dtbsubdir = device["dtb"].split('/')
                 dtb_relpath = "/dts/"
@@ -666,18 +661,16 @@ def boot(param):
                 os.mkdir("%s/%s" % (outputdir, lab["name"]))
             result = subprocess.check_output("chmod -R o+rX %s" % datadir, shell=True)
             #print(result.decode("UTF-8"))
-            jobf = open("%s/job-%s.yaml" % (cachedir, devicename))
-            jobt = jobf.read()
-            jobf.close()
-            jobt = jobt.replace("__BOOT_FQDN__", lab["datahost_baseuri"])
-            jobt = jobt.replace("__ROOT_FQDN__", lab["rootfs_baseuri"])
-            jobf = open("%s/%s/job-%s.yaml" % (outputdir, lab["name"], devicename), 'w')
+            jobdict["BOOT_FQDN"] = lab["datahost_baseuri"]
+            jobdict["ROOT_FQDN"] = lab["rootfs_baseuri"]
+            jobt = template.render(jobdict)
             # HACK CONFIG_SERIAL_PMACZILOG=y CONFIG_SERIAL_PMACZILOG_TTYS=y
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
                 print("INFO: PMACZILOG console hack")
                 jobt = jobt.replace("console=ttyPZ0", "console=ttyS0")
-            jobf.write(jobt)
-            jobf.close()
+            fw = open("%s/job-%s.yaml" % (cachedir, devicename), "w")
+            fw.write(jobt)
+            fw.close()
             if not args.noact:
                 jobid = server.scheduler.jobs.submit(jobt)
                 print(jobid)
@@ -1305,6 +1298,7 @@ parser.add_argument("--action", "-a", type=str, help="one of create,update,build
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
+parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd'], type=str, default="ramdisk")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
