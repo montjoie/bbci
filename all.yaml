@@ -108,6 +108,31 @@ targets:
     subarch: ip28
     full_tgt: vmlinux modules
     warnings: "-W1"
+  - name: omap1_defconfig
+    larch: arm
+    subarch: omap1
+    flavour: defconfig
+    defconfig: omap1_defconfig
+    full_tgt: vmlinux zImage dtbs modules
+    warnings: "-W1"
+    configs:
+      - name: "CONFIG_CPU_DCACHE_WRITETHROUGH"
+        disable: True
+      - name: "CONFIG_FB"
+        disable: True
+  - name: omap2plus_defconfig
+    larch: arm
+    subarch: omap2
+    flavour: defconfig
+    full_tgt: vmlinux modules zImage dtbs
+    warnings: "-W1"
+    defconfig: omap2plus_defconfig
+    configs:
+      - name: "CONFIG_OMAP_WATCHDOG=y"
+      - name: "CONFIG_SND"
+        disable: true
+      - name: "CONFIG_DRM"
+        disable: true
   - name: malta_defconfig
     larch: mips
     subarch: mips32
@@ -391,6 +416,96 @@ configoverlays:
       - config: CONFIG_ATA=y
       - config: CONFIG_PATA_CMD64X=y
 templates:
+  - name: cheetah
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-cheetah
+    kernelfile: zImage
+    mach: omap
+    qemu:
+        machine: cheetah
+        netdevice: tap
+        cpu: ti925t
+        memory: 256
+        guestfs_interface: sd
+        append: "console=ttyS0 root=/dev/mmcblk0 rootwait"
+    configs:
+      - name: CONFIG_ARCH_OMAP1=y
+        type: mandatory
+      - name: MACH_OMAP_PALMTE=y
+        type: mandatory
+    tags:
+      - ok
+      - noinitrd
+      - nostorage
+      - rootonsd
+  - name: n800
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-n800
+    kernelfile: zImage
+    dtb: omap2420-n800.dtb
+    mach: omap
+    qemu:
+        machine: n800
+        cpu: ti925t
+        netdevice: tap
+        memory: 128
+        guestfs_interface: none
+        append: "console=ttyS0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_OMAP2=y
+        type: mandatory
+    tags:
+      - ok
+      - new
+  - name: n810
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-n810
+    kernelfile: zImage
+    dtb: omap2420-n810.dtb
+    mach: omap
+    qemu:
+        machine: n810
+        cpu: ti925t
+        netdevice: tap
+        memory: 128
+        guestfs_interface: none
+        append: "console=ttyS0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_OMAP2=y
+        type: mandatory
+    tags:
+      - ok
+      - new
+  - name: sx1
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-sx1
+    kernelfile: zImage
+    mach: omap
+    qemu:
+        machine: sx1
+        cpu: ti925t
+        netdevice: tap
+        memory: 256
+        guestfs_interface: sd
+        append: "console=ttyS0 root=/dev/mmcblk0 rootwait"
+    configs:
+      - name: CONFIG_ARCH_OMAP1=y
+        type: mandatory
+      - name: CONFIG_MACH_SX1=y
+        type: mandatory
+    tags:
+      - ok
+      - noinitrd
+      - nostorage
+      - rootonsd
   - name: SS-10
     arch: sparc
     larch: sparc
