@@ -523,7 +523,7 @@ def boot(param):
             flags = flags | os.O_NONBLOCK
             fcntl.fcntl(qp.stderr, fcntl.F_SETFL, flags)
 
-            qlogfile = open("%s/%s.log" % (logdir, device["name"].replace('/', '_')), 'w')
+            qlogfile = open("%s/%s-%s-%s.log" % (logdir, device["name"].replace('/', '_'), sourcename, param["targetname"]), 'w')
             poweroff_done = False
             qtimeout = 0
             lastline = ""
@@ -604,6 +604,9 @@ def boot(param):
             qemu_boot_id = qemu_boot_id + 1
             boots["qemu"][qemu_boot_id] = {}
             boots["qemu"][qemu_boot_id]["devicename"] = devicename
+            boots["qemu"][qemu_boot_id]["arch"] = arch
+            boots["qemu"][qemu_boot_id]["targetname"] = param["targetname"]
+            boots["qemu"][qemu_boot_id]["sourcename"] = sourcename
             if ret == 0:
                 boots["qemu"][qemu_boot_id]["result"] = 'PASS'
             else:
@@ -811,6 +814,13 @@ def genconfig(sourcedir, param, defconfig):
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
+            if coverlay == "nfs":
+                enable_config(param, "CONFIG_STMMAC_ETH=y")
+                enable_config(param, "CONFIG_USB_NET_SMSC95XX=y")
+                enable_config(param, "CONFIG_IP_PNP_DHCP=y")
+                enable_config(param, "CONFIG_NFS_V3=y")
+                enable_config(param, "CONFIG_NFS_V4=y")
+                enable_config(param, "CONFIG_ROOT_NFS=y")
             if coverlay == "cpu_be":
                 enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
             if coverlay == "cpu_el":
@@ -1196,7 +1206,7 @@ def toolchain_download(targetname):
 ###############################################################################
 ###############################################################################
 def do_actions(all_sources, all_targets, all_actions):
-    #print("DEBUG: Check sources %s with target %s" % (all_sources, all_targets))
+    #print("DEBUG: Check sources %s with target %s and action %s" % (all_sources, all_targets, all_actions))
     if re.search(",", all_actions):
         for action in all_actions.split(","):
             do_actions(all_sources, all_targets, action)
@@ -1294,7 +1304,7 @@ parser.add_argument("--source", "-s", type=str, help="source to use separated by
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
 parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
-parser.add_argument("--action", "-a", type=str, help="one of create,update,build,boot")
+parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
@@ -1303,6 +1313,10 @@ parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay"
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
 args = parser.parse_args()
+
+if args.source is None:
+    parser.print_help()
+    sys.exit(0)
 
 tfile = open("all.yaml")
 t = yaml.load(tfile)

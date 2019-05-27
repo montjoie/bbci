@@ -85,13 +85,16 @@ actions:
     os: oe
 {%- endif %}
 {%- if rootfs_method == "nbd" %}
+    initrd:
+      url: {{ ROOT_FQDN }}/initrd/nbd-{{ ARCHENDIAN }}/rootfs.cpio.gz
+      compression: gz
     nbdroot:
       url: {{ ROOT_FQDN }}/{{ rootfs_path }}
       compression: gz
 {% endif %}
 {%- if rootfs_method == "nfs" %}
     ramdisk:
-      url: {{ ROOT_FQDN }}/initrd/{{ ARCHENDIAN }}/rootfs.cpio.gz
+      url: {{ ROOT_FQDN }}/initrd/nfs-{{ ARCHENDIAN }}/rootfs.cpio.gz
       compression: gz
     nfsrootfs:
       url: {{ ROOT_FQDN }}/{{ rootfs_path }}
