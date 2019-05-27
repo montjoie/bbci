@@ -62,6 +62,20 @@ targets:
     defconfig: defconfig
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "-W1"
+  - name: exynos_defconfig
+    larch: arm
+    full_tgt: dtbs zImage modules
+    subarch: exynos
+    flavour: defconfig
+    defconfig: exynos_defconfig
+    warnings: "-W1"
+    configs:
+      - name: "CONFIG_ARM_EXYNOS_CPUIDLE"
+        disable: True
+      - name: "CONFIG_CPU_IDLE"
+        disable: True
+      - name: "CONFIG_CRYPTO_DEV_S5P"
+        disable: True
   - name: hsdk_defconfig
     larch: arc
     full_tgt: dtbs uImage modules
@@ -627,6 +641,54 @@ templates:
       - imx
       - nostorage
       - nonetwork
+  - name: qemu-smdkc210
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-smdkc210
+    kernelfile: zImage
+    dtb: exynos4210-smdkv310.dtb
+    mach: qemu
+    qemu:
+        machine: smdkc210
+        cpu: cortex-a7
+        guestfs_interface: none
+        model: model=lan9118
+        netdevice: tap
+        append: "console=ttySAC0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_EXYNOS=y
+        type: mandatory
+      - name: "CONFIG_ARM_EXYNOS_CPUIDLE"
+        type: blacklist
+      - name: "CONFIG_CRYPTO_DEV_S5P"
+        type: blacklist
+    tags:
+      - ok
+      - exynos
+  - name: qemu-nuri
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-nuri
+    kernelfile: zImage
+    dtb: exynos4210-smdkv310.dtb
+    mach: qemu
+    qemu:
+        machine: nuri
+        cpu: cortex-a7
+        guestfs_interface: none
+        model: model=lan9118
+        netdevice: tap
+        append: "console=ttySAC0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_EXYNOS=y
+        type: mandatory
+      - name: "CONFIG_ARM_EXYNOS_CPUIDLE"
+        type: blacklist
+      - name: "CONFIG_CRYPTO_DEV_S5P"
+        type: blacklist
+    tags:
+      - ok
+      - exynos
   - name: MIPS malta
     arch: mips
     devicetype: qemu
