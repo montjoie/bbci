@@ -594,6 +594,78 @@ templates:
     tags:
       - ok
       - virt
+  - name: qemu-arm64-xlnx-versal-virt
+    arch: arm64
+    devicetype: qemu
+    devicename: qemu-arm64-xlnx-versal-virt
+    kernelfile: Image
+    mach: qemu
+    qemu:
+        machine: xlnx-versal-virt
+        memory: 1024
+        cpu: cortex-a53
+        guestfs_interface: none
+        model: model=cadence_gem
+        netdevice: tap
+        append: "console=ttyAMA0 earlycon=pl011,0xff000000 root=/dev/ram0"
+        extra_options:
+        - "-device virtio-blk-device,drive=lavatest"
+    configs:
+      - name: CONFIG_ARCH_ZYNQMP=y
+        type: mandatory
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - xilinx
+  - name: qemu-arm64-xlnx-zcu102
+    arch: arm64
+    devicetype: qemu
+    devicename: qemu-arm64-xlnx-zcu102
+    kernelfile: Image
+    dtb: xilinx/zynqmp-zcu102-rev1.0.dtb
+    mach: qemu
+    qemu:
+        machine: xlnx-zcu102
+        memory: 1024
+        cpu: cortex-a53
+        guestfs_interface: none
+        model: model=cadence_gem
+        netdevice: tap
+        append: "earlycon=cdns,mmio,0xFF000000,115200n8 console=ttyPS0 root=/dev/ram0"
+        extra_options:
+        - "-device ide-hd,drive=lavatest"
+    configs:
+      - name: CONFIG_ARCH_ZYNQMP=y
+        type: mandatory
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - nonetwork
+      - xilinx
+  - name: qemu-arm64-raspi3
+    arch: arm64
+    devicetype: qemu
+    devicename: qemu-arm64-raspi3
+    kernelfile: Image
+    dtb: broadcom/bcm2837-rpi-3-b.dtb
+    mach: qemu
+    qemu:
+        machine: raspi3
+        memory: 1024
+        cpu: cortex-a57
+        guestfs_interface: none
+        netdevice: tap
+        append: "earlycon=uart8250,mmio32,0x3f215040 console=ttyS1,115200 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_BCM2835=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - broken
+      - rpi
 # Cannot use virt due to https://bugzilla.redhat.com/show_bug.cgi?id=1633328
 # a virt can be created and depend on ARM_LPAE
   - name: qemu-arm-virt-2.11
