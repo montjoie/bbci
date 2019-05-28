@@ -99,6 +99,8 @@ targets:
     defconfig: imx_v6_v7_defconfig
     full_tgt: dtbs zImage modules LOADADDR=0x40008000
     warnings: "-W1"
+    configs:
+     - name: "CONFIG_IMX_DMA=y"
   - name: malta_kvm_defconfig
     larch: mips
     subarch: default
