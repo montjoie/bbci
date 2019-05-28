@@ -1087,7 +1087,7 @@ templates:
     tags:
       - ok
       - virtex
-      - notests
+      - nostorage
   - name: QEMU PPC Sam460ex
     arch: powerpc
     devicetype: qemu
@@ -1189,7 +1189,7 @@ templates:
     qemu:
         machine: pseries
         cpu: POWER8
-        model: model=pcnet
+        model: model=e1000
         netdevice: tap
         guestfs_interface: scsi
         append: "console=hvc0 root=/dev/ram0"
@@ -1207,6 +1207,7 @@ templates:
     mach: powerpc
     qemu:
         machine: mpc8544ds
+        model: model=e1000
         netdevice: tap
         guestfs_interface: none
         append: "console=ttyS0 root=/dev/ram0"
