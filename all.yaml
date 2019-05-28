@@ -10,6 +10,9 @@ targets:
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
     tags: { defconfig }
+    configs:
+      - name: "CONFIG_PCIE_XILINX=y"
+      - name: "CONFIG_XILINX_ZYNQMP_DMA=y"
   - name: arm64_generic
     larch: arm64
     full_tgt: dtbs Image modules
