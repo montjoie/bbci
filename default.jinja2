@@ -71,7 +71,7 @@ actions:
     kernel:
       url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
       type: {{ KERNELTYPE }}
-{%- if rootfs_method == "ram" %}
+{%- if rootfs_method == "ramdisk" %}
     ramdisk:
       url: {{ ROOT_FQDN }}/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
       compression: gz
