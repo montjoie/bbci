@@ -8,7 +8,7 @@ BBCI is licensed under the GPL-v2
 ## External dependencies:
 For using BBCI, you need the following:
 * A LAVA instance for booting devices/qemu
-	See https://wiki.linaro.org/LAVA
+	See https://www.lavasoftware.org/
 * A web server for hosting builded kernel, since LAVA need to download them
 	The docroot need to be set in lab/datadir
 * A collection of rootfs for all arches.
