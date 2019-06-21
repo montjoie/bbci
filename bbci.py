@@ -1319,14 +1319,14 @@ if args.source is None:
     sys.exit(0)
 
 tfile = open("all.yaml")
-t = yaml.load(tfile)
+t = yaml.safe_load(tfile)
 tlabsfile = open("labs.yaml")
-tlabs = yaml.load(tlabsfile)
+tlabs = yaml.safe_load(tlabsfile)
 tcfile = open("config.yaml")
-tc = yaml.load(tcfile)
+tc = yaml.safe_load(tcfile)
 
 toolchainfile = open("toolchains.yaml")
-yto = yaml.load(toolchainfile)
+yto = yaml.safe_load(toolchainfile)
 
 do_actions(args.source, args.target, args.action)
 
