@@ -1151,21 +1151,6 @@ templates:
       - sam460ex
       - sil_not_working
       - emac_not_implemented
-  - name: QEMU PPC 40p
-    arch: powerpc
-    devicetype: qemu
-    devicename: qemu-ppc-40p
-    kernelfile: vmlinux
-    mach: powerpc
-    qemu:
-        machine: 40p
-        netdevice: tap
-        guestfs_interface: none
-        memory: 192
-        append: "console=ttyS0 root=/dev/ram0"
-    configs:
-    tags:
-      - broken
   - name: QEMU PPC Mac99
     arch: powerpc
     devicetype: qemu
@@ -1464,6 +1449,19 @@ templates:
       - ok
       - a20
       - allwinner
+  - name: sun8i-a83t-bananapi-m3
+    arch: arm
+    devicetype: sun8i-a83t-bananapi-m3
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-a83t-bananapi-m3.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a83t
+      - allwinner
   - name: sun8i-h2-plus-libretech-all-h3-cc
     arch: arm
     devicetype: sun8i-h2-plus-libretech-all-h3-cc
@@ -1660,6 +1658,24 @@ templates:
     kernelfile: Image
     mach: amlogic
     dtb: amlogic/meson-gxm-khadas-vim2.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-g12a-x96-max
+    arch: arm64
+    larch: arm64
+    devicetype: meson-g12a-x96-max
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-g12a-x96-max.dtb
     configs:
       - name: CONFIG_ARCH_MESON=y
         type: mandatory
