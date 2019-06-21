@@ -420,6 +420,29 @@ configoverlays:
       - config: CONFIG_VIRTIO_NET=y
       - config: CONFIG_ATA=y
       - config: CONFIG_PATA_CMD64X=y
+  - name: nosound
+    list:
+      - config: CONFIG_SOUND
+        disable: True
+  - name: nodrm
+    list:
+      - config: CONFIG_DRM
+        disable: True
+  - name: novideo
+    list:
+      - config: CONFIG_VIDEO_DEV
+        disable: True
+  - name: nomedia
+    list:
+      - config: CONFIG_MEDIA_SUPPORT
+        disable: True
+  - name: nfsd
+    list:
+      - config: CONFIG_NFSD
+  - name: lavalab
+    list:
+      - config: CONFIG_USB_SERIAL=y
+      - config: CONFIG_USB_SERIAL_FTDI_SIO=y
 templates:
   - name: cheetah
     arch: arm

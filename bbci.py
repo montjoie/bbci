@@ -815,6 +815,10 @@ def genconfig(sourcedir, param, defconfig):
                 #subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
                 disable_config(param, "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS")
                 enable_config(param, "CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y")
+                enable_config(param, "CONFIG_CRYPTO_USER=y")
+                enable_config(param, "CONFIG_CRYPTO_USER_API=y")
+                enable_config(param, "CONFIG_CRYPTO_USER_API_RNG=y")
+                enable_config(param, "CONFIG_CRYPTO_ANSI_CPRNG=y")
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
@@ -826,7 +830,15 @@ def genconfig(sourcedir, param, defconfig):
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
             if coverlay == "nfs":
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*DWMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("sed -i 's,^#[[:space:]]\(.*STMMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("sed -i 's,^\(.*DWMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("sed -i 's,^\(.*STMMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                enable_config(param, "CONFIG_STMMAC_PLATFORM=y")
                 enable_config(param, "CONFIG_STMMAC_ETH=y")
+                enable_config(param, "CONFIG_DWMAC_MESON=y")
+                enable_config(param, "CONFIG_DWMAC_SUNXI=y")
+                enable_config(param, "CONFIG_DWMAC_SUN8I=y")
                 enable_config(param, "CONFIG_USB_NET_SMSC95XX=y")
                 enable_config(param, "CONFIG_IP_PNP_DHCP=y")
                 enable_config(param, "CONFIG_NFS_V3=y")
