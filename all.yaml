@@ -547,6 +547,7 @@ templates:
         netdevice: tap
         memory: 256
         guestfs_interface: scsi
+        console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_SUNLANCE
@@ -564,6 +565,7 @@ templates:
         memory: 384
         model: model=pcnet
         netdevice: tap
+        console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
     configs:
       - name: CONFIG_PATA_CMD64X=
@@ -589,6 +591,7 @@ templates:
         memory: 512
         netdevice: tap
         guestfs_interface: none
+        console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
         extra_options:
         - "-device ide-hd,drive=lavatest"
@@ -810,6 +813,7 @@ templates:
         guestfs_interface: none
         model: model=fec
         netdevice: tap
+        console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
@@ -841,6 +845,7 @@ templates:
         model: model=fec
         netdevice: tap
         guestfs_interface: none
+        console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0"
     configs:
       - name: CONFIG_SOC_IMX6=y
@@ -872,6 +877,7 @@ templates:
         guestfs_interface: none
         model: model=fec
         netdevice: tap
+        console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0 earlycon=ec_imx6q,mmio,0x30860000,115200n8"
         extra_options:
         - '-display none'
@@ -903,6 +909,7 @@ templates:
         guestfs_interface: none
         model: model=lan9118
         netdevice: tap
+        console_device: ttySAC0
         append: "console=ttySAC0 root=/dev/ram0"
     configs:
       - name: CONFIG_ARCH_EXYNOS=y
@@ -927,6 +934,7 @@ templates:
         guestfs_interface: none
         model: model=lan9118
         netdevice: tap
+        console_device: ttySAC0
         append: "console=ttySAC0 root=/dev/ram0"
     configs:
       - name: CONFIG_ARCH_EXYNOS=y
