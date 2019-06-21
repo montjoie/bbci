@@ -427,7 +427,7 @@ def boot(param):
         spetial = param["toolchaininuse"]
         if args.configoverlay:
             spetial += "+%s" % args.configoverlay
-        jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial)
+        jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s,root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial, jobdict["rootfs_method"])
         nonetwork = False
         for dtag in device["tags"]:
             if dtag == "nonetwork":
