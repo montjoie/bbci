@@ -404,10 +404,11 @@ def boot(param):
         if args.rootfs == "nfs":
             jobdict["rootfs_method"] = "nfs"
             jobdict["boot_commands"] = "nfs"
-            jobdict["initrd_path"] = "/rootfs/nfs-%s/rootfs.cpio.gz" % arch_endian
             if "qemu" in device:
                 jobdict["boot_method"] = "qemu-nfs"
                 jobdict["boot_media"] = "nfs"
+                jobdict["initrd_path"] = "/initrd/nfs-%s/rootfs.cpio.gz" % arch_endian
+                jobdict["rootfs_path"] = "/rootfs/%s/rootfs.tar.xz" % arch_endian
             else:
                 # default
                 #jobdict["boot_method"] = "u-boot"
@@ -451,12 +452,22 @@ def boot(param):
                 jobdict["qemu_cpu"] = device["qemu"]["cpu"]
             if "memory" in device["qemu"]:
                 jobdict["qemu_memory"] = device["qemu"]["memory"]
+            if "console_device" in device["qemu"]:
+                jobdict["console_device"] = device["qemu"]["console_device"]
             if "guestfs_interface" in device["qemu"]:
                 jobdict["guestfs_interface"] = device["qemu"]["guestfs_interface"]
             if "guestfs_driveid" in device["qemu"]:
                 jobdict["guestfs_driveid"] = device["qemu"]["guestfs_driveid"]
             if "extra_options" in device["qemu"]:
                 jobdict["qemu_extra_options"] = device["qemu"]["extra_options"]
+                # with root on nfs/nbd, tests are not set on a storage, so we need to filter them
+                if args.rootfs == "nfs" or args.rootfs == "nbd":
+                    newextrao = []
+                    for extrao in device["qemu"]["extra_options"]:
+                        if re.search("lavatest", extrao):
+                            continue
+                        newextrao.append(extrao)
+                    jobdict["qemu_extra_options"] = newextrao
             if "extra_options" not in device["qemu"]:
                 jobdict["qemu_extra_options"] = []
             netoptions = "ip=dhcp"
