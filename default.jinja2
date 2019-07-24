@@ -71,6 +71,7 @@ actions:
     kernel:
       url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
       type: {{ KERNELTYPE }}
+      sha256sum: {{ KERNEL_SHA256 }}
 {%- if rootfs_method == "ramdisk" %}
     ramdisk:
       url: {{ ROOT_FQDN }}/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
@@ -79,9 +80,11 @@ actions:
     modules:
       url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
       compression: gz
+      sha256sum: {{ MODULES_SHA256 }}
 {%- if dtb_path is defined %}
     dtb:
       url: {{ BOOT_FQDN }}/{{ dtb_path }}
+      sha256sum: {{ DTB_SHA256 }}
     os: oe
 {%- endif %}
 {%- if rootfs_method == "nbd" %}

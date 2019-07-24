@@ -13,6 +13,7 @@ import time
 import fcntl
 import pprint
 import jinja2
+import hashlib
 
 ###############################################################################
 ###############################################################################
@@ -384,6 +385,8 @@ def boot(param):
         # Fill lab indepedant data
         jobdict = {}
         jobdict["KERNELFILE"] = kernelfile
+        with open(kfile, "rb") as fkernel:
+            jobdict["KERNEL_SHA256"] = hashlib.sha256(fkernel.read()).hexdigest()
         jobdict["DEVICETYPE"] = device["devicetype"]
         jobdict["MACH"] = device["mach"]
         jobdict["ARCH"] = device["arch"]
@@ -504,6 +507,8 @@ def boot(param):
                 if not os.path.isfile(dtbfile):
                     print("SKIP: no dtb at %s" % dtbfile)
                     continue
+                with open(dtbfile, "rb") as fdtb:
+                    jobdict["DTB_SHA256"] = hashlib.sha256(fdtb.read()).hexdigest()
                 qemu_cmd += " -dtb %s" % dtbfile
             if "memory" in device["qemu"]:
                 qemu_cmd += " -m %s" % device["qemu"]["memory"]
@@ -666,8 +671,12 @@ def boot(param):
                     print("SKIP: no dtb at %s" % dtbfile)
                     continue
                 lab_copy(lab, dtbfile, "%s/%s" % (data_relpath, dtb_relpath))
+                with open(dtbfile, "rb") as fdtb:
+                    jobdict["DTB_SHA256"] = hashlib.sha256(fdtb.read()).hexdigest()
             # modules.tar.gz
             lab_copy(lab, "%s/modules.tar.gz" % modules_dir, data_relpath)
+            with open("%s/modules.tar.gz" % modules_dir, "rb") as fmodules:
+                jobdict["MODULES_SHA256"] = hashlib.sha256(fmodules.read()).hexdigest()
             # final job
             if not os.path.isdir(outputdir):
                 os.mkdir(outputdir)
