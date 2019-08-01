@@ -613,10 +613,10 @@ parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", 
 args = parser.parse_args()
 
 tfile = open("uboot.yaml")
-t = yaml.load(tfile)
+t = yaml.safe_load(tfile)
 
 toolchainfile = open("toolchains.yaml")
-yto = yaml.load(toolchainfile)
+yto = yaml.safe_load(toolchainfile)
 
 do_actions(args.source, args.target, args.action)
 
