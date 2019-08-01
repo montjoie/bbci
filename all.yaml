@@ -1404,6 +1404,20 @@ templates:
       - ok
       - h5
       - allwinner
+  - name: sun50i-h6-orangepi-one-plus
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h6-orangepi-one-plus
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h6-orangepi-one-plus.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h6
+      - allwinner
   - name: sun50i-h6-pine-h64
     arch: arm64
     larch: arm64
@@ -1430,6 +1444,19 @@ templates:
     tags:
       - ok
       - a13
+      - allwinner
+  - name: sun8i-a33-olinuxino
+    arch: arm
+    devicetype: sun8i-a33-olinuxino
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-a33-olinuxino.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a33
       - allwinner
   - name: sun7i-a20-cubietruck
     arch: arm
@@ -1666,6 +1693,24 @@ templates:
     kernelfile: Image
     mach: amlogic
     dtb: amlogic/meson-gxm-khadas-vim2.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-g12a-sei510
+    arch: arm64
+    larch: arm64
+    devicetype: meson-g12a-sei510
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-g12a-sei510.dtb
     configs:
       - name: CONFIG_ARCH_MESON=y
         type: mandatory
