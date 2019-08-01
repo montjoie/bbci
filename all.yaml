@@ -436,6 +436,14 @@ configoverlays:
     list:
       - config: CONFIG_MEDIA_SUPPORT
         disable: True
+  - name: noipv6
+    list:
+      - config: CONFIG_NF_LOG_IPV6
+        disable: True
+      - config: CONFIG_NF_NAT_IPV6
+        disable: True
+      - config: CONFIG_IPV6
+        disable: True
   - name: nfsd
     list:
       - config: CONFIG_NFSD
