@@ -863,6 +863,15 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
             if coverlay == "cpu_el":
                 disable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
+            if coverlay == "wifi":
+                enable_config(param, "CONFIG_WLAN=y")
+                enable_config(param, "CONFIG_CFG80211=y")
+                enable_config(param, "CONFIG_MAC80211=y")
+                enable_config(param, "CONFIG_BRCMSMAC=m")
+                enable_config(param, "CONFIG_BRCMFMAC=m")
+                enable_config(param, "CONFIG_BRCMFMAC_SDIO=m")
+                enable_config(param, "CONFIG_BRCMFMAC_USB=y")
+                enable_config(param, "CONFIG_CFG80211_WEXT=y")
             if coverlay == "hack_drm_mxfsb":
                 disable_config(param, "CONFIG_DRM_MXSFB")
                 disable_config(param, "CONFIG_DRM_IMX")
