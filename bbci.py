@@ -1333,6 +1333,7 @@ outputdir = "/tmp/joboutput/"
 boots = {}
 builds = {}
 templatedir = os.getcwd()
+startdir = os.getcwd()
 qemu_boot_id = 0
 
 os.nice(19)
@@ -1377,10 +1378,32 @@ yto = yaml.safe_load(toolchainfile)
 
 do_actions(args.source, args.target, args.action)
 
+os.chdir(startdir)
 pprint.pprint(builds)
+with open('result-build.yml', 'w') as rfile:
+    yaml.dump(builds, rfile, default_flow_style=False)
 pprint.pprint(boots)
 if args.waitforjobsend:
-    for labname in boots:
-        for job in boots[labname]:
-            print(job)
+    all_jobs_ended = False
+    while not all_jobs_ended:
+        time.sleep(10)
+        all_jobs_ended = True
+        for labname in boots:
+            for lab in tlabs["labs"]:
+                if lab["name"] == labname:
+                    break;
+            #print("DEBUG: Check %s with %s" % (labname, lab["lavauri"]))
+            server = xmlrpc.client.ServerProxy(lab["lavauri"], allow_none=True)
+            for jobid in boots[labname]:
+                jobd = server.scheduler.jobs.show(jobid)
+                if jobd["state"] != 'Finished':
+                    all_jobs_ended = False
+                    print("Wait for job %d" % jobid)
+                    print(jobd)
+                else:
+                    boots[labname][jobid]["health"] = jobd["health"]
+                    boots[labname][jobid]["state"] = jobd["state"]
+with open('result-boots.yml', 'w') as rfile:
+    yaml.dump(boots, rfile, default_flow_style=False)
+
 sys.exit(0)
