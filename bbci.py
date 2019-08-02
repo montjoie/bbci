@@ -333,6 +333,9 @@ def boot(param):
         goodtag = True
         if args.dtag:
             for tag in args.dtag.split(","):
+                if tag == device["devicetype"]:
+                    tagfound = True
+                    continue
                 if args.debug:
                     print("DEBUG: check tag %s" % tag)
                 if "tags" not in device:
