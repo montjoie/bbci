@@ -1177,7 +1177,7 @@ def toolchain_validate(targetname):
             toolchain_subdir = toolchain_file.split(".tar")[0]
             os.environ["PATH"] = "%s/%s/bin:%s" % (toolchain_dir, toolchain_subdir, basepath)
         if "prefix" in toolchain:
-            ret = subprocess.run("%sgcc --version >/dev/null" % toolchain["prefix"], shell=True)
+            ret = subprocess.run("%sgcc --version >/dev/null 2>/dev/null" % toolchain["prefix"], shell=True)
             if ret.returncode == 0:
                 print("INFO: Will use %s as toolchain" % toolchain["name"])
                 target["cross_compile"] = toolchain["prefix"]
