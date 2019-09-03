@@ -26,6 +26,9 @@ targets:
   - name: Cubieboard2_defconfig
     larch: arm
     defconfig: Cubieboard2_defconfig
+  - name: libretech_all_h3_cc_h2_plus_defconfig
+    larch: arm
+    defconfig: libretech_all_h3_cc_h2_plus_defconfig
   - name: orangepi_pc_defconfig
     larch: arm
     defconfig: orangepi_pc_defconfig
@@ -46,6 +49,15 @@ targets:
     atf: sun50i_a64
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+  - name: nanopi_neo_plus2_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: nanopi_neo_plus2_defconfig
+    atf: sun50i_a64
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
   - name: ATF-sun50i_a64
     platform: sun50i_a64
     larch: arm64
