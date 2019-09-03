@@ -265,6 +265,7 @@ def boot(param):
     if os.path.isdir(".git"):
         git_describe = subprocess.check_output('git describe', shell=True).strip().decode("utf-8")
         git_lastcommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip().decode("utf-8")
+        git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip().decode("utf-8")
     else:
         VERSION = subprocess.check_output('grep ^VERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         PATCHLEVEL = subprocess.check_output('grep ^PATCHLEVEL Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
@@ -272,6 +273,7 @@ def boot(param):
         EXTRAVERSION = subprocess.check_output('grep ^EXTRAVERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         git_describe = "%s.%s.%s%s" % (VERSION, PATCHLEVEL, SUBLEVEL, EXTRAVERSION)
         git_lastcommit = "None"
+        git_branch = "None"
 
     # generate modules.tar.gz
     #TODO check error
@@ -397,9 +399,11 @@ def boot(param):
         jobdict["ARCHENDIAN"] = arch_endian
         jobdict["GIT_DESCRIBE"] = git_describe
         jobdict["KVERSION"] = git_describe
+        jobdict["K_DEFCONFIG"] = param["configbase"]
         jobdict["KENDIAN"] = endian
         jobdict["KERNELTYPE"] = kerneltype
         jobdict["GIT_LASTCOMMIT"] = git_lastcommit
+        jobdict["GIT_BRANCH"] = git_branch
         jobdict["LAVA_BOOT_TYPE"] = kerneltype
         jobdict["initrd_path"] = "/rootfs/%s/rootfs.cpio.gz" % arch_endian
         jobdict["test"] = "True"

@@ -8,8 +8,8 @@ metadata:
   kernel.tree: mainline
   kernel.version: {{ KVERSION }}
   kernel.endian: {{ KENDIAN }}
-  kernel.defconfig: montjoie_defconfig
-  kernel.defconfig_base: montjoie_defconfig
+  kernel.defconfig: {{ K_DEFCONFIG }}
+  kernel.defconfig_base: {{ K_DEFCONFIG }}
   kernel.arch_defconfig: {{ ARCH }}-montjoie_defconfig
 {%- if dtb_path is defined %}
   platform.dtb: {{ DTB }}
@@ -22,7 +22,7 @@ metadata:
   test.plan: boot
   git.commit: {{ GIT_LASTCOMMIT }}
   git.describe: {{ GIT_DESCRIBE }}
-  git.branch: master
+  git.branch: {{ GIT_BRANCH }}
   git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
   device.type: {{ DEVICETYPE }}
   job.arch: {{ ARCH }}
