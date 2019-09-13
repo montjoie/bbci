@@ -1366,6 +1366,7 @@ parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags"
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
 parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu")
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
+parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
 parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd'], type=str, default="ramdisk")
