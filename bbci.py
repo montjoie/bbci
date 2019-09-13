@@ -989,18 +989,22 @@ def common(sourcename, targetname):
     param["targetname"] = targetname
     param["target"] = target
     param["sourcename"] = sourcename
+    param["configbase"] = 'generic'
 
     if "randconfig" in target:
+        param["configbase"] = 'randconfig'
         err = genconfig(sourcedir, param, "randconfig")
         if err:
             param["error"] = 1
-    if not os.path.exists("%s/.config" % kdir) or "defconfig" in target:
-        if "defconfig" in target:
-            err = genconfig(sourcedir, param, target["defconfig"])
-            if err:
-                param["error"] = 1
-                return param
-        else:
+            return param
+
+    if "defconfig" in target and not args.hc:
+        param["configbase"] = target["defconfig"]
+        err = genconfig(sourcedir, param, target["defconfig"])
+        if err:
+            param["error"] = 1
+            return param
+    if not os.path.exists("%s/.config" % kdir):
             print("No config in %s, cannot do anything" % kdir)
             param["error"] = 1
             return param
@@ -1070,6 +1074,8 @@ def do_action(sourcename, targetname, action):
 ###############################################################################
 ###############################################################################
 def do_source_create(sourcename):
+    sourcedir = None
+
     for t_source in t["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
@@ -1103,6 +1109,8 @@ def do_source_create(sourcename):
 ###############################################################################
 ###############################################################################
 def do_source_update(sourcename):
+    sourcedir = None
+
     for t_source in t["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
