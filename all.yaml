@@ -1453,7 +1453,7 @@ templates:
   - name: sun50i-h6-pine-h64
     arch: arm64
     larch: arm64
-    devicetype: sun50i-h6-pineh64
+    devicetype: sun50i-h6-pine-h64
     kernelfile: Image
     mach: sunxi
     dtb: allwinner/sun50i-h6-pine-h64.dtb
