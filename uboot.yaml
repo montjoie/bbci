@@ -18,11 +18,13 @@ targets:
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: 'CONFIG_BOOTDELAY=10'
   - name: Sinovoip_BPI_M3_defconfig
     larch: arm
     defconfig: Sinovoip_BPI_M3_defconfig
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: 'CONFIG_BOOTDELAY=10'
   - name: Cubieboard2_defconfig
     larch: arm
     defconfig: Cubieboard2_defconfig
@@ -34,6 +36,8 @@ targets:
     defconfig: orangepi_pc_defconfig
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
   - name: h8_homlet_v2_defconfig
     larch: arm
     defconfig: h8_homlet_v2_defconfig
@@ -42,6 +46,23 @@ targets:
     uarch: arm
     defconfig: orangepi_one_plus_defconfig
     atf: sun50i_h6
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_DM9601=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+  - name: pine_h64_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: pine_h64_defconfig
+    atf: sun50i_h6
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+      - name: "CONFIG_NET_RETRY_COUNT=15"
   - name: bananapi_m64_defconfig
     larch: arm64
     uarch: arm
