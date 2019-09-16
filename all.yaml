@@ -1390,6 +1390,7 @@ templates:
     tags:
       - ok
       - a64
+      - sun8i-ce
       - allwinner
   - name: sun50i-a64-pine64-plus
     arch: arm64
@@ -1404,6 +1405,7 @@ templates:
     tags:
       - ok
       - a64
+      - sun8i-ce
       - allwinner
   - name: sun50i-h5-libretech-all-h3-cc
     arch: arm64
@@ -1418,6 +1420,7 @@ templates:
     tags:
       - ok
       - h5
+      - sun8i-ce
       - allwinner
   - name: sun50i-h5-nanopi-neo-plus2
     arch: arm64
@@ -1432,6 +1435,7 @@ templates:
     tags:
       - ok
       - h5
+      - sun8i-ce
       - allwinner
   - name: sun50i-h6-orangepi-one-plus
     arch: arm64
@@ -1446,6 +1450,7 @@ templates:
     tags:
       - ok
       - h6
+      - sun8i-ce
       - allwinner
   - name: sun50i-h6-pine-h64
     arch: arm64
@@ -1460,6 +1465,7 @@ templates:
     tags:
       - ok
       - h6
+      - sun8i-ce
       - allwinner
   - name: sun5i-a13-olinuxino-micro
     arch: arm
@@ -1473,6 +1479,7 @@ templates:
     tags:
       - ok
       - a13
+      - sun4i-ss
       - allwinner
   - name: sun8i-a33-olinuxino
     arch: arm
@@ -1486,6 +1493,7 @@ templates:
     tags:
       - ok
       - a33
+      - sun4i-ss
       - allwinner
   - name: sun7i-a20-cubietruck
     arch: arm
@@ -1499,6 +1507,7 @@ templates:
     tags:
       - ok
       - a20
+      - sun4i-ss
       - allwinner
   - name: sun7i-a20-cubieboard2
     arch: arm
@@ -1512,6 +1521,7 @@ templates:
     tags:
       - ok
       - a20
+      - sun4i-ss
       - allwinner
   - name: sun8i-a83t-bananapi-m3
     arch: arm
@@ -1525,6 +1535,7 @@ templates:
     tags:
       - ok
       - a83t
+      - sun8i-ss
       - allwinner
   - name: sun8i-h2-plus-libretech-all-h3-cc
     arch: arm
@@ -1538,6 +1549,7 @@ templates:
     tags:
       - ok
       - h2+
+      - sun8i-ce
       - allwinner
   - name: sun8i-h2-plus-orangepi-zero
     arch: arm
@@ -1551,6 +1563,7 @@ templates:
     tags:
       - ok
       - h2+
+      - sun8i-ce
       - allwinner
   - name: sun8i-h2-plus-orangepi-r1
     arch: arm
@@ -1566,6 +1579,7 @@ templates:
     tags:
       - ok
       - h2+
+      - sun8i-ce
       - allwinner
   - name: sun8i-h3-libretech-all-h3-cc
     arch: arm
@@ -1579,6 +1593,21 @@ templates:
     tags:
       - ok
       - h3
+      - sun8i-ce
+      - allwinner
+  - name: sun8i-h3-orangepi-pc
+    arch: arm
+    devicetype: sun8i-h3-orangepi-pc
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h3-orangepi-pc.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h3
+      - sun8i-ce
       - allwinner
   - name: sun8i-r40-bananapi-m2-ultra
     arch: arm
@@ -1593,6 +1622,7 @@ templates:
     tags:
       - ok
       - r40
+      - sun8i-ce
       - allwinner
   - name: imx6q-sabrelite
     arch: arm
