@@ -286,16 +286,13 @@ labs:
 # TODO list
 <ul>
 <li>
-rootfs selection: permit to use others rootfs
+Split build action in two (config and build)
 </li>
 <li>
 toolchain selection: currently it uses the first good one id find
 </li>
 <li>
 toolchain cycling: like source/target
-</li>
-<li>
-Implement a local qemu boot without LAVA
 </li>
 <li>
 The cross_compile: None assume the host is x86, this is a wrong assumption.
