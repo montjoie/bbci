@@ -7,22 +7,22 @@ metadata:
   kernel.tree: mainline
   kernel.version: {{ KVERSION }}
   kernel.endian: {{ ARCHENDIAN }}
-  kernel.defconfig: x86_64_defconfig
-  kernel.defconfig_base: x86_64_defconfig
-  kernel.arch_defconfig: x86-x86_64_defconfig
+  kernel.defconfig: {{ K_DEFCONFIG }}
+  kernel.defconfig_base: {{ K_DEFCONFIG }}
+  kernel.arch_defconfig: {{ K_DEFCONFIG }}
   platform.fastboot: false
   platform.name: qemu
   platform.mach: {{ MACH }}
   test.plan: boot
   git.commit: {{ GIT_LASTCOMMIT }}
   git.describe: {{ GIT_DESCRIBE }}
-  git.branch: master
+  git.branch: {{ GIT_BRANCH }}
   git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
   device.type: {{ DEVICETYPE }}
-  job.arch: arm
+  job.arch: {{ qemu_arch }}
   job.name: {{ JOBNAME }}
   job.kernel_url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
-  job.kernel_image: bzImage
+  job.kernel_image: {{ KERNELFILE }}
   job.modules_url: http://{{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
   job.initrd_url: http://{{ ROOT_FQDN }}/{{ initrd_path }}
   job.nfsrootfs_url: None
@@ -33,7 +33,7 @@ device_type: {{ DEVICETYPE }}
 job_name: {{ JOBNAME }}
 timeouts:
   job:
-    minutes: 70
+    minutes: 90
   action:
    minutes: 10
   actions:
@@ -53,6 +53,9 @@ context:
 {%- endif %}
 {%- if qemu_memory is defined %}
     memory: {{ qemu_memory }}
+{%- endif %}
+{%- if console_device is defined %}
+    console_device: {{ console_device }}
 {%- endif %}
 {%- if qemu_netdevice is defined %}
     netdevice: {{ qemu_netdevice }}
@@ -88,16 +91,21 @@ actions:
         image_arg: '{{ image_arg }}'
 {% else %}
         image_arg: '-initrd {ramdisk}'
-{% endif %}
-{% endif %}
+{%- endif %}
+{%- endif %}
         url: {{ ROOT_FQDN }}{{ initrd_path }}
 {% endif %}
 {%- if dtb_path is defined %}
       dtb:
 {%- if DEVICETYPE == "qemu" %}
         image_arg: '-dtb {dtb}'
-{% endif %}
+{%- endif %}
         url: {{ BOOT_FQDN }}{{ dtb_path }}
+{%- endif %}
+{%- if rootfs_method == "nfs" %}
+      nfsrootfs:
+        url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+        compression: xz
 {% endif %}
 
 - boot:
@@ -105,13 +113,16 @@ actions:
       minutes: 5
     method: {{ boot_method }}
     media: {{ boot_media }}
+{%- if boot_commands is defined %}
+    commands: {{ boot_commands }}
+{%- endif %}
     prompts:
       - '/ #'
 
 {%- if test == 'True' %}
 - test:
     timeout:
-        minutes: 70
+        minutes: 90
     definitions:
         - repository:
             metadata:
