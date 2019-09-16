@@ -1349,6 +1349,7 @@ startdir = os.getcwd()
 qemu_boot_id = 0
 sources_yaml = "sources.yaml"
 targets_yaml = "targets.yaml"
+dtemplates_yaml = "all.yaml"
 
 os.nice(19)
 # ionice need root priv
@@ -1362,6 +1363,7 @@ basepath = os.environ["PATH"]
 parser = argparse.ArgumentParser()
 parser.add_argument("--noact", "-n", help="No act", action="store_true")
 parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
+parser.add_argument("--devtemplates", type=str, help="Path to device templates file")
 parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
 parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
@@ -1381,7 +1383,14 @@ if args.source is None:
     parser.print_help()
     sys.exit(0)
 
-tfile = open("all.yaml")
+if args.devtemplates is not None:
+    dtemplates_yaml = args.devtemplates
+
+try:
+    tfile = open(dtemplates_yaml)
+except IOError:
+    print("ERROR: Cannot open device template config file: %s" % dtemplates_yaml)
+    sys.exit(1)
 t = yaml.safe_load(tfile)
 
 try:
