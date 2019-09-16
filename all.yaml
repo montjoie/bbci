@@ -372,26 +372,6 @@ targets:
     full_tgt: bzImage modules
     warnings: "-W1"
     randconfig: True
-sources:
-  - name: next
-    directory: $HOME/linux-next
-    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    update_script: ./scripts/git-stable
-    ltag: next-
-  - name: linux
-    directory: /usr/src/linux-master
-    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    update_command: "git pull"
-  - name: stable
-    directory: /usr/src/linux-stable
-    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-    update_script: ./scripts/git-stable
-    ltag: v5.0
-  - name: gentoo-4.20
-    directory: /usr/src/gentoo/linux-4.20
-    ltag: "4.20"
-    create_script: ./scripts/gentoo_add_sources.py
-    update_script: ./scripts/gentoo_add_sources.py
 configoverlays:
   - name: crypto
     list:

@@ -162,6 +162,7 @@ toolchains:
     prefix:	(mandatory) The prefix of this toolchain
 ```
 
+## sources.yaml documentation
 ### Sources section
 This section configure sources and where to store them
 ```

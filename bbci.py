@@ -933,7 +933,7 @@ def common(sourcename, targetname):
 
     param["toolchaininuse"] = target["toolchaininuse"]
 
-    for t_source in t["sources"]:
+    for t_source in sources["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
             break
@@ -1076,7 +1076,7 @@ def do_action(sourcename, targetname, action):
 def do_source_create(sourcename):
     sourcedir = None
 
-    for t_source in t["sources"]:
+    for t_source in sources["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
             break
@@ -1111,7 +1111,7 @@ def do_source_create(sourcename):
 def do_source_update(sourcename):
     sourcedir = None
 
-    for t_source in t["sources"]:
+    for t_source in sources["sources"]:
         if t_source["name"] == sourcename:
             sourcedir = os.path.expandvars(t_source["directory"])
             break
@@ -1272,7 +1272,7 @@ def do_actions(all_sources, all_targets, all_actions):
         return 0
     # all_actions is now only one name
     if all_sources == "all":
-        for t_source in t["sources"]:
+        for t_source in sources["sources"]:
             do_actions(t_source["name"], all_targets, all_actions)
         return 0
     if re.search(",", all_sources):
@@ -1347,6 +1347,7 @@ builds = {}
 templatedir = os.getcwd()
 startdir = os.getcwd()
 qemu_boot_id = 0
+sources_yaml = "sources.yaml"
 
 os.nice(19)
 # ionice need root priv
@@ -1381,6 +1382,14 @@ if args.source is None:
 
 tfile = open("all.yaml")
 t = yaml.safe_load(tfile)
+
+try:
+    sources_file = open(sources_yaml)
+except IOError:
+    print("ERROR: Cannot open sources config file: %s" % sources_yaml)
+    sys.exit(1)
+sources = yaml.safe_load(sources_file)
+
 tlabsfile = open("labs.yaml")
 tlabs = yaml.safe_load(tlabsfile)
 tcfile = open("config.yaml")
