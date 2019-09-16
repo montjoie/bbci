@@ -189,7 +189,7 @@ Example:
 "./bbci.py -s next -a create" Will checkout linux-next in $HOME/linux-next
 "./bbci.py -s next -a update" Will update linux-next in $HOME/linux-next
 
-## all.yaml documentation
+## targets.yaml documentation
 ### Target triplet section
 Target triplet are arch/subarch/flavour:
 * Arch need to be set to arch as used by Linux.
@@ -244,6 +244,7 @@ The following config overlays are hardcoded:
 * vanilla:	Disable all builtin changes
 * nomodule:	Replace all CONFIG from modules to builtin
 
+## all.yaml documentation
 ### Device job template
 ```
   - name: unused

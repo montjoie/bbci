@@ -879,7 +879,7 @@ def genconfig(sourcedir, param, defconfig):
             if coverlay == "hack_drm_mxfsb":
                 disable_config(param, "CONFIG_DRM_MXSFB")
                 disable_config(param, "CONFIG_DRM_IMX")
-            for overlay in t["configoverlays"]:
+            for overlay in targets["configoverlays"]:
                 if overlay["name"] == coverlay:
                     for oconfig in overlay["list"]:
                         if "disable" in oconfig:
@@ -914,7 +914,7 @@ def common(sourcename, targetname):
     sourcedir = None
     target = None
     param = {}
-    for t_target in t["targets"]:
+    for t_target in targets["targets"]:
         if t_target["name"] == targetname:
             target = t_target
             larch = target["larch"]
@@ -1137,7 +1137,7 @@ def do_source_update(sourcename):
 # validate that the toolchain for targetname works
 def toolchain_validate(targetname):
     target = None
-    for t_target in t["targets"]:
+    for t_target in targets["targets"]:
         if t_target["name"] == targetname:
             target = t_target
             larch = t_target["larch"]
@@ -1201,7 +1201,7 @@ def toolchain_validate(targetname):
 ###############################################################################
 def toolchain_download(targetname):
     target = None
-    for t_target in t["targets"]:
+    for t_target in targets["targets"]:
         if t_target["name"] == targetname:
             larch = t_target["larch"]
             target = t_target
@@ -1288,7 +1288,7 @@ def do_actions(all_sources, all_targets, all_actions):
         print("ERROR: target is mandatory")
         return 1
     if all_targets == "all" or all_targets == "defconfig":
-        for t_target in t["targets"]:
+        for t_target in targets["targets"]:
             if all_targets == "defconfig" and "defconfig" not in t_target:
                 continue
             useit = False
@@ -1313,7 +1313,7 @@ def do_actions(all_sources, all_targets, all_actions):
         return 0
     # all_targets is now only one name
     Found_target = False
-    for ft_target in t["targets"]:
+    for ft_target in targets["targets"]:
         if ft_target["name"] == all_targets:
             Found_target = True
             break
@@ -1348,6 +1348,7 @@ templatedir = os.getcwd()
 startdir = os.getcwd()
 qemu_boot_id = 0
 sources_yaml = "sources.yaml"
+targets_yaml = "targets.yaml"
 
 os.nice(19)
 # ionice need root priv
@@ -1389,6 +1390,13 @@ except IOError:
     print("ERROR: Cannot open sources config file: %s" % sources_yaml)
     sys.exit(1)
 sources = yaml.safe_load(sources_file)
+
+try:
+    targets_file = open(targets_yaml)
+except IOError:
+    print("ERROR: Cannot open targets config file: %s" % targets_yaml)
+    sys.exit(1)
+targets = yaml.safe_load(targets_file)
 
 tlabsfile = open("labs.yaml")
 tlabs = yaml.safe_load(tlabsfile)
