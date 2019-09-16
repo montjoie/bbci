@@ -1350,6 +1350,8 @@ qemu_boot_id = 0
 sources_yaml = "sources.yaml"
 targets_yaml = "targets.yaml"
 dtemplates_yaml = "all.yaml"
+config_yaml = "config.yaml"
+labs_yaml = "labs.yaml"
 
 os.nice(19)
 # ionice need root priv
@@ -1383,6 +1385,27 @@ if args.source is None:
     parser.print_help()
     sys.exit(0)
 
+try:
+    tcfile = open(config_yaml)
+except IOError:
+    print("ERROR: Cannot open bbci config file: %s" % config_yaml)
+    sys.exit(1)
+tc = yaml.safe_load(tcfile)
+if "config" not in tc:
+    print("ERROR: invalid config file in %s" % config_yaml)
+    sys.exit(1)
+
+if "sources" in tc["config"]:
+    sources_yaml = tc["config"]["sources"]
+if "devicetemplates" in tc["config"]:
+    dtemplates_yaml = tc["config"]["devicetemplates"]
+if "targets" in tc["config"]:
+    targets_yaml = tc["config"]["targets"]
+if "labs" in tc["config"]:
+    labs_yaml = tc["config"]["labs"]
+if args.debug:
+    print("DEBUG: will use labs from %s" % labs_yaml)
+
 if args.devtemplates is not None:
     dtemplates_yaml = args.devtemplates
 
@@ -1407,10 +1430,12 @@ except IOError:
     sys.exit(1)
 targets = yaml.safe_load(targets_file)
 
-tlabsfile = open("labs.yaml")
+try:
+    tlabsfile = open(labs_yaml)
+except IOError:
+    print("ERROR: Cannot open labs config file: %s" % labs_yaml)
+    sys.exit(1)
 tlabs = yaml.safe_load(tlabsfile)
-tcfile = open("config.yaml")
-tc = yaml.safe_load(tcfile)
 
 toolchainfile = open("toolchains.yaml")
 yto = yaml.safe_load(toolchainfile)
