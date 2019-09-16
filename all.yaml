@@ -437,6 +437,41 @@ configoverlays:
       - config: CONFIG_VIRT_DRIVERS=y
       - config: CONFIG_DRM_VIRTIO_GPU=y
       - config: CONFIG_DRM_QXL=y
+  - name: cutdown
+    list:
+      - config: CONFIG_NET_VENDOR_MELLANOX
+        disable: True
+      - config: CONFIG_NET_VENDOR_QUALCOMM
+        disable: True
+      - config: CONFIG_NET_VENDOR_BROADCOM
+        disable: True
+      - config: CONFIG_NET_VENDOR_MARVELL
+        disable: True
+      - config: CONFIG_NET_VENDOR_ATHEROS
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_ATH
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_MARVELL
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_TI
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_BROADCOM
+        disable: True
+      - config: CONFIG_BT
+        disable: True
+      - config: CONFIG_BTRFS_FS
+        disable: True
+  - name: nopm
+    comment: disable power management
+    list:
+      - config: CONFIG_PM_CLK
+        disable: True
+      - config: CONFIG_PM_SLEEP_SMP
+        disable: True
+      - config: CONFIG_PM_SLEEP
+        disable: True
+      - config: CONFIG_PM
+        disable: True
   - name: hack
     list:
       - config: CONFIG_USB_ANNOUNCE_NEW_DEVICES=y
