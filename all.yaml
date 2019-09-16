@@ -524,8 +524,7 @@ templates:
       - name: CONFIG_ARCH_OMAP2=y
         type: mandatory
     tags:
-      - ok
-      - new
+      - broken
   - name: n810
     arch: arm
     larch: arm
@@ -545,8 +544,7 @@ templates:
       - name: CONFIG_ARCH_OMAP2=y
         type: mandatory
     tags:
-      - ok
-      - new
+      - broken
   - name: sx1
     arch: arm
     larch: arm
