@@ -42,7 +42,7 @@ notify:
 job_name: {{ JOBNAME }}
 timeouts:
   job:
-    minutes: 25
+    minutes: 30
   action:
    minutes: 20
   actions:
@@ -120,7 +120,7 @@ actions:
 {%- if test == 'True' %}
 - test:
     timeout:
-        minutes: 25
+        minutes: 30
     definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
