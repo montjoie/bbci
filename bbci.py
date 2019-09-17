@@ -315,7 +315,7 @@ def boot(param):
             device_larch = device["arch"]
         if device_larch != larch:
             if args.debug:
-                print("SKIP: %s (wrong larch)" % devicename)
+                print("SKIP: %s (wrong larch %s vs %s)" % (devicename, device_larch, larch))
             continue
         if device["arch"] != arch:
             if args.debug:
