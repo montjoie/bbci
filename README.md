@@ -69,7 +69,16 @@ This example assume you build on a X86 machine, see next example for cross compi
 ```
 ./bbcy.py -s next -a create
 ```
-This will checkout linux-next in the directory specified in
+This will checkout linux-next in the directory specified in sources.yaml, in
+the following examples, it will be $HOME/linux-next
+```
+sources:
+  - name: next
+    directory: $HOME/linux-next
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    update_script: ./scripts/git-stable
+    ltag: next-
+```
 
 #### build linux-next for x86
 ```
