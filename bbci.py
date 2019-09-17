@@ -840,6 +840,7 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL_DEBUG=y")
                 enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE_DEBUG=y")
                 enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_DEBUG=y")
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_PRNG=y")
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
