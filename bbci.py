@@ -153,89 +153,108 @@ def boot(param):
 
     arch_endian = None
 
-    kconfig = open("%s/.config" % kdir)
-    kconfigs = kconfig.read()
-    kconfig.close()
-    if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
-        endian = "big"
-    else:
-        endian = "little"
-    if re.search("CONFIG_NIOS2=", kconfigs):
-        arch = "nios2"
-        arch_endian = "nios2"
-        qarch = "nios2"
-    if re.search("CONFIG_XTENSA=", kconfigs):
-        arch = "xtensa"
-        arch_endian = "xtensa"
-        qarch = "xtensa"
-    if re.search("CONFIG_SPARC32=", kconfigs):
-        arch = "sparc"
-        arch_endian = "sparc"
-        qarch = "sparc"
-    if re.search("CONFIG_SPARC64=", kconfigs):
-        arch = "sparc64"
-        arch_endian = "sparc64"
-        qarch = "sparc64"
-    if re.search("CONFIG_ARM=", kconfigs):
-        arch = "arm"
-        arch_endian = "armel"
-        qarch = "arm"
-    if re.search("CONFIG_ARM64=", kconfigs):
-        arch = "arm64"
-        arch_endian = "arm64"
-        qarch = "aarch64"
-    if re.search("CONFIG_ARC=", kconfigs):
-        arch = "arc"
-        arch_endian = "arc"
-        qarch = None
-    if re.search("CONFIG_MIPS=", kconfigs):
-        if re.search("CONFIG_64BIT=y", kconfigs):
-            arch = "mips64"
-            qarch = "mips64"
-            if endian == 'big':
-                arch_endian = "mips64be"
-            else:
-                arch_endian = 'mips64el'
-        else:
-            arch = "mips"
-            qarch = "mips"
-            if endian == 'big':
-                arch_endian = "mipsbe"
-            else:
-                arch_endian = 'mipsel'
-                qarch = "mipsel"
-    if re.search("CONFIG_ALPHA=", kconfigs):
-        arch = "alpha"
-        arch_endian = "alpha"
-        qarch = "alpha"
-    if re.search("CONFIG_PPC=", kconfigs):
-        arch = "powerpc"
-        arch_endian = "powerpc"
-        qarch = "ppc"
-    if re.search("CONFIG_PPC64=", kconfigs):
-        arch = "powerpc64"
-        arch_endian = "ppc64"
-        qarch = "ppc64"
-    if re.search("CONFIG_OPENRISC=", kconfigs):
-        arch = "openrisc"
-        arch_endian = "openrisc"
-        qarch = "or1k"
-    if re.search("CONFIG_MICROBLAZE=", kconfigs):
-        arch = "microblaze"
+    if os.path.exists("%s/.config" % kdir):
+        kconfig = open("%s/.config" % kdir)
+        kconfigs = kconfig.read()
+        kconfig.close()
         if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
-            arch_endian = "microblaze"
-            qarch = "microblaze"
+            endian = "big"
         else:
-            arch_endian = "microblazeel"
-            qarch = "microblazeel"
-    if re.search("CONFIG_X86_64=", kconfigs):
-        arch = "x86_64"
-        arch_endian = "x86_64"
-        qarch = "x86_64"
-    if re.search("CONFIG_X86=", kconfigs) and not re.search("CONFIG_X86_64=", kconfigs):
-        arch = "x86"
-        arch_endian = "x86"
-        qarch = "i386"
+            endian = "little"
+        if re.search("CONFIG_NIOS2=", kconfigs):
+            arch = "nios2"
+            arch_endian = "nios2"
+            qarch = "nios2"
+        if re.search("CONFIG_XTENSA=", kconfigs):
+            arch = "xtensa"
+            arch_endian = "xtensa"
+            qarch = "xtensa"
+        if re.search("CONFIG_SPARC32=", kconfigs):
+            arch = "sparc"
+            arch_endian = "sparc"
+            qarch = "sparc"
+        if re.search("CONFIG_SPARC64=", kconfigs):
+            arch = "sparc64"
+            arch_endian = "sparc64"
+        qarch = "sparc64"
+        if re.search("CONFIG_ARM=", kconfigs):
+            arch = "arm"
+            arch_endian = "armel"
+            qarch = "arm"
+        if re.search("CONFIG_ARM64=", kconfigs):
+            arch = "arm64"
+            arch_endian = "arm64"
+            qarch = "aarch64"
+        if re.search("CONFIG_ARC=", kconfigs):
+            arch = "arc"
+            arch_endian = "arc"
+            qarch = None
+        if re.search("CONFIG_MIPS=", kconfigs):
+            if re.search("CONFIG_64BIT=y", kconfigs):
+                arch = "mips64"
+                qarch = "mips64"
+                if endian == 'big':
+                    arch_endian = "mips64be"
+                else:
+                    arch_endian = 'mips64el'
+            else:
+                arch = "mips"
+                qarch = "mips"
+                if endian == 'big':
+                    arch_endian = "mipsbe"
+                else:
+                    arch_endian = 'mipsel'
+                    qarch = "mipsel"
+        if re.search("CONFIG_ALPHA=", kconfigs):
+            arch = "alpha"
+            arch_endian = "alpha"
+            qarch = "alpha"
+        if re.search("CONFIG_PPC=", kconfigs):
+            arch = "powerpc"
+            arch_endian = "powerpc"
+            qarch = "ppc"
+        if re.search("CONFIG_PPC64=", kconfigs):
+            arch = "powerpc64"
+            arch_endian = "ppc64"
+            qarch = "ppc64"
+        if re.search("CONFIG_OPENRISC=", kconfigs):
+            arch = "openrisc"
+            arch_endian = "openrisc"
+            qarch = "or1k"
+        if re.search("CONFIG_MICROBLAZE=", kconfigs):
+            arch = "microblaze"
+            if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
+                arch_endian = "microblaze"
+                qarch = "microblaze"
+            else:
+                arch_endian = "microblazeel"
+                qarch = "microblazeel"
+        if re.search("CONFIG_X86_64=", kconfigs):
+            arch = "x86_64"
+            arch_endian = "x86_64"
+            qarch = "x86_64"
+        if re.search("CONFIG_X86=", kconfigs) and not re.search("CONFIG_X86_64=", kconfigs):
+            arch = "x86"
+            arch_endian = "x86"
+            qarch = "i386"
+    else:
+        kconfigs = ""
+        # detect from the given larch
+        if larch == "x86_64":
+            arch = "x86_64"
+            arch_endian = "x86_64"
+            qarch = "x86_64"
+            endian = "little"
+        if larch == "arm":
+            arch = "arm"
+            arch_endian = "armel"
+            qarch = "arm"
+            endian = "little"
+        if larch == "arm64":
+            arch = "arm64"
+            arch_endian = "arm64"
+            qarch = "aarch64"
+            endian = "little"
 
     if arch_endian is None:
         print("ERROR: Missing endian arch")
@@ -306,7 +325,7 @@ def boot(param):
         print("CHECK: %s" % devicename)
         # check config requirements
         skip = False
-        if "configs" in device and device["configs"] is not None:
+        if "configs" in device and device["configs"] is not None and kconfigs != "":
             for config in device["configs"]:
                 if "name" not in config:
                     print("Invalid config")
