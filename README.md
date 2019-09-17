@@ -15,52 +15,6 @@ For using BBCI, you need the following:
 	Availlable via the lab/rootfs_baseuri parameter.
 * A toolchain for building. Note that BBCI could download one for you
 
-## Usage:
-```
-./bbci.py -s source -t target -a action
-```
-
-You can separate source, target and actions by ","
-You can also use all for source and target.
-You can use defconfig for target for filtering only targets with defconfig: attribute.
-
-Example:
-build all source with all targets and boot them
-```
-./bbci.py -s all -t all -a build,boot
-```
-
-## Reference of all arguments
-### --source/-s sourcename[,sourcename]
-* One sourcename
-* A list of sourcename separated by ","
-* all
-### --target/-t targetname[,targetname]
-* Only one targetname
-* A list of targetname separated by ","
-* all
-* defconfig
-### --action/-a action[,action]
-* download: download toolchain for specified targets
-* build
-* boot
-* qemu
-### --dtag/-D devicetag[,devicetag]
-* A devicetag
-* qemu: Select only qemu machines
-### --ttag/-T sourcetag[;sourcetag]
-### -W
-Instead of exiting after ended the boot action (sending all jobs to LAVA server)
-bbci will wait for all jobs to end
-This is WIP.
-
-### --debug -d
-### --overlay -o overlayname[,overlayname]
-See config overlay below
-
-### --randconfigseed SEED
-When using a randconfig target, use SEED as config seed.
-
 ## Quickstart
 ### build linux-next for x86
 This is an example on how to test linux-next on x86 qemu.
@@ -121,6 +75,52 @@ This will checkout sources in $HOME/linux-stable-4.20
 ```
 ./bbci.py -s stable-4.20 -t arm_defconfig -a boot
 ```
+
+## Usage:
+```
+./bbci.py -s source -t target -a action
+```
+
+You can separate source, target and actions by ","
+You can also use all for source and target.
+You can use defconfig for target for filtering only targets with defconfig: attribute.
+
+Example:
+build all source with all targets and boot them
+```
+./bbci.py -s all -t all -a build,boot
+```
+
+## Reference of all arguments
+### --source/-s sourcename[,sourcename]
+* One sourcename
+* A list of sourcename separated by ","
+* all
+### --target/-t targetname[,targetname]
+* Only one targetname
+* A list of targetname separated by ","
+* all
+* defconfig
+### --action/-a action[,action]
+* download: download toolchain for specified targets
+* build
+* boot
+* qemu
+### --dtag/-D devicetag[,devicetag]
+* A devicetag
+* qemu: Select only qemu machines
+### --ttag/-T sourcetag[;sourcetag]
+### -W
+Instead of exiting after ended the boot action (sending all jobs to LAVA server)
+bbci will wait for all jobs to end
+This is WIP.
+
+### --debug -d
+### --overlay -o overlayname[,overlayname]
+See config overlay below
+
+### --randconfigseed SEED
+When using a randconfig target, use SEED as config seed.
 
 ## Workflow
 ### build
