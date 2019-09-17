@@ -502,8 +502,14 @@ def boot(param):
             if "dtb" in device:
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
                 if not os.path.isfile(dtbfile):
-                    print("SKIP: no dtb at %s" % dtbfile)
-                    continue
+                    #try at base directory
+                    dtbfile = "%s/%s" % (kdir, device["dtb"])
+                    if not os.path.isfile(dtbfile):
+                        # retry with basename
+                        dtbfile = "%s/%s" % (kdir, os.path.basename(device["dtb"]))
+                        if not os.path.isfile(dtbfile):
+                            print("SKIP: no dtb at %s" % dtbfile)
+                            continue
                 with open(dtbfile, "rb") as fdtb:
                     jobdict["DTB_SHA256"] = hashlib.sha256(fdtb.read()).hexdigest()
                 qemu_cmd += " -dtb %s" % dtbfile
@@ -665,8 +671,14 @@ def boot(param):
                 if len(dtbsubdir) > 1:
                     dtb_relpath = dtb_relpath + dtbsubdir[0]
                 if not os.path.isfile(dtbfile):
-                    print("SKIP: no dtb at %s" % dtbfile)
-                    continue
+                    #try at base directory
+                    dtbfile = "%s/%s" % (kdir, device["dtb"])
+                    if not os.path.isfile(dtbfile):
+                        # retry with basename
+                        dtbfile = "%s/%s" % (kdir, os.path.basename(device["dtb"]))
+                        if not os.path.isfile(dtbfile):
+                            print("SKIP: no dtb at %s" % dtbfile)
+                            continue
                 lab_copy(lab, dtbfile, "%s/%s" % (data_relpath, dtb_relpath))
                 with open(dtbfile, "rb") as fdtb:
                     jobdict["DTB_SHA256"] = hashlib.sha256(fdtb.read()).hexdigest()
