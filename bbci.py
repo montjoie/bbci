@@ -250,12 +250,16 @@ def boot(param):
         git_describe = subprocess.check_output('git describe', shell=True).strip().decode("utf-8")
         git_lastcommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip().decode("utf-8")
         git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip().decode("utf-8")
-    else:
+    elif os.path.exists("Makefile"):
         VERSION = subprocess.check_output('grep ^VERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         PATCHLEVEL = subprocess.check_output('grep ^PATCHLEVEL Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         SUBLEVEL = subprocess.check_output('grep ^SUBLEVEL Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         EXTRAVERSION = subprocess.check_output('grep ^EXTRAVERSION Makefile | sed "s,.* ,,"', shell=True).strip().decode("utf-8")
         git_describe = "%s.%s.%s%s" % (VERSION, PATCHLEVEL, SUBLEVEL, EXTRAVERSION)
+        git_lastcommit = "None"
+        git_branch = "None"
+    else:
+        git_describe = "None"
         git_lastcommit = "None"
         git_branch = "None"
 
