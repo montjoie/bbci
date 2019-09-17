@@ -39,6 +39,23 @@ sources:
 ./bbci.py -s next -t x86_defconfig -a build
 ```
 
+This will build next in the directory specified in config.yaml (BBCI build kernel out of tree).
+```
+config:
+    builddir: $HOME/crossbuild
+```
+For building BBCI will use the x86_defconfig specified in targets.yaml
+```
+targets:
+  - name: x86_defconfig
+    larch: x86
+    flavour: defconfig
+    defconfig: i386_defconfig
+    full_tgt: bzImage modules
+    warnings: "-W1"
+```
+So in this example, BBCi will build the i386_defconfig
+
 #### boot the builded kernel on qemu
 ```
 ./bbci.py -s next -t x86_defconfig -a boot
