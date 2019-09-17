@@ -946,8 +946,6 @@ def common(sourcename, targetname):
         sys.exit(1)
     os.chdir(sourcedir)
 
-    builddir = os.path.expandvars(tc["config"]["builddir"])
-
     kdir = "%s/%s/%s/%s/%s" % (builddir, sourcename, larch, subarch, flavour)
     if args.debug:
         print("DEBUG: Builddir is %s" % kdir)
@@ -1439,6 +1437,8 @@ except IOError:
     print("ERROR: Cannot open labs config file: %s" % labs_yaml)
     sys.exit(1)
 tlabs = yaml.safe_load(tlabsfile)
+
+builddir = os.path.expandvars(tc["config"]["builddir"])
 
 toolchainfile = open("toolchains.yaml")
 yto = yaml.safe_load(toolchainfile)
