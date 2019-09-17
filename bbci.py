@@ -152,7 +152,6 @@ def boot(param):
         os.mkdir(logdir)
 
     arch_endian = None
-    make_opts = param["make_opts"]
 
     kconfig = open("%s/.config" % kdir)
     kconfigs = kconfig.read()
