@@ -1284,7 +1284,94 @@ def toolchain_download(targetname):
 
 ###############################################################################
 ###############################################################################
+def find_arch_in_kernel(kernelpath):
+    # TODO use `file` also
+    try:
+        p_arch = subprocess.check_output("strings %s |grep -E 'x86-64|x86|armv7'" % kernelpath, shell=True)
+    except subprocess.CalledProcessError:
+        return None
+    for output in p_arch.decode("UTF-8").split("\n"):
+        if output == "x86-64":
+            return "x86_64"
+    return None
+###############################################################################
+###############################################################################
+def bootdir():
+    larch = None
+    image = None
+    iskbuilddir = False
+    if os.path.exists("%s/arch" % args.scandir):
+        print("INFO: detect a KBUILDIR")
+        iskbuilddir = True
+
+    if args.arch is not None:
+        larch = args.arch
+
+    if image is None:
+        # scan for know kernel
+        images = subprocess.check_output("find %s -iname zImage -o -iname Image -o -iname uImage -o -iname bzImage" % args.scandir, shell=True)
+        for image in images.decode("UTF-8").split("\n"):
+            print(image)
+            baseimage = os.path.basename(image)
+            if baseimage == "zImage":
+                if larch is None:
+                    larch = find_arch_in_kernel(image)
+                break
+            if baseimage == "Image":
+                if larch is None:
+                    larch = find_arch_in_kernel(image)
+                break
+            if baseimage == "uImage":
+                if larch is None:
+                    larch = find_arch_in_kernel(image)
+                break
+            if baseimage == "bzImage":
+                if larch is None:
+                    larch = find_arch_in_kernel(image)
+                break
+            if baseimage == "":
+                image = None
+
+    if image is None:
+        print("ERROR: Cannot found kernel")
+        return 1
+    else:
+        print("INFO: Found kernel %s" % image)
+
+    if iskbuilddir and larch is None:
+        print("DEBUG: detect arch from image path")
+        parts = image.split("/")
+        goodpart = False
+        for part in parts:
+            if goodpart:
+                larch = part
+                break
+            if part == "arch":
+                goodpart = True
+
+    if larch is None:
+        print("ERROR: Cannot detect arch")
+        return 1
+
+    p = {}
+    p["larch"] = larch
+    p["subarch"] = "manual"
+    p["flavour"] = "manual"
+    p["sourcename"] = "manual"
+    p["configbase"] = "manual"
+    p["toolchaininuse"] = "unknown"
+    p["kdir"] = args.scandir
+    os.chdir(args.scandir)
+    return boot(p)
+
+###############################################################################
+###############################################################################
 def do_actions(all_sources, all_targets, all_actions):
+    if all_actions == "bootdir":
+        if args.scandir is None:
+            print("ERROR: --scandir is mandatory")
+            sys.exit(1)
+        return bootdir()
     #print("DEBUG: Check sources %s with target %s and action %s" % (all_sources, all_targets, all_actions))
     if re.search(",", all_actions):
         for action in all_actions.split(","):
@@ -1398,10 +1485,12 @@ parser.add_argument("--noclean", help="Do not clean before building", action="st
 parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd'], type=str, default="ramdisk")
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
+parser.add_argument("--scandir", type=str, help="Directory to boot via bootdir action")
+parser.add_argument("--arch", type=str, help="Arch to boot via bootdir action", default=None)
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
 args = parser.parse_args()
 
-if args.source is None:
+if args.source is None and args.action != "bootdir":
     parser.print_help()
     sys.exit(0)
 
