@@ -269,6 +269,8 @@ def boot(param):
         modules_dir = param["modules_dir"]
     else:
         modules_dir = "%s/fake" % builddir
+        if os.path.exists(modules_dir):
+            shutil.rmtree(modules_dir)
         os.mkdir(modules_dir)
         os.mkdir("%s/lib/" % modules_dir)
         os.mkdir("%s/lib/modules" % modules_dir)
