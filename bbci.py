@@ -454,7 +454,7 @@ def boot(param):
             if dtag == "noinitrd" or dtag == 'rootonsd':
                 jobdict["image_arg"] = '-drive format=raw,if=sd,file={ramdisk}'
                 jobdict["initrd_path"] = "/rootfs/%s/rootfs.ext2" % arch_endian
-            if dtag == "notests" or dtag == "nostorage":
+            if dtag == "notests" or dtag == "nostorage" or args.testsuite is None:
                 jobdict["test"] = "False"
                 if args.debug:
                     print("DEBUG: Remove test from job")
@@ -1478,6 +1478,7 @@ parser.add_argument("--target", "-t", type=str, help="target to use separated by
 parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
 parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu")
+parser.add_argument("--testsuite", type=str, help="Comma separated list of testss to do", default = None)
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
