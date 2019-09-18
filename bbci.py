@@ -493,7 +493,6 @@ def boot(param):
             if nonetwork:
                 netoptions = ""
             jobdict["qemu_extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
-        cachedir = os.path.expandvars(tc["config"]["cache"])
         templateLoader = jinja2.FileSystemLoader(searchpath=templatedir)
         templateEnv = jinja2.Environment(loader=templateLoader)
         if "qemu" in device:
@@ -1236,9 +1235,6 @@ def toolchain_download(targetname):
             print("DEBUG: target need 64 bits")
 
     print("DEBUG: try to download a toolchain for %s" % larch)
-    cachedir = os.path.expandvars(tc["config"]["cache"])
-    if not os.path.isdir(cachedir):
-        os.mkdir(cachedir)
     for toolchain in yto["toolchains"]:
         if toolchain["larch"] != larch:
             continue
@@ -1548,6 +1544,9 @@ except IOError:
 tlabs = yaml.safe_load(tlabsfile)
 
 builddir = os.path.expandvars(tc["config"]["builddir"])
+cachedir = os.path.expandvars(tc["config"]["cache"])
+if not os.path.isdir(cachedir):
+    os.mkdir(cachedir)
 
 toolchainfile = open("toolchains.yaml")
 yto = yaml.safe_load(toolchainfile)
