@@ -35,7 +35,7 @@ cd $SOURCEDIR || exit $?
 
 git fetch || exit $?
 
-TAG_TO_CHECK=$(git tag | grep -v rc | grep $TAG | tail -n1)
+TAG_TO_CHECK=$(git tag | grep -v rc | grep $TAG | sort -V | tail -n1)
 if [ -z "$TAG_TO_CHECK" ];then
 	exit 1
 fi
