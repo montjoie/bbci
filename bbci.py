@@ -666,6 +666,10 @@ def boot(param):
             for labdevice in devlist:
                 if labdevice["type"] == device["devicetype"]:
                     send_to_lab = True
+            alia_list = server.scheduler.aliases.list()
+            for alias in alia_list:
+                if alias == device["devicetype"]:
+                    send_to_lab = True
             if not send_to_lab:
                 print("\tSKIP: not found")
                 continue
