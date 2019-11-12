@@ -805,7 +805,20 @@ def genconfig(sourcedir, param, defconfig):
         return 0
     if defconfig == "randconfig" and args.randconfigseed is not None:
         os.environ["KCONFIG_SEED"] = args.randconfigseed
-    pbuild = subprocess.Popen("make %s %s >/dev/null" % (make_opts, defconfig), shell=True)
+
+    logdir = os.path.expandvars(tc["config"]["logdir"])
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+
+    if args.nolog:
+        logfile = sys.stdout
+    else:
+        logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
+
+    if args.quiet:
+        pbuild = subprocess.Popen("make %s %d" % (make_opts, defconfig), shell=True, stdout=subprocess.DEVNULL)
+    else:
+        pbuild = subprocess.Popen("make %s %s 2>&1" % (make_opts, defconfig), shell=True, stdout=logfile)
     outs, err = pbuild.communicate()
 
     if args.configoverlay:
