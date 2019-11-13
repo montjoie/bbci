@@ -1130,18 +1130,24 @@ def do_source_create(sourcename):
         git_create_cmd = "%s %s" % (t_source["create_script"], git_create_args)
         if args.debug:
             print("DEBUG: Will do %s" % git_create_cmd)
-        subprocess.run(git_create_cmd, shell=True)
-        return 0
+        ret = subprocess.run(git_create_cmd, shell=True)
+        return ret.returncode
     if "gituri" not in t_source or t_source["gituri"] is None:
         print("ERROR: Need gituri for %s" % sourcename)
         return 1
 
-    git_create_cmd = "git clone %s %s" % (t_source["gituri"], sourcedir)
+    git_opts = ""
+    if "branch" in t_source:
+        git_opts = "-b %s" % t_source["branch"]
+    git_create_cmd = "git clone %s %s %s" % (git_opts, t_source["gituri"], sourcedir)
     if args.noact:
         print("DEBUG: will do %s" % git_create_cmd)
     else:
-        subprocess.run(git_create_cmd, shell=True)
-    #TODO check return
+        ret = subprocess.run(git_create_cmd, shell=True)
+        if ret.returncode != 0:
+            return ret.returncode
+
+    return 0
 ###############################################################################
 ###############################################################################
 def do_source_update(sourcename):
@@ -1165,7 +1171,8 @@ def do_source_update(sourcename):
         if args.noact:
             print("INFO: Will do %s" % git_update_cmd)
         else:
-            subprocess.run(git_update_cmd, shell=True)
+            ret = subprocess.run(git_update_cmd, shell=True)
+            return ret.returncode
         return 0
 
 ###############################################################################
