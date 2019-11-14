@@ -179,8 +179,11 @@ def boot(param):
         qarch = "sparc64"
         if re.search("CONFIG_ARM=", kconfigs):
             arch = "arm"
-            arch_endian = "armel"
             qarch = "arm"
+            if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
+                arch_endian = "armbe"
+            else:
+                arch_endian = "armel"
         if re.search("CONFIG_ARM64=", kconfigs):
             arch = "arm64"
             arch_endian = "arm64"
