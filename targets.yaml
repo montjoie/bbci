@@ -454,6 +454,12 @@ configoverlays:
     list:
       - config: CONFIG_USB_SERIAL=y
       - config: CONFIG_USB_SERIAL_FTDI_SIO=y
+      - config: CONFIG_NFSD
+      - config: CONFIG_NFSD_V3
+      - config: CONFIG_NFSD_V4
+      - config: CONFIG_USB_SERIAL_PL2303=y
+      - config: CONFIG_USB_SERIAL_CH341=y
+      - config: CONFIG_USB_SERIAL_CP210X=y
   - name: virtio
     list:
       - config: CONFIG_FB_VIRTUAL=y
@@ -487,6 +493,14 @@ configoverlays:
   - name: nopm
     comment: disable power management
     list:
+      - config: CONFIG_SUSPEND
+        disable: True
+      - config: CONFIG_BLK_PM
+        disable: True
+      - config: CONFIG_CPU_PM
+        disable: True
+      - config: CONFIG_PM_OPP
+        disable: True
       - config: CONFIG_PM_CLK
         disable: True
       - config: CONFIG_PM_SLEEP_SMP
@@ -495,11 +509,13 @@ configoverlays:
         disable: True
       - config: CONFIG_PM
         disable: True
-  - name: hack
+  - name: nonf
+    comment: disable netfiler
     list:
-      - config: CONFIG_USB_ANNOUNCE_NEW_DEVICES=y
-      - config: CONFIG_BT_HCIBTSDIO=y
-      - config: CONFIG_BT_SELFTEST=y
-      - config: CONFIG_BT_DEBUGFS=y
-      - config: CONFIG_BT_HCIUART_INTEL=y
-      - config: CONFIG_BT_HCIBFUSB=y
+      - config: CONFIG_NETFILTER
+        disable: True
+  - name: kdebug
+    list:
+      - config: CONFIG_CRYPTO_DEV_SUN8I_SS=y
+      - config: CONFIG_KALLSYMS_ALL=y
+      - config: CONFIG_DEBUG_INFO=y
