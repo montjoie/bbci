@@ -269,7 +269,7 @@ def boot(param):
 
     #TODO check error
     if os.path.isdir(".git"):
-        git_describe = subprocess.check_output('git describe', shell=True).strip().decode("utf-8")
+        git_describe = subprocess.check_output('git describe --always', shell=True).strip().decode("utf-8")
         git_lastcommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip().decode("utf-8")
         git_branch = subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True).strip().decode("utf-8")
     elif os.path.exists("Makefile"):
