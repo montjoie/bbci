@@ -20,6 +20,9 @@ toolchains:
     larch: arm64
     url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
     prefix: aarch64-linux-gnu-
+  - name: Gentoo crossdev M68K
+    larch: m68k
+    prefix: m68k-unknown-linux-gnu-
   - name: Gentoo crossdev MIPS
     larch: mips
     prefix: mips-unknown-linux-gnu-
