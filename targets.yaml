@@ -141,6 +141,13 @@ targets:
         disable: true
       - name: "CONFIG_DRM"
         disable: true
+  - name: m68k_defconfig
+    larch: m68k
+    subarch: default
+    flavour: defconfig
+    defconfig: multi_defconfig
+    full_tgt: vmlinux modules
+    warnings: "-W1"
   - name: malta_defconfig
     larch: mips
     subarch: mips32
@@ -365,6 +372,13 @@ targets:
     configs:
       - name: 'CONFIG_RD_GZIP=y'
 #      - name: 'CONFIG_INITRAMFS_SOURCE="/home/compile/bbci/rootfs.cpio"'
+  - name: vexpress_defconfig
+    larch: arm
+    subarch: vexpress
+    flavour: defconfig
+    full_tgt: vmlinux modules dtbs
+    warnings: "-W1"
+    defconfig: vexpress_defconfig
   - name: arm_randconfig
     larch: arm
     subarch: default
