@@ -4,7 +4,7 @@
 
 metadata:
   image.type: 'montjoie-ci'
-  image.url: https://{{ BOOT_FQDN }}/result/{{ PATCH }}
+  image.url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   kernel.tree: mainline
   kernel.version: {{ KVERSION }}
   kernel.endian: {{ KENDIAN }}
@@ -14,7 +14,7 @@ metadata:
 {%- if dtb_path is defined %}
   platform.dtb: {{ DTB }}
   platform.dtb_short: {{ DTB }}
-  job.dtb_url: http://{{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
+  job.dtb_url: {{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
 {%- endif %}
   platform.fastboot: false
   platform.name: {{ DEVICETYPE }}
@@ -27,11 +27,13 @@ metadata:
   device.type: {{ DEVICETYPE }}
   job.arch: {{ ARCH }}
   job.name: {{ JOBNAME }}
-  job.kernel_url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  job.kernel_url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   job.kernel_image: {{ KERNELFILE }}
-  job.modules_url: http://{{ BOOT_FQDN }}/{{ PATH }}/module.tar.gz
-  job.initrd_url: http://kernel.montjoie.ovh/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
-  job.nfsrootfs_url: None
+  job.modules_url: {{ BOOT_FQDN }}/{{ PATH }}/module.tar.gz
+  job.initrd_url: {{ ROOT_FQDN }}{{ initrd_path }}
+{%- if rootfs_method == "nfs" %}
+  job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
+{% endif %}
 
 device_type: {{ DEVICETYPE }}
 

@@ -3,7 +3,7 @@
 
 metadata:
   image.type: 'montjoie-ci'
-  image.url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  image.url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   kernel.tree: mainline
   kernel.version: {{ KVERSION }}
   kernel.endian: {{ ARCHENDIAN }}
@@ -21,12 +21,14 @@ metadata:
   device.type: {{ DEVICETYPE }}
   job.arch: {{ qemu_arch }}
   job.name: {{ JOBNAME }}
-  job.kernel_url: http://{{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  job.kernel_url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   job.kernel_image: {{ KERNELFILE }}
-  job.modules_url: http://{{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
-  job.initrd_url: http://{{ ROOT_FQDN }}/{{ initrd_path }}
-  job.nfsrootfs_url: None
-  job.dtb_url: None
+  job.modules_url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+  job.initrd_url: { ROOT_FQDN }}/{{ initrd_path }}
+  job.dtb_url: {{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
+{%- if rootfs_method == "nfs" %}
+  job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
+{% endif %}
 
 device_type: {{ DEVICETYPE }}
 
