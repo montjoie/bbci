@@ -1779,6 +1779,26 @@ templates:
       - ok
       - meson
       - amlogic
+      - yukawa
+  - name: meson-sm1-sei610
+    arch: arm64
+    larch: arm64
+    devicetype: meson-sm1-sei610
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-sm1-sei610.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+      - yukawa
   - name: meson-g12a-x96-max
     arch: arm64
     larch: arm64
