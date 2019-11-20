@@ -1485,7 +1485,6 @@ qemu_boot_id = 0
 sources_yaml = "sources.yaml"
 targets_yaml = "targets.yaml"
 dtemplates_yaml = "all.yaml"
-config_yaml = "config.yaml"
 labs_yaml = "labs.yaml"
 
 os.nice(19)
@@ -1498,6 +1497,7 @@ os.environ["LANG"] = "C"
 basepath = os.environ["PATH"]
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--bbciconfig", help="path to BBCI config", type=str, default="config.yaml")
 parser.add_argument("--noact", "-n", help="No act", action="store_true")
 parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
 parser.add_argument("--devtemplates", type=str, help="Path to device templates file")
@@ -1524,13 +1524,13 @@ if args.source is None and args.action != "bootdir":
     sys.exit(0)
 
 try:
-    tcfile = open(config_yaml)
+    tcfile = open(args.bbciconfig)
 except IOError:
-    print("ERROR: Cannot open bbci config file: %s" % config_yaml)
+    print("ERROR: Cannot open bbci config file: %s" % args.bbciconfig)
     sys.exit(1)
 tc = yaml.safe_load(tcfile)
 if "config" not in tc:
-    print("ERROR: invalid config file in %s" % config_yaml)
+    print("ERROR: invalid config file in %s" % args.bbciconfig)
     sys.exit(1)
 
 if "sources" in tc["config"]:
