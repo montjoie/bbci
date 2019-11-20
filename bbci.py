@@ -863,6 +863,7 @@ def genconfig(sourcedir, param, defconfig):
                 subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
             if coverlay == "fullcrypto":
+                enable_config(param, "CONFIG_DEBUG_KERNEL=y")
                 enable_config(param, "CONFIG_CRYPTO_CBC=y")
                 enable_config(param, "CONFIG_MD=y")
                 enable_config(param, "CONFIG_BLK_DEV_DM=y")
@@ -908,6 +909,7 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_NFS_V4=y")
                 enable_config(param, "CONFIG_ROOT_NFS=y")
             if coverlay == "cpu_be":
+                subprocess.run("sed -i 's,^\(.*.CPU_LITTLE_ENDIAN*\)=,# \\1 is not set,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
             if coverlay == "cpu_el":
                 disable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
