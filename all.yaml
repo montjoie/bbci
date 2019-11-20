@@ -1435,6 +1435,22 @@ templates:
       - h5
       - sun8i-ce
       - allwinner
+  - name: sun50i-h6-orangepi-3
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h6-orangepi-3
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h6-orangepi-3.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h6
+      - sun8i-ce
+      - emce
+      - allwinner
   - name: sun50i-h6-orangepi-one-plus
     arch: arm64
     larch: arm64
@@ -1449,6 +1465,7 @@ templates:
       - ok
       - h6
       - sun8i-ce
+      - emce
       - allwinner
   - name: sun50i-h6-pine-h64
     arch: arm64
@@ -1464,6 +1481,23 @@ templates:
       - ok
       - h6
       - sun8i-ce
+      - emce
+      - allwinner
+  - name: sun50i-h6-pine-h64-model-b
+    arch: arm64
+    larch: arm64
+    devicetype: sun50i-h6-pine-h64-model-b
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun50i-h6-pine-h64-model-b.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h6
+      - sun8i-ce
+      - emce
       - allwinner
   - name: sun5i-a13-olinuxino-micro
     arch: arm
@@ -1513,6 +1547,20 @@ templates:
     kernelfile: zImage
     mach: sunxi
     dtb: sun7i-a20-cubieboard2.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a20
+      - sun4i-ss
+      - allwinner
+  - name: sun7i-a20-olinuxino-micro
+    arch: arm
+    devicetype: sun7i-a20-olinuxino-micro
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun7i-a20-olinuxino-micro.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
