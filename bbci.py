@@ -423,6 +423,10 @@ def boot(param):
         jobdict["initrd_path"] = "/rootfs/%s/rootfs.cpio.gz" % arch_endian
         jobdict["test"] = "True"
         jobdict["rootfs_method"] = "ramdisk"
+        jobdict["BUILD_OVERLAYS"] = args.configoverlay
+        jobdict["BUILD_PROFILE"] = "%s-%s-%s" % (larch, subarch, flavour)
+        jobdict["BUILD_TOOLCHAIN"] = param["toolchaininuse"].replace(" ", "_")
+
         if "boot-method" in device:
             jobdict["boot_method"] = device["boot-method"]
         # ROOTFS cpio.gz are for ramdisk, tar.xz for nfs, ext4.gz for NBD

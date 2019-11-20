@@ -34,6 +34,9 @@ metadata:
 {%- if rootfs_method == "nfs" %}
   job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
 {% endif %}
+  build.overlays: {{ BUILD_OVERLAYS }}
+  build.toolchain: {{ BUILD_TOOLCHAIN }}
+  squad.path: {{ GIT_DESCRIBE }}+{{ BUILD_PROFILE }}+{{ BUILD_TOOLCHAIN }}+{{ BUILD_OVERLAYS }}/{{ DEVICETYPE }}
 
 device_type: {{ DEVICETYPE }}
 
