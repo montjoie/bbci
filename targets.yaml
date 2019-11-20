@@ -490,6 +490,8 @@ configoverlays:
         disable: True
       - config: CONFIG_BTRFS_FS
         disable: True
+      - config: CONFIG_SPI
+        disable: True
   - name: nopm
     comment: disable power management
     list:
