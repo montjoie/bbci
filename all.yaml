@@ -1683,6 +1683,19 @@ templates:
     tags:
       - ok
       - imx
+  - name: imx8mn-ddr4-evk
+    arch: arm64
+    larch: arm64
+    devicetype: imx8mn-ddr4-evk
+    kernelfile: Image
+    mach: freescale
+    dtb: freescale/imx8mn-ddr4-evk.dtb
+    configs:
+      - name: CONFIG_CLK_IMX8MN=y
+        type: mandatory
+    tags:
+      - ok
+      - imx
   - name: meson8b-odroidc1
     arch: arm
     larch: arm
