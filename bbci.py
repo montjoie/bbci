@@ -420,7 +420,6 @@ def boot(param):
         jobdict["GIT_LASTCOMMIT"] = git_lastcommit
         jobdict["GIT_BRANCH"] = git_branch
         jobdict["LAVA_BOOT_TYPE"] = kerneltype
-        jobdict["initrd_path"] = "/rootfs/%s/rootfs.cpio.gz" % arch_endian
         jobdict["test"] = "True"
         jobdict["rootfs_method"] = "ramdisk"
         jobdict["BUILD_OVERLAYS"] = args.configoverlay
@@ -429,21 +428,12 @@ def boot(param):
 
         if "boot-method" in device:
             jobdict["boot_method"] = device["boot-method"]
-        # ROOTFS cpio.gz are for ramdisk, tar.xz for nfs, ext4.gz for NBD
         if args.rootfs == "nfs":
             jobdict["rootfs_method"] = "nfs"
             jobdict["boot_commands"] = "nfs"
+            jobdict["boot_media"] = "nfs"
             if "qemu" in device:
                 jobdict["boot_method"] = "qemu-nfs"
-                jobdict["boot_media"] = "nfs"
-                jobdict["initrd_path"] = "/initrd/nfs-%s/rootfs.cpio.gz" % arch_endian
-                jobdict["rootfs_path"] = "/rootfs/%s/rootfs.tar.xz" % arch_endian
-            else:
-                # default
-                #jobdict["boot_method"] = "u-boot"
-                #jobdict["boot_to"] = "tftp"
-                jobdict["boot_media"] = "nfs"
-                jobdict["rootfs_path"] = "/rootfs/%s/rootfs.tar.xz" % arch_endian
         elif args.rootfs == "nbd":
             jobdict["rootfs_method"] = "nbd"
             if "qemu" in device:
@@ -451,7 +441,6 @@ def boot(param):
                 continue
             jobdict["boot_commands"] = "nbd"
             jobdict["boot_to"] = "nbd"
-            jobdict["rootfs_path"] = "/rootfs/%s/rootfs.ext4.gz" % arch_endian
 
         spetial = param["toolchaininuse"]
         if args.configoverlay:
@@ -725,8 +714,73 @@ def boot(param):
                 os.mkdir("%s/%s" % (outputdir, lab["name"]))
             result = subprocess.check_output("chmod -R o+rX %s" % datadir, shell=True)
             #print(result.decode("UTF-8"))
+
             jobdict["BOOT_FQDN"] = lab["datahost_baseuri"]
-            jobdict["ROOT_FQDN"] = lab["rootfs_baseuri"]
+            # ROOTFS cpio.gz are for ramdisk, tar.xz for nfs, ext4.gz for NBD
+            print(lab)
+            rootfs_loc = lab["rootfs_loc"]
+            if args.rootfs_loc:
+                rootfs_loc = args.rootfs_loc
+            if rootfs_loc not in trootfs["rootfs"]:
+                print("ERROR: cannot found %s" % rootfs_loc)
+                continue
+            print(trootfs["rootfs"][rootfs_loc])
+            rfs = trootfs["rootfs"][rootfs_loc]
+            if args.rootfs not in rfs:
+                print("ERROR: %s does not support rootfs for %s" % (rootfs_loc, args.rootfs))
+                continue
+            rfsm = rfs[args.rootfs]
+            if args.rootfs_path is None:
+                if "rootfs_script" in rfsm:
+                    result = subprocess.check_output("%s/%s --arch %s --root %s --cachedir %s" % (bbci_dir, rfsm["rootfs_script"], arch_endian, args.rootfs, cachedir), shell=True)
+                    for line in result.decode("utf-8").split("\n"):
+                        what = line.split("=")
+                        if what[0] == 'ROOTFS_PATH':
+                            jobdict["rootfs_path"] = what[1]
+                        if what[0] == 'ROOTFS_BASE':
+                            jobdict["ROOT_FQDN"] = what[1]
+                        if what[0] == 'ROOTFS_SHA512':
+                            jobdict["rootfs_sha512"] = what[1]
+                        if what[0] == 'PORTAGE_URL':
+                            jobdict["portage_url"] = what[1]
+                        if args.rootfs_loc == 'gentoo' or args.rootfs_loc == 'gentoo-m':
+                            jobdict["auto_login_password"] = 'bob'
+                            jobdict["test_gentoo"] = "True"
+                        print(line)
+                else:
+                    jobdict["rootfs_path"] = rfsm["rootfs"]
+                    jobdict["ROOT_FQDN"] = rfs["rootfs_baseuri"]
+                print("DEBUG: rootfs is %s" % jobdict["rootfs_path"])
+            else:
+                jobdict["rootfs_path"] = args.rootfs_path
+            jobdict["rootfs_path"] = jobdict["rootfs_path"].replace("__ARCH_ENDIAN__", arch_endian).replace("__ARCH__", arch)
+
+            if re.search("gz$", jobdict["rootfs_path"]):
+                jobdict["ROOTFS_COMP"] = "gz"
+            if re.search("xz$", jobdict["rootfs_path"]):
+                jobdict["ROOTFS_COMP"] = "xz"
+            if re.search("bz2$", jobdict["rootfs_path"]):
+                jobdict["ROOTFS_COMP"] = "bz2"
+            if args.rootfs_base is not None:
+                jobdict["ROOT_FQDN"] = args.rootfs_base
+
+            # initrd handling
+            # by default the RAMDISK URI is the same as ROOT
+            jobdict["RAMD_FQDN"] = jobdict["ROOT_FQDN"]
+            if "initrd_baseuri" in rfs:
+                if rfs["initrd_baseuri"] == 'fromdefault':
+                    jobdict["RAMD_FQDN"] = trootfs["rootfs"][lab["rootfs_loc"]]["initrd_baseuri"]
+                else:
+                    jobdict["RAMD_FQDN"] = rfs["initrd_baseuri"]
+            if "initrd" in rfsm:
+                jobdict["initrd_path"] = rfsm["initrd"]
+                jobdict["initrd_path"] = jobdict["initrd_path"].replace("__ARCH_ENDIAN__", arch_endian).replace("__ARCH__", arch)
+            # HACK for device omap/sx1 omap/cheetah
+            for dtag in device["tags"]:
+                if dtag == "noinitrd" or dtag == 'rootonsd':
+                    jobdict["image_arg"] = '-drive format=raw,if=sd,file={ramdisk}'
+                    jobdict["initrd_path"] = "/rootfs/%s/rootfs.ext2" % arch_endian
+
             jobt = template.render(jobdict)
             # HACK CONFIG_SERIAL_PMACZILOG=y CONFIG_SERIAL_PMACZILOG_TTYS=y
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
@@ -1485,11 +1539,13 @@ boots = {}
 builds = {}
 templatedir = os.getcwd()
 startdir = os.getcwd()
+bbci_dir = startdir
 qemu_boot_id = 0
 sources_yaml = "sources.yaml"
 targets_yaml = "targets.yaml"
 dtemplates_yaml = "all.yaml"
 labs_yaml = "labs.yaml"
+rootfs_yaml = "rootfs.yaml"
 
 os.nice(19)
 # ionice need root priv
@@ -1516,6 +1572,9 @@ parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
 parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd'], type=str, default="ramdisk")
+parser.add_argument("--rootfs_path", help="Select the path to rootfs", type=str, default=None)
+parser.add_argument("--rootfs_base", help="Select the base URL to rootfs", type=str, default=None)
+parser.add_argument("--rootfs_loc", help="Select the location of rootfs", type=str, default=None)
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--scandir", type=str, help="Directory to boot via bootdir action")
@@ -1578,6 +1637,13 @@ except IOError:
     print("ERROR: Cannot open labs config file: %s" % labs_yaml)
     sys.exit(1)
 tlabs = yaml.safe_load(tlabsfile)
+
+try:
+    t_rootfs_file = open(rootfs_yaml)
+except IOError:
+    print("ERROR: Cannot open rootfs config file: %s" % rootfs_yaml)
+    sys.exit(1)
+trootfs = yaml.safe_load(t_rootfs_file)
 
 builddir = os.path.expandvars(tc["config"]["builddir"])
 cachedir = os.path.expandvars(tc["config"]["cache"])

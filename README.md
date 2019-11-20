@@ -306,9 +306,33 @@ labs:
     datadir:		(mandatory) Local directory where to copy data (kernel, dtb, modules) to use if bbCI is run on datahost
     datahost:		(mandatory) FQDN of the host storing data (kernel, dtb, modules)
     datahost_baseuri:	(mandatory) Base URI to access data (kernel, dtb, modules)
-    rootfs_baseuri:	(mandatory) Base URI to access rootfs
+    rootfs_loc:		(mandatory) name of the rootfs location (found in rootfs.yaml)
 ```
 
+## rootfs.yaml
+```
+rootfs:
+  nameofrootfsloc:
+    rootfs_baseuri: base URI for rootfs
+    initrd_baseuri: base URI for initrd
+    ramdisk:
+      rootfs: path to rootfs
+    nfs:
+      initrd: path to initrd
+      rootfs:
+    nbd:
+      rootfs_script:	Script giving path/URL to rootfs
+```
+rootfs and initrd will have __ARCH_ENDIAN__ replace by the arch endian name.
+rootfs_script must accept the following parametrs:
+- arch		(mandatory) the archendian for the rootfs
+- cachedir
+- root		(mandatory) type of rootfs (nfs/ramdisk/nbd)
+and need to print the following variables:
+ROOTFS_URL	(mandatory)
+ROOTFS_BASE	(mandatory)
+ROOTFS_PATH	(mandatory)
+ROOTFS_SHA512	(optional)
 
 # TODO list
 <ul>

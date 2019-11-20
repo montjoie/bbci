@@ -75,7 +75,7 @@ actions:
       sha256sum: {{ KERNEL_SHA256 }}
 {%- if rootfs_method == "ramdisk" %}
     ramdisk:
-      url: {{ ROOT_FQDN }}/rootfs/{{ ARCHENDIAN }}/rootfs.cpio.gz
+      url: {{ ROOT_FQDN }}{{ rootfs_path }}
       compression: gz
 {% endif %}
     modules:
@@ -90,19 +90,22 @@ actions:
 {%- endif %}
 {%- if rootfs_method == "nbd" %}
     initrd:
-      url: {{ ROOT_FQDN }}/initrd/nbd-{{ ARCHENDIAN }}/rootfs.cpio.gz
+      url: {{ RAMD_FQDN }}{{ initrd_path }}
       compression: gz
     nbdroot:
-      url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+      url: {{ ROOT_FQDN }}{{ rootfs_path }}
       compression: gz
 {% endif %}
 {%- if rootfs_method == "nfs" %}
     ramdisk:
-      url: {{ ROOT_FQDN }}/initrd/nfs-{{ ARCHENDIAN }}/rootfs.cpio.gz
+      url: {{ RAMD_FQDN }}{{ initrd_path }}
       compression: gz
     nfsrootfs:
-      url: {{ ROOT_FQDN }}/{{ rootfs_path }}
-      compression: xz
+      url: {{ ROOT_FQDN }}{{ rootfs_path }}
+      compression: {{ ROOTFS_COMP }}
+{%- if rootfs_sha512 %}
+      sha512sum: {{ rootfs_sha512 }}
+{% endif %}
 {% endif %}
 
 - boot:
@@ -112,10 +115,34 @@ actions:
     commands: {{ boot_commands }}
     prompts:
       - '/ #'
+      - '~ #'
+{%- if auto_login_password %}
+    auto_login:
+      login_prompt: "login:"
+      username: root
+      password_prompt: 'Password:'
+      password: {{ auto_login_password }}
+{% endif %}
+
 {%- if rootfs_method == "nbd" %}
     transfer_overlay:
       download_command: ifconfig; wget
       unpack_command: tar -C / -zxf
+{% endif %}
+
+{%- if test_gentoo == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/gentoo.yaml
+          name: Gentoo
+{%- if portage_url %}
+          parameters:
+            PORTAGE_URL: {{ portage_url }}
+{% endif %}
 {% endif %}
 
 {%- if test == 'True' %}

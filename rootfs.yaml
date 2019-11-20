@@ -1,0 +1,20 @@
+rootfs:
+  local:
+    rootfs_baseuri: http://boot.montjoie.local
+    initrd_baseuri: http://boot.montjoie.local
+    ramdisk:
+      rootfs: /rootfs/__ARCH_ENDIAN__/rootfs.cpio.gz
+    nfs:
+      initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs: /rootfs/__ARCH_ENDIAN__/rootfs.tar.xz
+    nbd:
+      initrd: /initrd/nbd-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs: /rootfs/__ARCH_ENDIAN__/rootfs.ext4.gz
+  gentoo:
+    initrd_baseuri: fromdefault
+    nfs:
+      initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh
+  kernelci:
+    ramdisk:
+      rootfs_script: ./scripts/kci_get_rootfs.sh

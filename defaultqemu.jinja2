@@ -24,7 +24,9 @@ metadata:
   job.kernel_url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   job.kernel_image: {{ KERNELFILE }}
   job.modules_url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
-  job.initrd_url: { ROOT_FQDN }}/{{ initrd_path }}
+{%- if initrd_path is defined %}
+  job.initrd_url: {{ RAMD_FQDN }}/{{ initrd_path }}
+{%- endif %}
   job.dtb_url: {{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
 {%- if rootfs_method == "nfs" %}
   job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
@@ -86,7 +88,7 @@ actions:
       kernel:
         image_arg: '-kernel {kernel}'
         url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
-{%- if initrd_path is defined %}
+{%- if rootfs_method == "ramdisk" %}
       ramdisk:
 {%- if DEVICETYPE == "qemu" %}
 {%- if image_arg is defined %}
@@ -95,7 +97,7 @@ actions:
         image_arg: '-initrd {ramdisk}'
 {%- endif %}
 {%- endif %}
-        url: {{ ROOT_FQDN }}{{ initrd_path }}
+        url: {{ ROOT_FQDN }}{{ rootfs_path }}
 {% endif %}
 {%- if dtb_path is defined %}
       dtb:
@@ -105,9 +107,16 @@ actions:
         url: {{ BOOT_FQDN }}{{ dtb_path }}
 {%- endif %}
 {%- if rootfs_method == "nfs" %}
+      ramdisk:
+{%- if image_arg is defined %}
+        image_arg: '{{ image_arg }}'
+{% else %}
+        image_arg: '-initrd {ramdisk}'
+{%- endif %}
+        url: {{ RAMD_FQDN }}{{ initrd_path }}
       nfsrootfs:
         url: {{ ROOT_FQDN }}/{{ rootfs_path }}
-        compression: xz
+        compression: {{ ROOTFS_COMP }}
 {% endif %}
 
 - boot:
@@ -120,6 +129,25 @@ actions:
 {%- endif %}
     prompts:
       - '/ #'
+      - '~ #'
+{%- if auto_login_password %}
+    auto_login:
+      login_prompt: "login:"
+      username: root
+      password_prompt: 'Password:'
+      password: {{ auto_login_password }}
+{% endif %}
+
+{%- if test_gentoo == 'True' %}
+- test:
+    timeout:
+        minutes: 30
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/gentoo.yaml
+          name: Gentoo
+{% endif %}
 
 {%- if test == 'True' %}
 - test:

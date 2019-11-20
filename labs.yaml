@@ -4,4 +4,4 @@ labs:
     datadir: /var/www/boot.montjoie.local/htdocs/storage
     datahost: Red
     datahost_baseuri: http://boot.montjoie.local/storage
-    rootfs_baseuri: http://boot.montjoie.local
+    rootfs_loc: local
