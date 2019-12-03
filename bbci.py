@@ -1674,14 +1674,19 @@ if args.waitforjobsend:
             #print("DEBUG: Check %s with %s" % (labname, lab["lavauri"]))
             server = xmlrpc.client.ServerProxy(lab["lavauri"], allow_none=True)
             for jobid in boots[labname]:
-                jobd = server.scheduler.jobs.show(jobid)
-                if jobd["state"] != 'Finished':
-                    all_jobs_ended = False
-                    print("Wait for job %d" % jobid)
-                    print(jobd)
-                else:
-                    boots[labname][jobid]["health"] = jobd["health"]
-                    boots[labname][jobid]["state"] = jobd["state"]
+                try:
+                    jobd = server.scheduler.jobs.show(jobid)
+                    if jobd["state"] != 'Finished':
+                        all_jobs_ended = False
+                        print("Wait for job %d" % jobid)
+                        print(jobd)
+                    else:
+                        boots[labname][jobid]["health"] = jobd["health"]
+                        boots[labname][jobid]["state"] = jobd["state"]
+                except OSError as e:
+                    print(e)
+                except TimeoutError as e:
+                    print(e)
 with open('result-boots.yml', 'w') as rfile:
     yaml.dump(boots, rfile, default_flow_style=False)
 
