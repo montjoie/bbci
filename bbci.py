@@ -1453,6 +1453,8 @@ def bootdir():
 ###############################################################################
 ###############################################################################
 def do_actions(all_sources, all_targets, all_actions):
+    if all_actions is None:
+        return 0
     if all_actions == "bootdir":
         if args.scandir is None:
             print("ERROR: --scandir is mandatory")
