@@ -1088,6 +1088,15 @@ templates:
     configs:
     tags:
       - ok
+  - name: upsquare
+    arch: x86_64
+    devicetype: upsquare
+    kernelfile: bzImage
+    mach: x86_64
+    configs:
+    boot-method: grub
+    tags:
+      - ok
   - name: qemu x86
     arch: x86
     devicetype: qemu
