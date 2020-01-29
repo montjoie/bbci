@@ -416,6 +416,8 @@ configoverlays:
     list:
       - config: CONFIG_MEDIA_SUPPORT
         disable: True
+      - config: CONFIG_RC_MAP
+        disable: True
   - name: noipv6
     list:
       - config: CONFIG_NF_LOG_IPV6
