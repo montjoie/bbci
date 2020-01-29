@@ -71,6 +71,11 @@ targets:
     larch: arm64
     atf: sun50i_a64
     defconfig: libretech_all_h3_cc_h5_defconfig
+  - name: nanopi_neo_plus2_defconfig
+    uarch: arm
+    larch: arm64
+    atf: sun50i_a64
+    defconfig: nanopi_neo_plus2_defconfig
   - name: orangepi_pc_defconfig
     larch: arm
     defconfig: orangepi_pc_defconfig
@@ -124,12 +129,25 @@ targets:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
       - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+  - name: imx8mq_evk_defconfig
+    larch: arm64
+    uarch: arm
+    atf: ATF-imx8mq
+    defconfig: imx8mq_evk_defconfig
+  - name: rpi_4_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: rpi_4_defconfig
   - name: ATF-sun50i_a64
     platform: sun50i_a64
     larch: arm64
     type: ATF
   - name: ATF-sun50i_h6
     platform: sun50i_h6
+    larch: arm64
+    type: ATF
+  - name: ATF-imx8mq
+    platform: imx8mq
     larch: arm64
     type: ATF
 sources:
