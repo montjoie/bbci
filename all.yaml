@@ -750,6 +750,8 @@ templates:
         guestfs_interface: virtio
         append: "console=ttyAMA0 root=/dev/ram0"
     configs:
+      - name: CONFIG_ARCH_VIRT=y
+        type: mandatory
       - name: CONFIG_SERIAL_AMBA_PL011=y
         type: mandatory
       - name: CONFIG_PCI_HOST_GENERIC=
