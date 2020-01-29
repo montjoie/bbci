@@ -1701,6 +1701,8 @@ templates:
     tags:
       - ok
       - imx
+      - caam
+      - crypto
   - name: imx8mn-ddr4-evk
     arch: arm64
     larch: arm64
@@ -1714,6 +1716,8 @@ templates:
     tags:
       - ok
       - imx
+      - caam
+      - crypto
   - name: meson8b-odroidc1
     arch: arm
     larch: arm
@@ -1804,6 +1808,7 @@ templates:
       - ok
       - meson
       - amlogic
+      - crypto
   - name: meson-gxl-s805x-p241
     arch: arm64
     larch: arm64
