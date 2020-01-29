@@ -1080,7 +1080,11 @@ templates:
         netdevice: tap
         model: model=e1000
         netdevice: tap
+        console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
+        extra_options:
+        - '-object cryptodev-backend-builtin,id=cryptodev0'
+        - '-device virtio-crypto-pci,id=crypto0,cryptodev=cryptodev0'
     configs:
     tags:
       - ok
