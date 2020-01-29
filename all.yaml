@@ -1232,6 +1232,7 @@ templates:
         machine: bamboo
         netdevice: tap
         guestfs_interface: none
+        guestfs_driveid: lavatest
         append: "console=ttyS0 root=/dev/ram0"
         extra_options:
         - '-device virtio-scsi-pci,id=scsi'
