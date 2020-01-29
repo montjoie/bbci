@@ -1935,3 +1935,17 @@ templates:
     tags:
       - ok
       - hsdk
+  - name: panda
+    arch: arm
+    larch: arm
+    devicetype: panda
+    kernelfile: zImage
+    mach: omap
+    dtb: omap4-panda.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - omap
+      - crypto
