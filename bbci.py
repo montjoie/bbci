@@ -1005,6 +1005,13 @@ def genconfig(sourcedir, param, defconfig):
             else:
                 enable_config(param, tconfig["name"])
 
+    if args.enable_configs:
+        for econfig in args.enable_configs.split(","):
+            enable_config(param, econfig)
+    if args.disable_configs:
+        for econfig in args.disable_configs.split(","):
+            disable_config(param, econfig)
+
     #subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
 
     if args.debug:
@@ -1585,6 +1592,8 @@ parser.add_argument("--rootfs_path", help="Select the path to rootfs", type=str,
 parser.add_argument("--rootfs_base", help="Select the base URL to rootfs", type=str, default=None)
 parser.add_argument("--rootfs_loc", help="Select the location of rootfs", type=str, default=None)
 parser.add_argument("--configoverlay", "-o", type=str, help="Add config overlay")
+parser.add_argument("--enable_configs", type=str, help="Enable some comma separated configs", default=None)
+parser.add_argument("--disable_configs", type=str, help="Disable some comma separated configs", default=None)
 parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--scandir", type=str, help="Directory to boot via bootdir action")
 parser.add_argument("--arch", type=str, help="Arch to boot via bootdir action", default=None)
