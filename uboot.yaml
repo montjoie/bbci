@@ -120,6 +120,13 @@ targets:
     atf: sun50i_a64
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+  - name: pine64_plus_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: pine64_plus_defconfig
+    atf: sun50i_a64
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
   - name: nanopi_neo_plus2_defconfig
     larch: arm64
     uarch: arm
