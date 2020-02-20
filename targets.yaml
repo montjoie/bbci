@@ -413,6 +413,13 @@ configoverlays:
       - config: CONFIG_DM_CRYPT=y
       - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
         disable: True
+      - config: CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y
+  - name: noarmcrypto
+    list:
+      - config: CONFIG_ARM64_CRYPTO
+        disable: True
+      - config: CONFIG_CRYPTO_AES_ARM64
+        disable: True
   - name: debug
     list:
       - config: CONFIG_DMA_API_DEBUG=y
@@ -442,6 +449,8 @@ configoverlays:
         disable: True
   - name: nomedia
     list:
+      - config: CONFIG_STAGING_MEDIA
+        disable: True
       - config: CONFIG_MEDIA_SUPPORT
         disable: True
       - config: CONFIG_RC_MAP
@@ -473,13 +482,14 @@ configoverlays:
       - config: CONFIG_VIRT_DRIVERS=y
       - config: CONFIG_DRM_VIRTIO_GPU=y
       - config: CONFIG_DRM_QXL=y
+      - config: CONFIG_VIRTIO_PCI=y
+      - config: CONFIG_VIRTIO_NET=y
+      - config: CONFIG_HW_RANDOM_VIRTIO=y
   - name: cutdown
     list:
       - config: CONFIG_NET_VENDOR_MELLANOX
         disable: True
       - config: CONFIG_NET_VENDOR_QUALCOMM
-        disable: True
-      - config: CONFIG_NET_VENDOR_BROADCOM
         disable: True
       - config: CONFIG_NET_VENDOR_MARVELL
         disable: True
@@ -496,6 +506,58 @@ configoverlays:
       - config: CONFIG_BT
         disable: True
       - config: CONFIG_BTRFS_FS
+        disable: True
+      - config: CONFIG_SPI
+        disable: True
+      - config: CONFIG_ARCH_HISI
+        disable: True
+      - config: CONFIG_ARCH_BERLIN
+        disable: True
+      - config: CONFIG_ARCH_ALPINE
+        disable: True
+      - config: CONFIG_ARCH_MEDIATEK
+        disable: True
+      - config: CONFIG_ARCH_QCOM
+        disable: True
+      - config: CONFIG_ARCH_LG1K
+        disable: True
+      - config: CONFIG_ARCH_K3
+        disable: True
+      - config: CONFIG_ARCH_LAYERSCAPE
+        disable: True
+      - config: CONFIG_ARCH_S32
+        disable: True
+      - config: CONFIG_ARCH_SEATTLE
+        disable: True
+      - config: CONFIG_ARCH_STRATIX10
+        disable: True
+      - config: CONFIG_ARCH_UNIPHIER
+        disable: True
+      - config: CONFIG_ARCH_SYNQUACER
+        disable: True
+      - config: CONFIG_ARCH_BRCMSTB
+        disable: True
+      - config: CONFIG_ARCH_BCM_IPROC
+        disable: True
+      - config: CONFIG_ARCH_AGILEX
+        disable: True
+  - name: nowireless
+    list:
+      - config: CONFIG_WLAN_VENDOR_ATH
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_MARVELL
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_TI
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_BROADCOM
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_REALTEK
+        disable: True
+      - config: CONFIG_WLAN_VENDOR_RALINK
+        disable: True
+      - config: CONFIG_WIRELESS
+        disable: True
+      - config: CONFIG_BT
         disable: True
       - config: CONFIG_SPI
         disable: True
@@ -523,8 +585,27 @@ configoverlays:
     list:
       - config: CONFIG_NETFILTER
         disable: True
+  - name: nommc
+    comment: disable all MMC
+    list:
+      - config: CONFIG_MMC
+        disable: True
   - name: kdebug
     list:
       - config: CONFIG_CRYPTO_DEV_SUN8I_SS=y
       - config: CONFIG_KALLSYMS_ALL=y
       - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_SPINLOCK=y
+  - name: kexec
+    list:
+      - config: "CONFIG_SUSPEND=y"
+      - config: "CONFIG_KEXEC=y"
+      - config: "CONFIG_PROC_KCORE=y"
+  - name: emce
+    list:
+      - config: "CONFIG_CRYPTO_DEV_SUN50I_EMCE=y"
+  - name: hack
+    list:
+      - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
+        disable: True
+      - config: CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y
