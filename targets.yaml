@@ -28,6 +28,13 @@ targets:
     larch: arm64
     full_tgt: dtbs Image modules
     warnings: "-W1"
+  - name: bcm2711_defconfig
+    larch: arm64
+    subarch: bcm2711
+    flavour: defconfig
+    defconfig: bcm2711_defconfig
+    full_tgt: dtbs Image modules
+    warnings: "-W1"
   - name: alpha_clipper
     larch: alpha
     subarch: clipper
