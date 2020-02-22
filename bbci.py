@@ -350,6 +350,9 @@ def boot(param):
         goodtag = True
         if args.dtag:
             for tag in args.dtag.split(","):
+                if "devicename" in device and tag == device["devicename"]:
+                    tagfound = True
+                    continue
                 if tag == device["devicetype"]:
                     tagfound = True
                     continue
