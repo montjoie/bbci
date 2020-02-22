@@ -448,7 +448,12 @@ def boot(param):
         spetial = param["toolchaininuse"]
         if args.configoverlay:
             spetial += "+%s" % args.configoverlay
-        jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s,root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial, jobdict["rootfs_method"])
+        if args.jobtitle:
+            jobdict["JOBNAME"] = args.jobtitle
+        else:
+            jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s,root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial, jobdict["rootfs_method"])
+            if len(jobdict["JOBNAME"]) > 200:
+                jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, jobdict["rootfs_method"])
         nonetwork = False
         for dtag in device["tags"]:
             if dtag == "nonetwork":
@@ -1586,6 +1591,7 @@ parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags"
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
 parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu")
 parser.add_argument("--testsuite", type=str, help="Comma separated list of testss to do", default = None)
+parser.add_argument("--jobtitle", type=str, help="Overrige job title", default = None)
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
