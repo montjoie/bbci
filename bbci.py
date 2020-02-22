@@ -413,7 +413,7 @@ def boot(param):
         jobdict["DEVICETYPE"] = device["devicetype"]
         jobdict["MACH"] = device["mach"]
         jobdict["ARCH"] = device["arch"]
-        jobdict["PATH"] = "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour)
+        jobdict["PATH"] = "%s/%s/%s/%s/%s" % (sourcename, larch, subarch, flavour, git_describe)
         jobdict["ARCHENDIAN"] = arch_endian
         jobdict["GIT_DESCRIBE"] = git_describe
         jobdict["KVERSION"] = git_describe
@@ -681,10 +681,10 @@ def boot(param):
                 print("\tSKIP: not found")
                 continue
             #copy files
-            data_relpath = "%s/%s/%s/%s" % (sourcename, larch, subarch, flavour)
+            data_relpath = "%s/%s/%s/%s/%s" % (sourcename, larch, subarch, flavour, git_describe)
             lab_create_directory(lab, data_relpath)
             datadir = lab["datadir"]
-            destdir = "%s/%s/%s/%s/%s" % (datadir, sourcename, larch, subarch, flavour)
+            destdir = "%s/%s/%s/%s/%s/%s" % (datadir, sourcename, larch, subarch, flavour, git_describe)
             # copy kernel
             if args.debug:
                 print("DEBUG: copy %s" % kfile)
@@ -692,7 +692,7 @@ def boot(param):
             # copy dtb
             # TODO dtb metadata
             if "dtb" in device:
-                jobdict["dtb_path"] = "/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, device["dtb"])
+                jobdict["dtb_path"] = "/%s/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, git_describe, device["dtb"])
                 jobdict["DTB"] = device["dtb"]
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
                 dtbsubdir = device["dtb"].split('/')
