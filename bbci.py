@@ -469,7 +469,7 @@ def boot(param):
             print("\tQEMU")
             jobdict["qemu_arch"] = qarch
             if "netdevice" in device["qemu"]:
-                jobdict["qemu_netdevice"] = "tap"
+                jobdict["qemu_netdevice"] = device["qemu"]["netdevice"]
             if "model" in device["qemu"]:
                 jobdict["qemu_model"] = device["qemu"]["model"]
             if "machine" in device["qemu"]:
