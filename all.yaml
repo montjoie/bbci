@@ -731,6 +731,10 @@ templates:
         type: mandatory
       - name: CONFIG_SERIAL_8250=y
         type: mandatory
+      - name: CONFIG_PINCTRL_BCM2835=y
+        type: mandatory
+      - name: CONFIG_CLK_BCM2835=y
+        type: mandatory
     tags:
       - broken
       - rpi
@@ -2023,6 +2027,27 @@ templates:
       - ok
       - meson
       - amlogic
+  - name: bcm2711-rpi-4-b
+    arch: arm64
+    larch: arm64
+    devicetype: bcm2711-rpi-4-b
+    kernelfile: Image
+    mach: broadcom
+    dtb: broadcom/bcm2711-rpi-4-b.dtb
+    configs:
+      - name: CONFIG_ARCH_BCM2835=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250_BCM2835AUX=y
+        type: mandatory
+      - name: CONFIG_USB_NET_SMSC95XX=y
+        type: test
+      - name: CONFIG_PINCTRL_BCM2835=y
+        type: mandatory
+    tags:
+      - ok
+      - rpi4
   - name: bcm2837-rpi-3-b
     arch: arm64
     larch: arm64
@@ -2031,12 +2056,18 @@ templates:
     mach: broadcom
     dtb: broadcom/bcm2837-rpi-3-b.dtb
     configs:
+      - name: CONFIG_ARCH_BCM2835=y
+        type: mandatory
       - name: CONFIG_SERIAL_8250=y
         type: mandatory
       - name: CONFIG_SERIAL_8250_BCM2835AUX=y
         type: mandatory
       - name: CONFIG_USB_NET_SMSC95XX=y
         type: test
+      - name: CONFIG_PINCTRL_BCM2835=y
+        type: mandatory
+      - name: CONFIG_CLK_BCM2835=y
+        type: mandatory
     tags:
       - ok
       - rpi3
