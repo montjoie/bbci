@@ -839,6 +839,128 @@ templates:
     tags:
       - ok
       - versatile
+  - name: qemu-realview-eb
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-realview-eb
+    kernelfile: zImage
+    dtb: arm-realview-eb.dtb
+    mach: qemu
+    qemu:
+        machine: realview-eb
+        cpu: arm926
+        memory: 1024
+        # seems to support rt8139 and smsc91c111
+        model: model=rtl8139
+        netdevice: tap
+        guestfs_interface: virtio
+        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_REALVIEW
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+      - name: RTC_DRV_DS1307
+        type: test
+    tags:
+      - ko
+      - realview
+      - eb
+  - name: qemu-realview-eb-mpcore
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-realview-eb-mpcore
+    kernelfile: zImage
+    dtb: arm-realview-eb-11mp.dtb
+    mach: qemu
+    qemu:
+        # see https://patchwork.kernel.org/patch/8349761/
+        # and commit 5809938c5c9200b68fdcaba4f89880829d510c00
+        machine: realview-eb-mpcore
+        cpu: arm11mpcore
+        memory: 1024
+        # seems to support rt8139 and smsc91c111
+        model: model=rtl8139
+        netdevice: tap
+        guestfs_interface: virtio
+        smp: 4
+        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+        extra_options:
+         - '-smp cpus=4'
+    configs:
+      - name: CONFIG_ARCH_REALVIEW
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+      - name: RTC_DRV_DS1307
+        type: test
+    tags:
+      - ko
+      - realview
+      - eb
+      - 11mp
+  - name: qemu-realview-pb-a8
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-realview-pb-a8
+    kernelfile: zImage
+    dtb: arm-realview-pba8.dtb
+    mach: qemu
+    qemu:
+        machine: realview-pb-a8
+        cpu: cortex-a8
+        memory: 1024
+        # seems to support rt8139 and smsc91c111
+        model: model=lan9118
+        netdevice: tap
+        guestfs_interface: none
+        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_REALVIEW
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+      - name: RTC_DRV_DS1307
+        type: test
+    tags:
+      - ok
+      - realview
+      - pba8
+      - notests
+  - name: qemu-realview-pbx-a9
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-realview-pbx-a9
+    kernelfile: zImage
+    dtb: arm-realview-pbx-a9.dtb
+    mach: qemu
+    qemu:
+        machine: realview-pbx-a9
+        cpu: cortex-a9
+        memory: 2048
+        # seems to support rt8139 and smsc91c111
+        model: model=lan9118
+        netdevice: tap
+        guestfs_interface: none
+        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_REALVIEW
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+      - name: RTC_DRV_DS1307
+        type: test
+    tags:
+      - ko
+      - realview
   - name: qemu-sabrelite
     arch: arm
     devicetype: qemu
