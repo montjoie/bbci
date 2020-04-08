@@ -1174,6 +1174,9 @@ def do_action(sourcename, targetname, action):
             return p["error"]
         build(p)
         return 0
+    if targetname in builds and "result" in builds[targetname] and builds[targetname]["result"] == 'FAIL':
+        print("SKIP actions depending on build for %s" % targetname)
+        return 1
     if action == "boot":
         p = common(sourcename, targetname)
         if "error" in p:
