@@ -502,7 +502,9 @@ def boot(param):
             jobdict["qemu_extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
         templateLoader = jinja2.FileSystemLoader(searchpath=templatedir)
         templateEnv = jinja2.Environment(loader=templateLoader)
-        if "qemu" in device:
+        if args.jobtemplate:
+            template = templateEnv.get_template(args.jobtemplate)
+        elif "qemu" in device:
             template = templateEnv.get_template("defaultqemu.jinja2")
         else:
             template = templateEnv.get_template("default.jinja2")
@@ -1588,6 +1590,7 @@ parser.add_argument("--bbciconfig", help="path to BBCI config", type=str, defaul
 parser.add_argument("--noact", "-n", help="No act", action="store_true")
 parser.add_argument("--quiet", "-q", help="Quiet, do not print build log", action="store_true")
 parser.add_argument("--devtemplates", type=str, help="Path to device templates file")
+parser.add_argument("--jobtemplate", type=str, help="Path to job template file")
 parser.add_argument("--source", "-s", type=str, help="source to use separated by comma (or all)")
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
 parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
