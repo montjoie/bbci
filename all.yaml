@@ -1625,6 +1625,7 @@ templates:
     tags:
       - ok
       - h6
+      - h64
       - sun8i-ce
       - emce
       - allwinner
@@ -1641,6 +1642,7 @@ templates:
     tags:
       - ok
       - h6
+      - h64
       - sun8i-ce
       - emce
       - allwinner
