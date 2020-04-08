@@ -145,7 +145,7 @@ targets:
   - name: imx8mq_evk_defconfig
     larch: arm64
     uarch: arm
-    atf: ATF-imx8mq
+    atf: imx8mq
     defconfig: imx8mq_evk_defconfig
   - name: rpi_4_defconfig
     larch: arm64
