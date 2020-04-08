@@ -1814,6 +1814,21 @@ templates:
       - r40
       - sun8i-ce
       - allwinner
+  - name: sun9i-a80-cubieboard4
+    arch: arm
+    larch: arm
+    devicetype: sun9i-a80-cubieboard4
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun9i-a80-cubieboard4.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a80
+      - sun8i-ss
+      - allwinner
   - name: imx6q-sabrelite
     arch: arm
     larch: arm
@@ -2101,4 +2116,31 @@ templates:
     tags:
       - ok
       - omap
+      - crypto
+  - name: rk3328-rock64
+    arch: arm64
+    larch: arm64
+    devicetype: rk3328-rock64
+    kernelfile: Image
+    mach: rockchip
+    dtb: rockchip/rk3328-rock64.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - rk
+  - name: rk3288-miqi
+    arch: arm
+    larch: arm
+    devicetype: rk3288-miqi
+    kernelfile: zImage
+    mach: rockchip
+    dtb: rk3288-miqi.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - rk
       - crypto
