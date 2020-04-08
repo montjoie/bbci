@@ -651,7 +651,7 @@ templates:
     mach: qemu
     qemu:
         machine: virt
-        memory: 1024
+        memory: 2048
         cpu: cortex-a57
         guestfs_interface: virtio
         netdevice: tap
@@ -670,7 +670,7 @@ templates:
     mach: qemu
     qemu:
         machine: xlnx-versal-virt
-        memory: 1024
+        memory: 2048
         cpu: cortex-a53
         guestfs_interface: none
         model: model=cadence_gem
@@ -1202,6 +1202,7 @@ templates:
     mach: x86_64
     qemu:
         machine: pc
+        memory: 1024
         cpu: qemu64
         netdevice: tap
         model: model=e1000
