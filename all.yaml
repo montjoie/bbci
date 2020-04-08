@@ -1646,6 +1646,20 @@ templates:
       - sun8i-ce
       - emce
       - allwinner
+  - name: sun4i-a10-olinuxino-lime
+    arch: arm
+    devicetype: sun4i-a10-olinuxino-lime
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun4i-a10-olinuxino-lime.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a10
+      - sun4i-ss
+      - allwinner
   - name: sun5i-a13-olinuxino-micro
     arch: arm
     devicetype: sun5i-a13-olinuxino-micro
