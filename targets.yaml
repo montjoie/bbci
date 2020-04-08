@@ -15,6 +15,21 @@ targets:
       - name: "CONFIG_XILINX_ZYNQMP_DMA=y"
       - name: "CONFIG_IMX_DMA=y"
         disable: True
+  - name: realview_defconfig
+    larch: arm
+    subarch: realview
+    flavour: defconfig
+    defconfig: realview_defconfig
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
+    warnings: "-W1"
+    tags: { defconfig }
+  - name: tegra_defconfig
+    larch: arm
+    subarch: tegra
+    flavour: defconfig
+    defconfig: tegra_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "-W1"
   - name: arm64_generic
     larch: arm64
     full_tgt: dtbs Image modules
