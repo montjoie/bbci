@@ -1,7 +1,7 @@
 toolchains:
   - name: Gentoo armv7a-hf
     larch: arm
-    prefix: armv7a-hardfloat-linux-gnueabi-
+    prefix: armv7a-unknown-linux-gnueabihf-
   - name: Bootlin armv7-eabihf
     larch: arm
     url: https://toolchains.bootlin.com/downloads/releases/toolchains/armv7-eabihf/tarballs/armv7-eabihf--glibc--stable-2018.11-1.tar.bz2
