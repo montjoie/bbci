@@ -289,7 +289,7 @@ targets:
     larch: sparc
     subarch: sparc64
     flavour: defconfig
-    full_tgt: vmlinux modules
+    full_tgt: vmlinux modules tftpboot.img
     defconfig: sparc64_defconfig
     bits: 64
     configs:
