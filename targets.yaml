@@ -175,7 +175,7 @@ targets:
     subarch: mips32
     flavour: defconfig
     defconfig: malta_kvm_guest_defconfig
-    full_tgt: vmlinux modules
+    full_tgt: vmlinux vmlinuz modules
     warnings: "-W1"
   - name: mips_generic
     larch: mips
