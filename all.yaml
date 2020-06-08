@@ -891,8 +891,6 @@ templates:
         guestfs_interface: virtio
         smp: 4
         append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
-        extra_options:
-         - '-smp cpus=4'
     configs:
       - name: CONFIG_ARCH_REALVIEW
         type: mandatory

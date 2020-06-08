@@ -516,6 +516,8 @@ def boot(param):
                     jobdict["qemu_extra_options"] = newextrao
             if "extra_options" not in device["qemu"]:
                 jobdict["qemu_extra_options"] = []
+            if "smp" in device["qemu"]:
+                jobdict["qemu_extra_options"].append("-smp cpus=%d" % device["qemu"]["smp"])
             netoptions = "ip=dhcp"
             if nonetwork:
                 netoptions = ""
