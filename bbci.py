@@ -176,7 +176,7 @@ def boot(param):
         if re.search("CONFIG_SPARC64=", kconfigs):
             arch = "sparc64"
             arch_endian = "sparc64"
-        qarch = "sparc64"
+            qarch = "sparc64"
         if re.search("CONFIG_ARM=", kconfigs):
             arch = "arm"
             qarch = "arm"
