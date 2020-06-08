@@ -643,6 +643,29 @@ templates:
       - ok
       - cubieboard
       - a10
+  - name: QEMU orangepi-pc
+    arch: arm
+    larch: arm
+    devicetype: qemu
+    devicename: qemu-orangepi-pc
+    kernelfile: zImage
+    dtb: sun8i-h3-orangepi-pc.dtb
+    mach: sunxi
+    qemu:
+        cpu: cortex-a7
+        machine: orangepi-pc
+        model: model=allwinner-sun8i-emac
+        memory: 1024
+        netdevice: tap
+        guestfs_interface: sd
+        console_device: ttyS0
+        append: "console=ttyS0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h3
   - name: qemu-arm64-virt
     arch: arm64
     devicetype: qemu
