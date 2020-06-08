@@ -10,9 +10,6 @@ targets:
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
     warnings: "-W1"
     tags: { defconfig }
-    configs:
-      - name: "CONFIG_IMX_DMA=y"
-        disable: True
   - name: arm64_generic
     larch: arm64
     full_tgt: dtbs Image modules
@@ -99,8 +96,6 @@ targets:
     defconfig: imx_v6_v7_defconfig
     full_tgt: dtbs zImage modules LOADADDR=0x40008000
     warnings: "-W1"
-    configs:
-     - name: "CONFIG_IMX_DMA=y"
   - name: malta_kvm_defconfig
     larch: mips
     subarch: default
@@ -1001,6 +996,8 @@ templates:
         netdevice: tap
         console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0"
+        extra_options:
+        - '-device usb-storage,bus=usb-bus.0,drive=lavatest'
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
@@ -1015,8 +1012,8 @@ templates:
         type: test
     tags:
       - ok
+      - imx
       - sabrelite
-      - nostorage
   - name: qemu-imx-mcimx6ul-evk
     arch: arm
     devicetype: qemu
@@ -1033,6 +1030,8 @@ templates:
         guestfs_interface: none
         console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0"
+        extra_options:
+        - '-device usb-storage,bus=usb-bus.0,drive=lavatest'
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
@@ -1048,7 +1047,6 @@ templates:
     tags:
       - ok
       - imx
-      - nostorage
       - nonetwork
   - name: qemu-mcimx7d-sabre
     arch: arm
