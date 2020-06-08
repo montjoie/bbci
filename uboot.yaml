@@ -54,6 +54,15 @@ targets:
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: 'CONFIG_BOOTDELAY=10'
+  - name: chip
+    larch: arm
+    defconfig: CHIP_defconfig
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: 'CONFIG_BOOTDELAY=10'
   - name: Cubieboard2_defconfig
     larch: arm
     defconfig: Cubieboard2_defconfig
