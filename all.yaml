@@ -11,8 +11,8 @@ targets:
     warnings: "-W1"
     tags: { defconfig }
     configs:
-      - name: "CONFIG_PCIE_XILINX=y"
-      - name: "CONFIG_XILINX_ZYNQMP_DMA=y"
+      - name: "CONFIG_IMX_DMA=y"
+        disable: True
   - name: arm64_generic
     larch: arm64
     full_tgt: dtbs Image modules
@@ -1119,18 +1119,27 @@ templates:
     qemu:
         machine: xilinx-zynq-a9
         cpu: cortex-a9
-        memory: 128
-        guestfs_interface: none
+        memory: 1024
+        guestfs_interface: sd
         model: model=cadence_gem
         netdevice: tap
         append: "console=ttyPS0 root=/dev/ram0"
         extra_options:
-        - '-serial null -monitor none'
+        - '-serial null -serial mon:stdio'
     configs:
       - name: CONFIG_ARCH_ZYNQ=y
         type: mandatory
+      - name: "CONFIG_MACB=y"
+        type: test
+      - name: "CONFIG_PL330_DMA=y"
+      - name: "CONFIG_MMC_SDHCI_OF_ARASAN=y"
+        type: test
     tags:
-      - broken
+      - netbroken
+      # the network can send packet but do not receive anything
+      # the qemuPHY addr is 23 but DTB has 7
+      - ok
+      - xilinx
       - zynq
   - name: qemu-midway
     arch: arm

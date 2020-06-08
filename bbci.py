@@ -460,9 +460,12 @@ def boot(param):
             if len(jobdict["JOBNAME"]) > 200:
                 jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, jobdict["rootfs_method"])
         nonetwork = False
+        netbroken = False
         for dtag in device["tags"]:
             if dtag == "nonetwork":
                 nonetwork = True
+            if dtag == "netbroken":
+                netbroken = True
             if dtag == "noinitrd" or dtag == 'rootonsd':
                 jobdict["image_arg"] = '-drive format=raw,if=sd,file={ramdisk}'
                 jobdict["initrd_path"] = "/rootfs/%s/rootfs.ext2" % arch_endian
@@ -519,7 +522,7 @@ def boot(param):
             if "smp" in device["qemu"]:
                 jobdict["qemu_extra_options"].append("-smp cpus=%d" % device["qemu"]["smp"])
             netoptions = "ip=dhcp"
-            if nonetwork:
+            if nonetwork or netbroken:
                 netoptions = ""
             jobdict["qemu_extra_options"].append("-append '%s %s'" % (device["qemu"]["append"], netoptions))
         templateLoader = jinja2.FileSystemLoader(searchpath=templatedir)
