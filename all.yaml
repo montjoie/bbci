@@ -622,7 +622,7 @@ templates:
     dtb: sun4i-a10-cubieboard.dtb
     mach: sunxi
     qemu:
-        cpu: cortex-a7
+        cpu: cortex-a8
         machine: cubieboard
         model: model=allwinner-emac
         memory: 512
