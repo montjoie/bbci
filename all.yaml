@@ -1213,6 +1213,15 @@ templates:
     configs:
     tags:
       - ok
+  - name: d2500cc
+    arch: x86_64
+    devicetype: d2500cc
+    kernelfile: bzImage
+    mach: x86_64
+    configs:
+    boot-method: grub
+    tags:
+      - ok
   - name: upsquare
     arch: x86_64
     devicetype: upsquare
