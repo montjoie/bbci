@@ -481,6 +481,9 @@ configoverlays:
   - name: nfsd
     list:
       - config: CONFIG_NFSD
+  - name: nbd
+    list:
+      - config: CONFIG_BLK_DEV_NBD=y
   - name: lavalab
     list:
       - config: CONFIG_USB_SERIAL=y
@@ -491,6 +494,43 @@ configoverlays:
       - config: CONFIG_USB_SERIAL_PL2303=y
       - config: CONFIG_USB_SERIAL_CH341=y
       - config: CONFIG_USB_SERIAL_CP210X=y
+  - name: docker
+    list:
+      - config: CONFIG_OVERLAY_FS=y
+      - config: CONFIG_MEMCG=y
+      - config: CONFIG_MEMCG_SWAP=y
+      - config: CONFIG_CGROUP_DEVICE=y
+      - config: CONFIG_CPUSETS=y
+      - config: CONFIG_BLK_CGROUP=y
+      - config: CONFIG_CGROUP_PIDS=y
+      - config: CONFIG_NAMESPACES=y
+      - config: CONFIG_USER_NS=y
+      - config: CONFIG_BRIDGE=y
+      - config: CONFIG_NETFILTER=y
+      - config: CONFIG_NETFILTER_XTABLES=y
+      - config: CONFIG_IP_NF_IPTABLES=y
+      - config: CONFIG_IP_NF_FILTER=y
+      - config: CONFIG_NF_TABLES=y
+      - config: CONFIG_NF_TABLES_IPV4=y
+      - config: CONFIG_NF_CONNTRACK=y
+      - config: CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+      - config: CONFIG_NETLINK_DIAG=y
+      - config: CONFIG_IP_NF_NAT=y
+      - config: CONFIG_IP_NF_TARGET_MASQUERADE=y
+      - config: CONFIG_NF_NAT=y
+      - config: CONFIG_NFT_NAT=y
+      - config: CONFIG_NFT_CT=y
+      - config: CONFIG_NFT_MASQ=y
+      - config: CONFIG_BRIDGE_NETFILTER=y
+      - config: CONFIG_NETFILTER_NETLINK_ACCT=y
+      - config: CONFIG_NF_TABLES_BRIDGE=y
+      - config: CONFIG_NFT_LOG=y
+      - config: CONFIG_NFT_LIMIT=y
+      - config: CONFIG_NETFILTER_XT_MATCH_STATE=y
+      - config: CONFIG_NETFILTER_XT_MATCH_OWNER=y
+      - config: CONFIG_NETFILTER_XT_MATCH_CONNTRACK=y
+      - config: CONFIG_VETH=y
+      - config: CONFIG_POSIX_MQUEUE=y
   - name: virtio
     list:
       - config: CONFIG_FB_VIRTUAL=y
@@ -576,6 +616,15 @@ configoverlays:
         disable: True
       - config: CONFIG_SPI
         disable: True
+  - name: nousb
+    comment: disable power management
+    list:
+      - config: CONFIG_USB
+        disable: True
+      - config: CONFIG_USB_COMMON
+        disable: True
+      - config: CONFIG_USB_PHY
+        disable: True
   - name: nopm
     comment: disable power management
     list:
@@ -619,6 +668,13 @@ configoverlays:
   - name: emce
     list:
       - config: "CONFIG_CRYPTO_DEV_SUN50I_EMCE=y"
+  - name: noefi
+    list:
+      - config: CONFIG_EFI
+        disable: True
+  - name: tegrausb
+    list:
+      - config: CONFIG_EXTRA_FIRMWARE="nvidia/tegra124/xusb.bin"
   - name: hack
     list:
       - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
