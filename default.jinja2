@@ -20,6 +20,7 @@ metadata:
   platform.name: {{ DEVICETYPE }}
   platform.mach: {{ MACH }}
   test.plan: boot
+  test.plan_variant: {{ TESTSUITES }}
   git.commit: {{ GIT_LASTCOMMIT }}
   git.describe: {{ GIT_DESCRIBE }}
   git.branch: {{ GIT_BRANCH }}
@@ -34,11 +35,32 @@ metadata:
 {%- if rootfs_method == "nfs" %}
   job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
 {% endif %}
+  job.build_environment: {{ BUILD_TOOLCHAIN }}
+{%- if metadata_build %}
   build.overlays: {{ BUILD_OVERLAYS }}
   build.toolchain: {{ BUILD_TOOLCHAIN }}
+{% endif %}
+{%- if use_squad %}
   squad.path: {{ GIT_DESCRIBE }}+{{ BUILD_PROFILE }}+{{ BUILD_TOOLCHAIN }}+{{ BUILD_OVERLAYS }}/{{ DEVICETYPE }}
+{% endif %}
+  job.file_server_resource: {{ BUILD_PROFILE }}+{{ BUILD_TOOLCHAIN }}+{{ BUILD_OVERLAYS }}/{{ DEVICETYPE }}
+
+{% if callback %}
+notify:
+  criteria:
+    status: finished
+  callbacks:
+    - url: http://{{callback}}/callback/lava/test?lab_name=lab-clabbe&status={STATUS}&status_string={STATUS_STRING}
+      method: POST
+      dataset: all
+      token: {{callback_token}}
+      content-type: json
+{% endif %}
 
 device_type: {{ DEVICETYPE }}
+
+context:
+  extra_kernel_args: "ip=dhcp"
 
 job_name: {{ JOBNAME }}
 timeouts:
@@ -150,26 +172,37 @@ actions:
     timeout:
         minutes: 90
     definitions:
+{%- if test_boot == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/boot.yaml
           name: Boot
+{% endif %}
 {%- if rootfs_method != "nbd" and rootfs_method != "nfs" %}
+{%- if test_network == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/network.yaml
           name: Network
 {% endif %}
+{% endif %}
+{%- if test_hw == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/hardware.yaml
           name: Hardware
+{% endif %}
+{%- if test_crypto == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/crypto.yaml
           name: Crypto
+{% endif %}
+{%- if test_misc == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/misc.yaml
           name: Misc
 {% endif %}
+{% endif %}
+

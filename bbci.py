@@ -424,6 +424,11 @@ def boot(param):
         jobdict["GIT_BRANCH"] = git_branch
         jobdict["LAVA_BOOT_TYPE"] = kerneltype
         jobdict["test"] = "True"
+        jobdict["TESTSUITES"] = "all"
+        if args.callback != None:
+            jobdict["callback"] = args.callback
+            if args.callback_token != None:
+                jobdict["callback_token"] = args.callback_token
         jobdict["rootfs_method"] = "ramdisk"
         jobdict["BUILD_OVERLAYS"] = args.configoverlay
         jobdict["BUILD_PROFILE"] = "%s-%s-%s" % (larch, subarch, flavour)
@@ -465,6 +470,21 @@ def boot(param):
                 jobdict["test"] = "False"
                 if args.debug:
                     print("DEBUG: Remove test from job")
+        # test are still enabled check testsuite
+        if jobdict["test"] and args.testsuite != None:
+            jobdict["TESTSUITES"] = args.testsuite
+            if args.testsuite == "all":
+                jobdict["test_boot"] = 'True'
+                jobdict["test_network"] = 'True'
+                jobdict["test_hw"] = 'True'
+                jobdict["test_crypto"] = 'True'
+                jobdict["test_misc"] = 'True'
+            else:
+                for testsuite in args.testsuite.split(','):
+                    print("DEBUG: enable test %s" % testsuite)
+                    jobdict["test_%s" % testsuite ] = 'True'
+        else:
+            jobdict["TESTSUITES"] = "none"
         if "qemu" in device:
             print("\tQEMU")
             jobdict["qemu_arch"] = qarch
