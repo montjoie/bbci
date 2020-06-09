@@ -870,11 +870,12 @@ templates:
     mach: qemu
     qemu:
         machine: realview-eb
-        cpu: arm926
+        cpu: cortex-a8
         memory: 1024
         # seems to support rt8139 and smsc91c111
         model: model=rtl8139
         netdevice: tap
+        audio: "none"
         guestfs_interface: virtio
         append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
     configs:
@@ -887,7 +888,7 @@ templates:
       - name: RTC_DRV_DS1307
         type: test
     tags:
-      - ko
+      - ok
       - realview
       - eb
   - name: qemu-realview-eb-mpcore
@@ -895,20 +896,21 @@ templates:
     devicetype: qemu
     devicename: qemu-realview-eb-mpcore
     kernelfile: zImage
-    dtb: arm-realview-eb-11mp.dtb
+    dtb: arm-realview-eb-11mp-ctrevb.dtb
     mach: qemu
     qemu:
         # see https://patchwork.kernel.org/patch/8349761/
         # and commit 5809938c5c9200b68fdcaba4f89880829d510c00
         machine: realview-eb-mpcore
         cpu: arm11mpcore
-        memory: 1024
+        memory: 256
         # seems to support rt8139 and smsc91c111
         model: model=rtl8139
         netdevice: tap
         guestfs_interface: virtio
         smp: 4
-        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+        audio: "none"
+        append: "console=ttyAMA0 earlyprintk root=/dev/ram0"
     configs:
       - name: CONFIG_ARCH_REALVIEW
         type: mandatory
@@ -919,7 +921,7 @@ templates:
       - name: RTC_DRV_DS1307
         type: test
     tags:
-      - ko
+      - ok
       - realview
       - eb
       - 11mp
