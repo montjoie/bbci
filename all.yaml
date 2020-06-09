@@ -963,12 +963,13 @@ templates:
     qemu:
         machine: realview-pbx-a9
         cpu: cortex-a9
-        memory: 2048
+        memory: 256
         # seems to support rt8139 and smsc91c111
         model: model=lan9118
         netdevice: tap
         guestfs_interface: none
-        append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+        append: "console=ttyAMA0 root=/dev/ram0"
+        audio: "none"
     configs:
       - name: CONFIG_ARCH_REALVIEW
         type: mandatory
@@ -979,7 +980,7 @@ templates:
       - name: RTC_DRV_DS1307
         type: test
     tags:
-      - ko
+      - ok
       - realview
   - name: qemu-sabrelite
     arch: arm
