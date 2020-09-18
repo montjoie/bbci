@@ -564,6 +564,8 @@ configoverlays:
         disable: True
       - config: CONFIG_SPI
         disable: True
+      - config: CONFIG_ARCH_ACTIONS
+        disable: True
       - config: CONFIG_ARCH_HISI
         disable: True
       - config: CONFIG_ARCH_BERLIN
@@ -596,6 +598,26 @@ configoverlays:
         disable: True
       - config: CONFIG_ARCH_AGILEX
         disable: True
+      - config: CONFIG_SLIMBUS
+        disable: True
+      - config: CONFIG_ARCH_MXC
+        disable: True
+      - config: CONFIG_ARCH_MVEBU
+        disable: True
+      - config: CONFIG_ARCH_SPRD
+        disable: True
+      - config: CONFIG_ARCH_THUNDER
+        disable: True
+      - config: CONFIG_ARCH_THUNDER2
+        disable: True
+      - config: CONFIG_ARCH_XGENE
+        disable: True
+      - config: CONFIG_ARCH_ZX
+        disable: True
+      - config: CONFIG_TEGRA_HOST1X
+        disable: True
+      - config: CONFIG_IPMI
+        disable: True
   - name: nowireless
     list:
       - config: CONFIG_WLAN_VENDOR_ATH
@@ -615,6 +637,12 @@ configoverlays:
       - config: CONFIG_BT
         disable: True
       - config: CONFIG_SPI
+        disable: True
+      - config: CONFIG_CAN
+        disable: True
+      - config: CONFIG_CFG80211
+        disable: True
+      - config: CONFIG_MAC80211
         disable: True
   - name: nousb
     comment: disable power management
@@ -675,8 +703,68 @@ configoverlays:
   - name: tegrausb
     list:
       - config: CONFIG_EXTRA_FIRMWARE="nvidia/tegra124/xusb.bin"
-  - name: hack
+  - name: arm-xilinx
     list:
-      - config: CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
-        disable: True
-      - config: CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y
+      - config: "CONFIG_PCIE_XILINX=y"
+      - config: "CONFIG_XILINX_ZYNQMP_DMA=y"
+  - name: media
+    list:
+      - config: CONFIG_MEDIA_SUPPORT=y
+      - config: CONFIG_MEDIA_TEST_SUPPORT=y
+      - config: CONFIG_V4L_TEST_DRIVERS=y
+  - name: nouveau
+    list:
+      - config: CONFIG_DRM_NOUVEAU=y
+  - name: usbaudio
+    list:
+      - config: CONFIG_SND_USB_AUDIO=y
+  - name: sndmixer
+    list:
+      - config: CONFIG_SND_OSSEMUL=y
+      - config: CONFIG_SND_MIXER_OSS=y
+  - name: ctest
+    list:
+      - config: CONFIG_COMPILE_TEST=y
+      - config: CONFIG_CRYPTO_DEV_ALLWINNER=y
+      - config: CONFIG_CRYPTO_DEV_SUN8I_CE=y
+      - config: CONFIG_CRYPTO_DEV_SUN8I_SS=y
+  - name: zoran
+    list:
+      - config: CONFIG_MEDIA_SUPPORT=y
+      - config: CONFIG_MEDIA_CAMERA_SUPPORT=y
+      - config: CONFIG_I2C_ALGOBIT=y
+      - config: CONFIG_STAGING=y
+      - config: CONFIG_STAGING_MEDIA=y
+      - config: CONFIG_MEDIA_PCI_SUPPORT=y
+      - config: CONFIG_MEDIA_SUBDRV_AUTOSELECT=y
+      - config: CONFIG_VIDEO_SAA7110=y
+      - config: CONFIG_VIDEO_SAA7185=y
+      - config: CONFIG_VIDEO_ZORAN=m
+      - config: CONFIG_VIDEO_ZORAN_DC30=m
+      - config: CONFIG_VIDEO_ZORAN_DC10=m
+      - config: CONFIG_VIDEO_ZORAN_BUZ=y
+      - config: CONFIG_VIDEO_ZORAN_LML33=y
+      - config: CONFIG_VIDEO_ZORAN_LML33R10=y
+      - config: CONFIG_VIDEO_ZORAN_AVS6EYES=y
+      - config: CONFIG_VIDEO_ZORAN_ZR36060=y
+  # configs for the server with adm1029
+  - name: adm1029
+    list:
+      - config: CONFIG_HWMON=y
+      - config: CONFIG_SENSORS_ADM1029=y
+      - config: CONFIG_HWMON_DEBUG_CHIP=y
+      - config: CONFIG_SCSI_LOWLEVEL=y
+      - config: CONFIG_I2C_PIIX4=y
+      - config: CONFIG_SCSI_AIC7XXX=y
+  - name: luks
+    list:
+      - config: CONFIG_BLK_DEV_LOOP=y
+      - config: CONFIG_BLK_DEV_CRYPTOLOOP=y
+      - config: CONFIG_MD=y
+      - config: CONFIG_BLK_DEV_DM=y
+      - config: CONFIG_DM_CRYPT=y
+      - config: CONFIG_CRYPTO_SHA256=y
+  - name: luks2
+    list:
+      - config: CONFIG_CRYPTO_USER_API_HASH=y
+      - config: CONFIG_CRYPTO_USER_API_SKCIPHER=y
