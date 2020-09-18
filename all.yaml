@@ -1162,7 +1162,6 @@ templates:
       - name: "CONFIG_MMC_SDHCI_OF_ARASAN=y"
         type: test
     tags:
-      - netbroken
       # the network can send packet but do not receive anything
       # the qemuPHY addr is 23 but DTB has 7
       - ok
