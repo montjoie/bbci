@@ -65,7 +65,7 @@ context:
 job_name: {{ JOBNAME }}
 timeouts:
   job:
-    minutes: 90
+    minutes: 120
   action:
    minutes: 20
   actions:
@@ -167,38 +167,57 @@ actions:
 {% endif %}
 {% endif %}
 
-{%- if test == 'True' %}
+{%- if test_boot == 'True' %}
 - test:
     timeout:
-        minutes: 90
+        minutes: 120
     definitions:
-{%- if test_boot == 'True' %}
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/boot.yaml
           name: Boot
 {% endif %}
+
 {%- if rootfs_method != "nbd" and rootfs_method != "nfs" %}
 {%- if test_network == 'True' %}
+- test:
+    timeout:
+        minutes: 120
+    definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/network.yaml
           name: Network
 {% endif %}
 {% endif %}
+
 {%- if test_hw == 'True' %}
+- test:
+    timeout:
+        minutes: 30
+    definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/hardware.yaml
           name: Hardware
 {% endif %}
+
 {%- if test_crypto == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/crypto.yaml
           name: Crypto
 {% endif %}
+
 {%- if test_misc == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/misc.yaml

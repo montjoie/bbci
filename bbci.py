@@ -723,8 +723,6 @@ def boot(param):
             datadir = lab["datadir"]
             destdir = "%s/%s/%s/%s/%s/%s" % (datadir, sourcename, larch, subarch, flavour, git_describe)
             # copy kernel
-            if args.debug:
-                print("DEBUG: copy %s" % kfile)
             lab_copy(lab, kfile, data_relpath)
             # copy dtb
             # TODO dtb metadata
@@ -757,8 +755,9 @@ def boot(param):
                 os.mkdir(outputdir)
             if not os.path.isdir("%s/%s" % (outputdir, lab["name"])):
                 os.mkdir("%s/%s" % (outputdir, lab["name"]))
-            result = subprocess.check_output("chmod -R o+rX %s" % datadir, shell=True)
-            #print(result.decode("UTF-8"))
+            result = subprocess.check_output("chmod -Rc o+rX %s" % datadir, shell=True)
+            if args.debug:
+                print(result.decode("UTF-8"))
 
             jobdict["BOOT_FQDN"] = lab["datahost_baseuri"]
             # ROOTFS cpio.gz are for ramdisk, tar.xz for nfs, ext4.gz for NBD
@@ -1742,11 +1741,12 @@ os.chdir(startdir)
 pprint.pprint(builds)
 with open('result-build.yml', 'w') as rfile:
     yaml.dump(builds, rfile, default_flow_style=False)
+
 pprint.pprint(boots)
 if args.waitforjobsend:
     all_jobs_ended = False
     while not all_jobs_ended:
-        time.sleep(10)
+        time.sleep(60)
         all_jobs_ended = True
         for labname in boots:
             for lab in tlabs["labs"]:

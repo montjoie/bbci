@@ -88,7 +88,7 @@ targets:
     flavour: defconfig
     defconfig: defconfig
     full_tgt: dtbs Image modules LOADADDR=0x40008000
-    warnings: "-W1"
+    warnings: "W=1"
     configs:
       - name: "CONFIG_USB_NET_DRIVERS=y"
       - name: "CONFIG_USB_NET_DM9601=y"
@@ -132,7 +132,7 @@ targets:
     flavour: defconfig
     defconfig: malta_kvm_defconfig
     full_tgt: vmlinux modules
-    warnings: "-W1"
+    warnings: "-W0"
   - name: indigo2
     larch: mips
     subarch: ip28
@@ -311,6 +311,7 @@ targets:
     configs:
       - name: "CONFIG_PCI=y"
       - name: "CONFIG_PCI_VERSATILE=y"
+      - name: "CONFIG_SCSI=y"
       - name: "CONFIG_SCSI_SYM53C8XX_2=y"
   - name: virtex5_defconfig
     larch: powerpc
@@ -328,7 +329,12 @@ targets:
     flavour: defconfig
     defconfig: x86_64_defconfig
     full_tgt: bzImage modules
-    warnings: "-W1"
+    warnings: "W=1"
+  - name: zoran
+    larch: x86_64
+    flavour: zoran
+    full_tgt: bzImage modules
+    warnings: "W=1 C=1"
   - name: x86_defconfig
     larch: x86
     flavour: defconfig
