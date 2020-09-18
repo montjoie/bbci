@@ -100,8 +100,9 @@ def build(param):
     if args.quiet:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
     else:
-        pbuild = subprocess.Popen("make %s 2>&1" % make_opts, shell=True, stdout=logfile)
+        pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=logfile, stderr=subprocess.STDOUT)
     outs, err = pbuild.communicate()
+    print(outs)
 
     builds[param["targetname"]] = {}
     if err is None and pbuild.returncode == 0:
