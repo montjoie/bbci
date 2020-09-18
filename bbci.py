@@ -496,6 +496,8 @@ def boot(param):
                 jobdict["qemu_netdevice"] = device["qemu"]["netdevice"]
             if "model" in device["qemu"]:
                 jobdict["qemu_model"] = device["qemu"]["model"]
+            if "no_kvm" in device["qemu"]:
+                jobdict["qemu_no_kvm"] = device["qemu"]["no_kvm"]
             if "machine" in device["qemu"]:
                 jobdict["qemu_machine"] = device["qemu"]["machine"]
             if "cpu" in device["qemu"]:
@@ -544,10 +546,12 @@ def boot(param):
                 qemu_cmd += " -L %s" % os.path.expandvars(tc["config"]["qemu_bios_path"])
             if "qemu_bin_path" in tc["config"]:
                 os.environ["PATH"] = "%s:%s" % (os.path.expandvars(tc["config"]["qemu_bin_path"]), os.environ["PATH"])
+            if "audio" in device["qemu"]:
+                os.environ["QEMU_AUDIO_DRV"] = device["qemu"]["audio"]
             if "extra_options" in device["qemu"]:
                 for extrao in device["qemu"]["extra_options"]:
                     qemu_cmd += " %s" % extrao
-            qemu_cmd += " -append '%s'" % device["qemu"]["append"]
+            qemu_cmd += " -append '%s ip=dhcp'" % device["qemu"]["append"]
             if re.search("CONFIG_SERIAL_PMACZILOG=", kconfigs) and re.search("CONFIG_SERIAL_PMACZILOG_TTYS=y", kconfigs):
                 print("INFO: PMACZILOG console hack")
                 qemu_cmd = qemu_cmd.replace("console=ttyPZ0", "console=ttyS0")
@@ -571,7 +575,7 @@ def boot(param):
             if "cpu" in device["qemu"]:
                 qemu_cmd += " -cpu %s" % device["qemu"]["cpu"]
             if "model" in device["qemu"]:
-                qemu_cmd += " -net nic,%s,macaddr=52:54:00:12:34:58 -net user" % device["qemu"]["model"]
+                qemu_cmd += " -nic user,%s,mac=52:54:00:12:34:58" % device["qemu"]["model"]
             if not os.path.isfile("%s/disk.img" % cachedir):
                 subprocess.run("qemu-img create -f qcow2 %s/disk.img 10M" % cachedir, shell=True)
             guestfs_interface = 'ide'
