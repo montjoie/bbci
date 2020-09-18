@@ -877,8 +877,10 @@ templates:
         model: model=rtl8139
         netdevice: tap
         audio: "none"
-        guestfs_interface: virtio
+        guestfs_interface: none
         append: "console=ttyS0 console=ttyAMA0 earlyprintk root=/dev/ram0"
+        extra_options:
+        - '-device scsi-disk,drive=lavatest'
     configs:
       - name: CONFIG_ARCH_REALVIEW
         type: mandatory
