@@ -184,6 +184,7 @@ def boot(param):
             qarch = "arm"
             if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
                 arch_endian = "armbe"
+                qarch = "unsupported"
             else:
                 arch_endian = "armel"
         if re.search("CONFIG_ARM64=", kconfigs):
@@ -491,6 +492,9 @@ def boot(param):
         else:
             jobdict["TESTSUITES"] = "none"
         if "qemu" in device:
+            if qarch == "unsupported":
+                print("Qemu does not support this")
+                continue
             print("\tQEMU")
             jobdict["qemu_arch"] = qarch
             if "netdevice" in device["qemu"]:
