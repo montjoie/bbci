@@ -148,6 +148,7 @@ def boot(param):
     global qemu_boot_id
 
     logdir = os.path.expandvars(tc["config"]["logdir"])
+    cachedir = os.path.expandvars(tc["config"]["cache"])
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
@@ -831,6 +832,21 @@ def boot(param):
                     boots[lab["name"]] = {}
                 boots[lab["name"]][jobid] = {}
                 boots[lab["name"]][jobid]["devicename"] = devicename
+                # copy config
+                copyconfig = False
+                if "copyconfig" in tc["config"]:
+                    copyconfig = tc["config"]["copyconfig"]
+                if os.path.exists("%s/.config" % kdir) and copyconfig:
+                    if not os.path.exists("%s/configs" % cachedir):
+                        os.mkdir("%s/configs" % cachedir)
+                    if not os.path.exists("%s/configs/%s" % (cachedir, lab["name"])):
+                        os.mkdir("%s/configs/%s" % (cachedir, lab["name"]))
+                    kconfig = open("%s/.config" % kdir)
+                    kconfigs = kconfig.read()
+                    kconfig.close()
+                    ckconfig = open("%s/configs/%s/%s.config" % (cachedir, lab["name"], jobid), 'w')
+                    ckconfig.write(kconfigs)
+                    ckconfig.close()
             else:
                 print("\tSKIP: send job to %s" % lab["name"])
     return 0
