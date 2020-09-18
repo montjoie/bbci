@@ -595,10 +595,11 @@ templates:
     qemu:
         machine: sun4u
         memory: 384
-        model: model=pcnet
+        model: model=sunhme
         netdevice: tap
         console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_PATA_CMD64X=
         type: test
