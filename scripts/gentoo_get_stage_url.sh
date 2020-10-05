@@ -55,7 +55,7 @@ do
 			exit 1
 		fi
 		CACHEDIR=$1
-		cd $CACHEDIR
+		cd "$CACHEDIR" || exit $?
 		#echo "DEBUG: go to $CACHEDIR"
 		shift
 	;;
@@ -95,9 +95,9 @@ found_latest()
 	arm64)
 		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH
 		BASEURL=$RFS_BASE$RFS_BPATH
-		wget -q $BASEURL/
+		wget -q "$BASEURL/"
 		if [ ! -e index.html ];then
-			echo "ERRROr: no index from $BASEURL"
+			echo "ERROR: no index from $BASEURL"
 			return 1
 		fi
 		STAGE3=$(grep -o '"stage3-arm64-[0-9]*.tar.bz2"' index.html | cut -d'"' -f2)
@@ -108,8 +108,9 @@ found_latest()
 	;;
 	esac
 
-	wget -q $BASEURL/latest-stage3-$SARCH.txt
-	if [ $? -ne 0 ];then
+	wget -q "$BASEURL/latest-stage3-$SARCH.txt"
+	RET=$?
+	if [ $RET -ne 0 ];then
 		echo "ERROR: fail to grab $BASEURL/latest-stage3-$SARCH.txt"
 		exit 1
 	fi
@@ -122,24 +123,29 @@ found_latest || exit $?
 
 debug "Found latest success"
 
-wget -q $BASEURL/$LATEST.DIGESTS
+wget -q "$BASEURL/$LATEST.DIGESTS"
 if [ $? -ne 0 ];then
 	echo "ERROR: fail to download $BASEURL/$LATEST.DIGESTS"
 	rm latest-stage3-$SARCH.txt
 	exit 1
 fi
 
+DIGESTS_ASC=$(basename "$LATEST.DIGESTS.asc")
+DIGESTS=$(basename "$LATEST.DIGESTS")
+
 if [ $CHECK_SIG -eq 1 ];then
-	wget -q $BASEURL/$LATEST.DIGESTS.asc
-	if [ $? -ne 0 ];then
+	wget -q "$BASEURL/$LATEST.DIGESTS.asc"
+	RET=$?
+	if [ $RET -ne 0 ];then
 		echo "ERROR: fail to download $BASEURL/$LATEST.DIGESTS.asc"
 		rm latest-stage3-$SARCH.txt
 		rm latest-stage3-$SARCH.DIGESTS
 		exit 1
 	fi
 
-	gpg --batch -q --verify $(basename $LATEST.DIGESTS.asc) >gpg.out 2>gpg.err
-	if [ $? -ne 0 ];then
+	gpg --batch -q --verify "$DIGESTS_ASC" >gpg.out 2>gpg.err
+	RET=$?
+	if [ $RET -ne 0 ];then
 		echo "ERROR: GPG fail to verify"
 		cat gpg.out
 		cat gpg.err
@@ -153,23 +159,27 @@ echo "ROOTFS_URL=$BASEURL/$LATEST"
 echo "ROOTFS_BASE=$RFS_BASE"
 echo "ROOTFS_PATH=$RFS_BPATH/$LATEST"
 #cat $(basename $LATEST.DIGESTS) |
-while read line
+while read -r line
 do
-	echo $line | grep -q SHA512
-	if [ $? -eq 0 ];then
+	echo "$line" | grep -q SHA512
+	RET=$?
+	if [ $RET -eq 0 ];then
 		read line
-		echo $line | grep -q "$(basename $LATEST)$"
-		if [ $? -eq 0 ];then
-			echo "ROOTFS_SHA512=$(echo $line | cut -d' ' -f1)"
+		LATEST_BASENAME=$(basename "$LATEST")
+		echo "$line" | grep -q "$LATEST_BASENAME$"
+		RET=$?
+		if [ $RET -eq 0 ];then
+			ROOTFS_SHA512=$(echo "$line" | cut -d' ' -f1)
+			echo "ROOTFS_SHA512=$ROOTFS_SHA512"
 		fi
 	fi
-done < $(basename $LATEST.DIGESTS)
+done < "$DIGESTS"
 
-rm $(basename $LATEST.DIGESTS)
+rm "$DIGESTS"
 if [ $CHECK_SIG -eq 1 ];then
-	rm $(basename $LATEST.DIGESTS.asc)
+	rm "$DIGESTS_ASC"
 fi
 if [ -e latest-stage3-$SARCH.txt ];then
 	rm latest-stage3-$SARCH.txt
 fi
-echo "PORTAGE_URL=$BASEURL/gentoo-distfiles/snapshots/portage-latest.tar.bz2"
+echo "PORTAGE_URL=$RFS_BASE/gentoo-distfiles/snapshots/portage-latest.tar.bz2"

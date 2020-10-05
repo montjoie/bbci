@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 
-import sys
-import re
-import yaml
-import subprocess
+"""
+    BBCI, build and boot CI
+"""
+
+import argparse
+from distutils.version import LooseVersion
+import fcntl
+import hashlib
 import os
 import platform
-import argparse
-import xmlrpc.client
-import shutil
-import time
-import fcntl
 import pprint
+import re
+import subprocess
+import shutil
+import sys
+import time
+import xmlrpc.client
+import yaml
 import jinja2
-import hashlib
 
 ###############################################################################
 ###############################################################################
@@ -428,9 +433,9 @@ def boot(param):
         jobdict["LAVA_BOOT_TYPE"] = kerneltype
         jobdict["test"] = "True"
         jobdict["TESTSUITES"] = "all"
-        if args.callback != None:
+        if args.callback is not None:
             jobdict["callback"] = args.callback
-            if args.callback_token != None:
+            if args.callback_token is not None:
                 jobdict["callback_token"] = args.callback_token
         jobdict["rootfs_method"] = "ramdisk"
         jobdict["BUILD_OVERLAYS"] = args.configoverlay
@@ -477,7 +482,7 @@ def boot(param):
                 if args.debug:
                     print("DEBUG: Remove test from job")
         # test are still enabled check testsuite
-        if jobdict["test"] and args.testsuite != None:
+        if jobdict["test"] and args.testsuite is not None:
             jobdict["TESTSUITES"] = args.testsuite
             if args.testsuite == "all":
                 jobdict["test_boot"] = 'True'
@@ -488,7 +493,7 @@ def boot(param):
             else:
                 for testsuite in args.testsuite.split(','):
                     print("DEBUG: enable test %s" % testsuite)
-                    jobdict["test_%s" % testsuite ] = 'True'
+                    jobdict["test_%s" % testsuite] = 'True'
         else:
             jobdict["TESTSUITES"] = "none"
         if "qemu" in device:
@@ -607,7 +612,6 @@ def boot(param):
             qlogfile = open("%s/%s-%s-%s.log" % (logdir, device["name"].replace('/', '_'), sourcename, param["targetname"]), 'w')
             poweroff_done = False
             qtimeout = 0
-            lastline = ""
             normal_halt = False
             ret = 0
             last_error_line = ""

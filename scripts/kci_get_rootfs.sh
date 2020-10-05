@@ -52,7 +52,7 @@ do
 			exit 1
 		fi
 		CACHEDIR=$1
-		cd $CACHEDIR
+		cd $CACHEDIR || exit $?
 		#echo "DEBUG: go to $CACHEDIR"
 		shift
 	;;
