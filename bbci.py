@@ -76,6 +76,27 @@ def linux_clean(param):
 
 ###############################################################################
 ###############################################################################
+def do_dtb_check(param):
+    larch = param["larch"]
+    kdir = param["kdir"]
+    make_opts = param["make_opts"]
+    logdir = os.path.expandvars(tc["config"]["logdir"])
+
+    if args.nolog:
+        logfile = sys.stdout
+    else:
+        logfile = open("%s/%s.dtb.log" % (logdir, param["targetname"]), 'w')
+
+    if args.quiet:
+        pbuild = subprocess.Popen("make %s dtbs_check" % make_opts, shell=True, stdout=subprocess.DEVNULL)
+    else:
+        pbuild = subprocess.Popen("make %s dtbs_check" % make_opts, shell=True, stdout=logfile, stderr=subprocess.STDOUT)
+    outs, err = pbuild.communicate()
+    print(outs)
+    return err
+
+###############################################################################
+###############################################################################
 def build(param):
     larch = param["larch"]
     kdir = param["kdir"]
@@ -1249,6 +1270,13 @@ def do_action(sourcename, targetname, action):
         return 0
     if action == "create":
         do_source_create(sourcename)
+        return 0
+    if action == "dtb":
+        print("DTB CHECK: %s" % targetname)
+        p = common(sourcename, targetname)
+        if "error" in p:
+            return p["error"]
+        do_dtb_check(p)
         return 0
     print("ERROR: unknow action %s" % action)
     return 1
