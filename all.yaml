@@ -1858,6 +1858,20 @@ templates:
       - h3
       - sun8i-ce
       - allwinner
+  - name: sun8i-h3-bananapi-m2-plus
+    arch: arm
+    devicetype: sun8i-h3-bananapi-m2-plus
+    kernelfile: zImage
+    mach: sunxi
+    dtb: sun8i-h3-bananapi-m2-plus.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - h3
+      - sun8i-ce
+      - allwinner
   - name: sun8i-r40-bananapi-m2-ultra
     arch: arm
     larch: arm
