@@ -1,0 +1,275 @@
+{%- if DEVICETYPE == "qemu" %}
+{%- set boot_method = boot_method|default("qemu") %}
+{% else %}
+{%- set boot_method = boot_method|default("u-boot") %}
+{%- endif %}
+{%- set boot_media= boot_media|default("tmpfs") %}
+{%- set boot_to = boot_to|default("tftp") %}
+{% set console_device = console_device|default('ttyS0') %}
+
+metadata:
+  image.type: 'montjoie-ci'
+  image.url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  kernel.tree: mainline
+  kernel.version: {{ KVERSION }}
+  kernel.endian: {{ KENDIAN }}
+  kernel.defconfig: {{ K_DEFCONFIG }}
+  kernel.defconfig_base: {{ K_DEFCONFIG }}
+  kernel.arch_defconfig: {{ ARCH }}-montjoie_defconfig
+{%- if dtb_path is defined %}
+  platform.dtb: {{ DTB }}
+  platform.dtb_short: {{ DTB }}
+  job.dtb_url: {{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
+{%- endif %}
+  platform.fastboot: false
+  platform.name: {{ DEVICETYPE }}
+  platform.mach: {{ MACH }}
+  test.plan: boot
+  git.commit: {{ GIT_LASTCOMMIT }}
+  git.describe: {{ GIT_DESCRIBE }}
+  git.branch: {{ GIT_BRANCH }}
+  git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+  device.type: {{ DEVICETYPE }}
+  job.arch: {{ ARCH }}
+  job.name: {{ JOBNAME }}
+  job.kernel_url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+  job.kernel_image: {{ KERNELFILE }}
+  job.modules_url: {{ BOOT_FQDN }}/{{ PATH }}/module.tar.gz
+  job.initrd_url: {{ ROOT_FQDN }}{{ initrd_path }}
+{%- if rootfs_method == "nfs" %}
+  job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
+{% endif %}
+  build.overlays: {{ BUILD_OVERLAYS }}
+  build.toolchain: {{ BUILD_TOOLCHAIN }}
+  squad.path: {{ GIT_DESCRIBE }}+{{ BUILD_PROFILE }}+{{ BUILD_TOOLCHAIN }}+{{ BUILD_OVERLAYS }}/{{ DEVICETYPE }}
+
+device_type: {{ DEVICETYPE }}
+
+job_name: {{ JOBNAME }}
+timeouts:
+  job:
+    minutes: 90
+  action:
+   minutes: 20
+  actions:
+    power-off:
+      seconds: 30
+priority: high
+visibility: public
+
+{%- if DEVICETYPE == "qemu" %}
+context:
+    arch: {{ qemu_arch }}
+{%- if qemu_no_kvm is defined %}
+    no_kvm: {{ qemu_no_kvm }}
+{%- endif %}
+{%- if qemu_cpu is defined %}
+    cpu: {{ qemu_cpu }}
+{%- endif %}
+{%- if qemu_machine is defined %}
+    machine: {{ qemu_machine }}
+{%- endif %}
+{%- if qemu_memory is defined %}
+    memory: {{ qemu_memory }}
+{%- endif %}
+{%- if console_device is defined %}
+    console_device: {{ console_device }}
+{%- endif %}
+{%- if qemu_netdevice is defined %}
+    netdevice: {{ qemu_netdevice }}
+{%- endif %}
+{%- if qemu_model is defined %}
+    model: {{ qemu_model }}
+{%- endif %}
+{%- if guestfs_interface is defined %}
+    guestfs_interface: {{ guestfs_interface }}
+{%- endif %}
+{%- if guestfs_driveid is defined %}
+    guestfs_driveid: {{ guestfs_driveid }}
+{%- endif %}
+{%- if qemu_extra_options is defined %}
+    extra_options: {{ qemu_extra_options }}
+{%- endif %}
+{%- endif %}
+
+{%- if rootfs_method == "nbd" %}
+protocols:
+  lava-xnbd:
+    port: auto
+{%- endif %}
+
+actions:
+- deploy:
+    timeout:
+      minutes: 20
+    to: downloads
+    postprocess:
+      docker:
+        image: debian:buster
+        steps:
+         - ls -l
+         - mkdir gentoo
+         - apt-get update && apt-get -y install xz-utils
+         - cd gentoo && tar xpf ../stage3*
+         - echo 'hostname="gentooci"' > etc/conf.d/hostname
+         - echo "rc_nocolor=YES" >> etc/rc.conf
+         - sed -i 's,^s0,#s0,' etc/inittab
+         - echo "s0:12345:respawn:/sbin/agetty -L 115200 {{ console_device }} vt100" >> etc/inittab
+         - grep ^s etc/inittab
+         - sed -i 's,root:.*,root:$6$p3gorwcg$ly73iRHcUPeR4WI2pRWbJv5Gg9SOtPGIHsFN.PH7b94U.F9vebcLVFBMAvJMurxLsKt6i/ZnLmuPj7JfD0d5k/:16834:0:::::,' etc/shadow
+{%- if rootfs_method == "nfs" %}
+         - tar cf ../gentoo.tar *
+{%- endif %}
+{%- if rootfs_method == "nbd" %}
+         - du -ah --max-depth=1
+         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1200M
+{%- endif %}
+         - cd ..
+         - rm -rf gentoo
+         - rm stage3*
+         - ls -l
+    images:
+{%- if rootfs_method == "nfs" %}
+      nfsrootfs:
+        url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+        compression: {{ ROOTFS_COMP }}
+{%- endif %}
+{%- if rootfs_method == "nbd" %}
+      stage3:
+        url: {{ ROOT_FQDN }}{{ rootfs_path }}
+        compression: {{ ROOTFS_COMP }}
+{%- endif %}
+{%- if rootfs_sha512 %}
+        sha512sum: {{ rootfs_sha512 }}
+{% endif %}
+
+{%- if DEVICETYPE == "qemu" %}
+- deploy:
+    timeout:
+      minutes: 3
+    to: {{ boot_media }}
+    os: oe
+    images:
+      kernel:
+        image_arg: '-kernel {kernel}'
+        url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+        type: {{ KERNELTYPE }}
+        sha256sum: {{ KERNEL_SHA256 }}
+      ramdisk:
+        image_arg: '-initrd {ramdisk}'
+        url: {{ RAMD_FQDN }}{{ initrd_path }}
+{%- if rootfs_method == "nfs" %}
+      nfsrootfs:
+        url: downloads://gentoo.tar
+{%- endif %}
+
+- boot:
+    timeout:
+      minutes: 5
+    method: {{ boot_method }}
+    media: {{ boot_media }}
+{%- if boot_commands is defined %}
+    commands: {{ boot_commands }}
+{%- endif %}
+    prompts:
+      - '/ #'
+      - '~ #'
+{%- if auto_login_password %}
+    auto_login:
+      login_prompt: "login:"
+      username: root
+      password_prompt: 'Password:'
+      password: {{ auto_login_password }}
+{% endif %}
+
+{# if qemu ######################################################}
+{% else %}
+
+- deploy:
+    timeout:
+      minutes: 5
+{%- if rootfs_method == "nbd" %}
+    protocols:
+      lava-xnbd:
+      - action: nbd-deploy
+        request: set_port
+{%- endif %}
+    to: {{ boot_to }}
+    os: oe
+    kernel:
+      url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
+      type: {{ KERNELTYPE }}
+      sha256sum: {{ KERNEL_SHA256 }}
+    modules:
+      url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+      compression: gz
+      sha256sum: {{ MODULES_SHA256 }}
+{%- if rootfs_method == "nfs" %}
+    ramdisk:
+      url: {{ RAMD_FQDN }}{{ initrd_path }}
+      compression: gz
+    nfsrootfs:
+      url: downloads://gentoo.tar
+{%- endif %}
+{%- if rootfs_method == "nbd" %}
+    initrd:
+      url: {{ RAMD_FQDN }}{{ initrd_path }}
+      compression: gz
+    nbdroot:
+      url: downloads://gentoo.ext2
+{%- endif %}
+{%- if dtb_path is defined %}
+    dtb:
+      url: {{ BOOT_FQDN }}/{{ dtb_path }}
+      sha256sum: {{ DTB_SHA256 }}
+{% endif %}
+
+- boot:
+    timeout:
+      minutes: 5
+    method: {{ boot_method }}
+    commands: {{ boot_commands }}
+    prompts:
+      - '/ #'
+      - '~ #'
+{%- if auto_login_password %}
+    auto_login:
+      login_prompt: "login:"
+      username: root
+      password_prompt: 'Password:'
+      password: {{ auto_login_password }}
+{% endif %}
+
+{%- if rootfs_method == "nbd" %}
+    transfer_overlay:
+      download_command: ifconfig; wget
+      unpack_command: tar -C / -zxf
+{% endif %}
+
+
+{% endif %}
+
+{%- if test_gentoo == 'True' %}
+- test:
+    timeout:
+        minutes: 90
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/gentoo.yaml
+          name: Gentoo
+{% endif %}
+
+{%- if test_distcc == 'True' %}
+- test:
+    timeout:
+        minutes: 90
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/distcc.yaml
+          name: distcc
+          parameters:
+            DISTCC_SRV: 192.168.1.100
+{% endif %}
+
