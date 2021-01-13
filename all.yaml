@@ -1255,6 +1255,7 @@ templates:
     mach: x86_64
     configs:
     boot-method: grub
+    console_device: ttyS2
     tags:
       - ok
   - name: upsquare
