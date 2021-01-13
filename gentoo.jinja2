@@ -123,7 +123,7 @@ actions:
 {%- endif %}
 {%- if rootfs_method == "nbd" %}
          - du -ah --max-depth=1
-         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1200M
+         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1600M
 {%- endif %}
          - cd ..
          - rm -rf gentoo
