@@ -121,6 +121,10 @@ actions:
 {%- if rootfs_method == "nfs" %}
          - tar cf ../gentoo.tar *
 {%- endif %}
+{%- if rootfs_method == "vdisk" %}
+         - du -ah --max-depth=1
+         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1600M
+{%- endif %}
 {%- if rootfs_method == "nbd" %}
          - du -ah --max-depth=1
          - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1600M
@@ -137,6 +141,12 @@ actions:
 {%- endif %}
 {%- if rootfs_method == "nbd" %}
       stage3:
+        url: {{ ROOT_FQDN }}{{ rootfs_path }}
+        compression: {{ ROOTFS_COMP }}
+{%- endif %}
+{%- if rootfs_method == "vdisk" %}
+      stage3:
+        image_arg: '-drive format=raw,file={gentoo} -append "root=/dev/sda console={{ console_device }}"'
         url: {{ ROOT_FQDN }}{{ rootfs_path }}
         compression: {{ ROOTFS_COMP }}
 {%- endif %}
@@ -162,9 +172,15 @@ actions:
         url: {{ BOOT_FQDN }}{{ dtb_path }}
         sha256sum: {{ DTB_SHA256 }}
 {% endif %}
+{%- if rootfs_method == "vdisk" %}
+      gentoo:
+        image_arg: '-drive format=raw,file={gentoo}'
+        url: downloads://gentoo.ext2
+{% else %}
       ramdisk:
         image_arg: '-initrd {ramdisk}'
         url: {{ RAMD_FQDN }}{{ initrd_path }}
+{% endif %}
 {%- if rootfs_method == "nfs" %}
       nfsrootfs:
         url: downloads://gentoo.tar

@@ -14,6 +14,8 @@ rootfs:
     initrd_baseuri: fromdefault
     ramdisk:
       rootfs_script: ./scripts/gentoo_get_stage_url.sh
+    vdisk:
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh
     nfs:
       initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
       rootfs_script: ./scripts/gentoo_get_stage_url.sh

@@ -471,6 +471,11 @@ def boot(param):
             jobdict["boot_media"] = "nfs"
             if "qemu" in device:
                 jobdict["boot_method"] = "qemu-nfs"
+        elif args.rootfs == "vdisk":
+            if "qemu" not in device:
+                print("ERROR: vdisk is only for qemu")
+                continue
+            jobdict["rootfs_method"] = "vdisk"
         elif args.rootfs == "nbd":
             jobdict["rootfs_method"] = "nbd"
             if "qemu" in device:
@@ -1683,7 +1688,7 @@ parser.add_argument("--debug", "-d", help="increase debug level", action="store_
 parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
-parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd'], type=str, default="ramdisk")
+parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd', 'vdisk'], type=str, default="ramdisk")
 parser.add_argument("--rootfs_path", help="Select the path to rootfs", type=str, default=None)
 parser.add_argument("--rootfs_base", help="Select the base URL to rootfs", type=str, default=None)
 parser.add_argument("--rootfs_loc", help="Select the location of rootfs", type=str, default=None)
