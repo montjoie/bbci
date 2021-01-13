@@ -2190,6 +2190,66 @@ templates:
       - ok
       - omap
       - crypto
+  - name: r8a7795-salvator-x
+    arch: arm64
+    larch: arm64
+    devicetype: r8a7795-salvator-x
+    kernelfile: Image
+    mach: renesas
+    dtb: renesas/r8a77950-salvator-x.dtb
+    configs:
+      - name: CONFIG_ARCH_RENESAS=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - renesas
+  - name: r8a7795-salvator-x
+    arch: arm64
+    larch: arm64
+    devicetype: r8a7795-salvator-x
+    kernelfile: Image
+    mach: renesas
+    dtb: renesas/r8a7795-salvator-x.dtb
+    configs:
+      - name: CONFIG_ARCH_RENESAS=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - renesas
+  - name: r8a7796-m3ulcb
+    arch: arm64
+    larch: arm64
+    devicetype: r8a7796-m3ulcb
+    kernelfile: Image
+    mach: renesas
+    dtb: renesas/r8a77960-ulcb.dtb
+    configs:
+      - name: CONFIG_ARCH_RENESAS=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - renesas
+  - name: r8a7795-h3ulcb-kf
+    arch: arm64
+    larch: arm64
+    devicetype: r8a7795-h3ulcb-kf
+    kernelfile: Image
+    mach: renesas
+    dtb: renesas/r8a77951-ulcb-kf.dtb
+    configs:
+      - name: CONFIG_ARCH_RENESAS=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - renesas
   - name: rk3328-rock64
     arch: arm64
     larch: arm64
