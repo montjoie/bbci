@@ -3,6 +3,8 @@
 DEBUG=0
 CACHEDIR=$(pwd)
 RFS_BASE=http://gentoo.mirrors.ovh.net
+SELINUX=0
+ARCH_OPTION=""
 
 debug() {
 	if [ $DEBUG -eq 1 ];then
@@ -15,6 +17,11 @@ do
 	case $1 in
 	-d)
 		DEBUG=1
+		shift
+	;;
+	--selinux)
+		SELINUX=1
+		ARCH_OPTION="-hardened-selinux+nomultilib"
 		shift
 	;;
 	--arch)
@@ -42,10 +49,6 @@ do
 	;;
 	--root)
 		shift
-		if [ "$1" != "nfs" ];then
-			echo "ERROR: gentoo support only NFS"
-			exit 1
-		fi
 		shift
 	;;
 	--cachedir)
@@ -108,14 +111,15 @@ found_latest()
 	;;
 	esac
 
-	wget -q "$BASEURL/latest-stage3-$SARCH.txt"
+	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
+	wget -q "$BASEURL/$LATEST_TXT"
 	RET=$?
 	if [ $RET -ne 0 ];then
-		echo "ERROR: fail to grab $BASEURL/latest-stage3-$SARCH.txt"
+		echo "ERROR: fail to grab $BASEURL/$LATEST_TXT"
 		exit 1
 	fi
-	echo "ROOTFS_LATEST=$BASEURL/latest-stage3-$SARCH.txt"
-	LATEST=$(grep -v ^# latest-stage3-$SARCH.txt | cut -d' ' -f1)
+	echo "ROOTFS_LATEST=$BASEURL/$LATEST_TXT"
+	LATEST=$(grep -v ^# $LATEST_TXT | cut -d' ' -f1)
 	return 0
 }
 
@@ -126,7 +130,7 @@ debug "Found latest success"
 wget -q "$BASEURL/$LATEST.DIGESTS"
 if [ $? -ne 0 ];then
 	echo "ERROR: fail to download $BASEURL/$LATEST.DIGESTS"
-	rm latest-stage3-$SARCH.txt
+	rm $LATEST_TXT
 	exit 1
 fi
 
@@ -179,7 +183,7 @@ rm "$DIGESTS"
 if [ $CHECK_SIG -eq 1 ];then
 	rm "$DIGESTS_ASC"
 fi
-if [ -e latest-stage3-$SARCH.txt ];then
-	rm latest-stage3-$SARCH.txt
+if [ -e $LATEST_TXT ];then
+	rm $LATEST_TXT
 fi
 echo "PORTAGE_URL=$RFS_BASE/gentoo-distfiles/snapshots/portage-latest.tar.bz2"

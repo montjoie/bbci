@@ -12,9 +12,24 @@ rootfs:
       rootfs: /rootfs/__ARCH_ENDIAN__/rootfs.ext4.gz
   gentoo:
     initrd_baseuri: fromdefault
+    ramdisk:
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh
     nfs:
       initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
       rootfs_script: ./scripts/gentoo_get_stage_url.sh
+    nbd:
+      initrd: /initrd/nbd-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh
+  gentoo-selinux:
+    initrd_baseuri: fromdefault
+    ramdisk:
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh --selinux
+    nfs:
+      initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh --selinux
+    nbd:
+      initrd: /initrd/nbd-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh --selinux
   kernelci:
     ramdisk:
       rootfs_script: ./scripts/kci_get_rootfs.sh

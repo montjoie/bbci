@@ -812,7 +812,7 @@ def boot(param):
                             jobdict["rootfs_sha512"] = what[1]
                         if what[0] == 'PORTAGE_URL':
                             jobdict["portage_url"] = what[1]
-                        if args.rootfs_loc == 'gentoo' or args.rootfs_loc == 'gentoo-m':
+                        if args.rootfs_loc == 'gentoo' or args.rootfs_loc == 'gentoo-m' or args.rootfs_loc == 'gentoo-selinux':
                             jobdict["auto_login_password"] = 'bob'
                             jobdict["test_gentoo"] = "True"
                         print(line)
