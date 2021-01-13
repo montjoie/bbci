@@ -114,6 +114,7 @@ actions:
          - echo 'hostname="gentooci"' > etc/conf.d/hostname
          - echo "rc_nocolor=YES" >> etc/rc.conf
          - sed -i 's,^s0,#s0,' etc/inittab
+         - sed -i 's,^f0,#f0,' etc/inittab
          - echo "s0:12345:respawn:/sbin/agetty -L 115200 {{ console_device }} vt100" >> etc/inittab
          - grep ^s etc/inittab
          - sed -i 's,root:.*,root:$6$p3gorwcg$ly73iRHcUPeR4WI2pRWbJv5Gg9SOtPGIHsFN.PH7b94U.F9vebcLVFBMAvJMurxLsKt6i/ZnLmuPj7JfD0d5k/:16834:0:::::,' etc/shadow
