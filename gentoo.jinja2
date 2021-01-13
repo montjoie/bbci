@@ -48,7 +48,7 @@ device_type: {{ DEVICETYPE }}
 job_name: {{ JOBNAME }}
 timeouts:
   job:
-    minutes: 90
+    minutes: 300
   action:
    minutes: 20
   actions:
@@ -258,7 +258,7 @@ actions:
 {%- if test_gentoo == 'True' %}
 - test:
     timeout:
-        minutes: 90
+        minutes: 300
     definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
@@ -269,7 +269,7 @@ actions:
 {%- if test_distcc == 'True' %}
 - test:
     timeout:
-        minutes: 90
+        minutes: 300
     definitions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
