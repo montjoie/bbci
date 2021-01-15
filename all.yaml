@@ -674,6 +674,7 @@ templates:
         cpu: cortex-a57
         guestfs_interface: virtio
         netdevice: tap
+        console_device: ttyAMA0
         append: "console=ttyAMA0 root=/dev/ram0"
     configs:
       - name: RTC_DRV_PL031
@@ -771,6 +772,7 @@ templates:
         cpu: cortex-a15
         netdevice: tap
         guestfs_interface: virtio
+        console_device: ttyAMA0
         append: "console=ttyAMA0 root=/dev/ram0"
     configs:
       - name: CONFIG_ARCH_VIRT=y

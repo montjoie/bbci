@@ -145,8 +145,14 @@ actions:
         compression: {{ ROOTFS_COMP }}
 {%- endif %}
 {%- if rootfs_method == "vdisk" %}
+{%- if guestfs_interface == "virtio" %}
+{% set root_device = 'vda' %}
+{%- endif %}
+{%- if guestfs_interface == "ide" %}
+{% set root_device = 'sda' %}
+{%- endif %}
       stage3:
-        image_arg: '-drive format=raw,file={gentoo} -append "root=/dev/sda console={{ console_device }}"'
+        image_arg: '-drive format=raw,file={gentoo} -append "root=/dev/{{ root_device }} console={{ console_device }}"'
         url: {{ ROOT_FQDN }}{{ rootfs_path }}
         compression: {{ ROOTFS_COMP }}
 {%- endif %}
