@@ -147,9 +147,12 @@ actions:
 {%- if rootfs_method == "vdisk" %}
 {%- if guestfs_interface == "virtio" %}
 {% set root_device = 'vda' %}
-{%- endif %}
-{%- if guestfs_interface == "ide" %}
+{% else %}
+{# ide scsi #}
 {% set root_device = 'sda' %}
+{% if MACH == 'alpha' %}
+{% set root_device = 'hda' %}
+{%- endif %}
 {%- endif %}
       stage3:
         image_arg: '-drive format=raw,file={gentoo} -append "root=/dev/{{ root_device }} console={{ console_device }}"'
