@@ -113,6 +113,10 @@ found_latest()
 		RFS_BPATH=/gentoo-distfiles/releases/sparc/autobuilds
 		BASEURL=$RFS_BASE$RFS_BPATH
 	;;
+	ppc64)
+		RFS_BPATH=/gentoo-distfiles/releases/ppc/autobuilds
+		BASEURL=$RFS_BASE$RFS_BPATH
+	;;
 	esac
 
 	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
