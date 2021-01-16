@@ -581,6 +581,7 @@ templates:
         guestfs_interface: scsi
         console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_SUNLANCE
     tags:
@@ -1298,6 +1299,7 @@ templates:
         model: model=pcnet
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
     tags:
       - ok
