@@ -109,6 +109,10 @@ found_latest()
 		rm index.html
 		return 0
 	;;
+	sparc64)
+		RFS_BPATH=/gentoo-distfiles/releases/sparc/autobuilds
+		BASEURL=$RFS_BASE$RFS_BPATH
+	;;
 	esac
 
 	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
