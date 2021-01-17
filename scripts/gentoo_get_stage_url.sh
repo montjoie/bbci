@@ -117,6 +117,9 @@ found_latest()
 		RFS_BPATH=/gentoo-distfiles/releases/ppc/autobuilds
 		BASEURL=$RFS_BASE$RFS_BPATH
 	;;
+	hppa)
+		ARCH_OPTION="1.1"
+	;;
 	esac
 
 	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
