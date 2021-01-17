@@ -1547,15 +1547,14 @@ templates:
         machine: hppa
         netdevice: tap
         memory: 512
-        guestfs_interface: none
-        extra_options:
-        - 'console=ttyS0 root=/dev/ram0"'
+        guestfs_interface: scsi
+        append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_PARISC=y
         type: mandatory
     tags:
       - ok
-      - notests
   - name: jetson-tk1
     arch: arm
     devicetype: jetson-tk1
