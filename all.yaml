@@ -1435,7 +1435,9 @@ templates:
         model: model=e1000
         netdevice: tap
         guestfs_interface: scsi
+        console_device: hvc0
         append: "console=hvc0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_PPC_PSERIES=y
         type: mandatory
