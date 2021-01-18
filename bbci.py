@@ -189,6 +189,10 @@ def boot(param):
             endian = "big"
         else:
             endian = "little"
+        if re.search("CONFIG_PARISC=", kconfigs):
+            arch = "parisc"
+            arch_endian = "hppa"
+            qarch = "hppa"
         if re.search("CONFIG_NIOS2=", kconfigs):
             arch = "nios2"
             arch_endian = "nios2"
