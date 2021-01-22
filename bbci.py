@@ -673,7 +673,7 @@ def boot(param):
                             qp.stdin.flush()
                             poweroff_done = True
                         # System Halted, OK to turn off power
-                        if line == "Machine halt..." or re.search("reboot: System halted", line) or re.search("reboot: power down", line):
+                        if line == "Machine halt..." or re.search("reboot: System halted", line) or re.search("reboot: power down", line) or re.search("reboot: Power Down", line):
                             if args.debug:
                                 print("DEBUG: detected machine halt")
                             normal_halt = True
