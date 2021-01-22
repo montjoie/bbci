@@ -193,6 +193,10 @@ def boot(param):
             arch = "parisc"
             arch_endian = "hppa"
             qarch = "hppa"
+        if re.search("CONFIG_M68K=", kconfigs):
+            arch = "m68k"
+            arch_endian = "m68k"
+            qarch = "m68k"
         if re.search("CONFIG_NIOS2=", kconfigs):
             arch = "nios2"
             arch_endian = "nios2"
