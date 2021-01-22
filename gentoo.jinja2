@@ -22,7 +22,11 @@ metadata:
   job.dtb_url: {{ BOOT_FQDN }}/{{ PATH }}/dts/{{ DTB }}
 {%- endif %}
   platform.fastboot: false
+{%- if DEVICETYPE == 'qemu' %}
+  platform.name: {{ qemu_machine }}
+{%- else %}
   platform.name: {{ DEVICETYPE }}
+{%- endif %}
   platform.mach: {{ MACH }}
   test.plan: boot
   git.commit: {{ GIT_LASTCOMMIT }}
