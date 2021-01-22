@@ -122,6 +122,13 @@ actions:
          - echo "s0:12345:respawn:/sbin/agetty -L 115200 {{ console_device }} vt100" >> etc/inittab
          - grep ^s etc/inittab
          - sed -i 's,root:.*,root:$6$p3gorwcg$ly73iRHcUPeR4WI2pRWbJv5Gg9SOtPGIHsFN.PH7b94U.F9vebcLVFBMAvJMurxLsKt6i/ZnLmuPj7JfD0d5k/:16834:0:::::,' etc/shadow
+{%- if rootfs_method == "vdisk" %}
+         - tar xf ../modules.tar -C /
+         - rm ../modules.tar
+         - chmod 755 /lib
+         - chown -R root:root /lib/modules
+         - ls -l /lib/modules
+{%- endif %}
 {%- if rootfs_method == "nfs" %}
          - tar cf ../gentoo.tar *
 {%- endif %}
@@ -166,6 +173,10 @@ actions:
 {%- if rootfs_sha512 %}
         sha512sum: {{ rootfs_sha512 }}
 {% endif %}
+      modules:
+        url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
+        compression: gz
+        sha256sum: {{ MODULES_SHA256 }}
 
 {%- if DEVICETYPE == "qemu" %}
 - deploy:
