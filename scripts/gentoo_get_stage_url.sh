@@ -120,6 +120,19 @@ found_latest()
 	hppa)
 		ARCH_OPTION="1.1"
 	;;
+	m68k)
+		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH/
+		BASEURL=$RFS_BASE$RFS_BPATH
+		LATEST="stage3-m68k-20130509.tar.bz2"
+		CHECK_SIG=0
+		return
+	;;
+	mips)
+		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH/autobuilds
+		BASEURL=$RFS_BASE$RFS_BPATH
+		# TODO
+		exit 1
+	;;
 	esac
 
 	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
@@ -194,7 +207,7 @@ rm "$DIGESTS"
 if [ $CHECK_SIG -eq 1 ];then
 	rm "$DIGESTS_ASC"
 fi
-if [ -e $LATEST_TXT ];then
-	rm $LATEST_TXT
+if [ -e "$LATEST_TXT" ];then
+	rm "$LATEST_TXT"
 fi
 echo "PORTAGE_URL=$RFS_BASE/gentoo-distfiles/snapshots/portage-latest.tar.bz2"
