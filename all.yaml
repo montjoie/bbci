@@ -718,7 +718,7 @@ templates:
     mach: qemu
     qemu:
         machine: xlnx-zcu102
-        memory: 1024
+        memory: 2048
         cpu: cortex-a53
         guestfs_interface: none
         model: model=cadence_gem
@@ -726,6 +726,7 @@ templates:
         append: "earlycon=cdns,mmio,0xFF000000,115200n8 console=ttyPS0 root=/dev/ram0"
         extra_options:
         - "-device ide-hd,drive=lavatest"
+        - "-serial mon:stdio -serial null"
     configs:
       - name: CONFIG_ARCH_ZYNQMP=y
         type: mandatory
