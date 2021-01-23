@@ -214,6 +214,8 @@ targets:
     defconfig: pmac32_defconfig
     full_tgt: vmlinux modules
     warnings: "-W1"
+    configs:
+     - name: "CONFIG_SERIAL_PMACZILOG=y"
   - name: ppc64_pseries
     larch: powerpc
     subarch: pseries
