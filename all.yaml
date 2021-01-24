@@ -747,9 +747,12 @@ templates:
         machine: raspi3
         memory: 1024
         cpu: cortex-a57
-        guestfs_interface: none
+        smp: 4
+        guestfs_interface: sd
         netdevice: tap
         append: "earlycon=uart8250,mmio32,0x3f215040 console=ttyS1,115200 root=/dev/ram0"
+        extra_options:
+        - "-serial null -monitor none -serial stdio"
     configs:
       - name: CONFIG_ARCH_BCM2835=y
         type: mandatory
