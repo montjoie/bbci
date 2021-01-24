@@ -1008,17 +1008,19 @@ templates:
     qemu:
         machine: sabrelite
         cpu: cortex-a9
+        memory: 512
         guestfs_interface: none
         model: model=fec
         netdevice: tap
         console_device: ttymxc0
-        append: "console=ttymxc0 root=/dev/ram0"
+        append: "earlycon=ec_imx6q,mmio,0x2020000,115200n8 console=ttymxc0 root=/dev/ram0"
         extra_options:
         - '-device usb-storage,bus=usb-bus.0,drive=lavatest'
     configs:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
       - name: CONFIG_AHCI_IMX=
+        type: test
       - name: CONFIG_SERIAL_IMX=y
         type: mandatory
       - name: CONFIG_SERIAL_IMX_CONSOLE=y
