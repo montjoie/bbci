@@ -807,6 +807,7 @@ templates:
         model: model=lan9118
         netdevice: tap
         guestfs_interface: none
+        console_device: ttyAMA0
         append: "console=ttyAMA0 root=/dev/ram0"
         extra_options:
         - '-device virtio-blk-device,drive=lavatest'
@@ -833,6 +834,7 @@ templates:
         model: model=lan9118
         netdevice: tap
         guestfs_interface: none
+        console_device: ttyAMA0
         append: "console=ttyAMA0 root=/dev/ram0"
         extra_options:
         - '-device virtio-blk-device,drive=lavatest'
