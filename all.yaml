@@ -1240,6 +1240,25 @@ templates:
       - name: CONFIG_PIIX
     tags:
       - ok
+  - name: qemu q800
+    arch: m68k
+    devicetype: qemu
+    devicename: qemu-m68k-q800
+    kernelfile: vmlinux
+    mach: m68k
+    qemu:
+        machine: q800
+        cpu: m68040
+        netdevice: tap
+        guestfs_interface: scsi
+        model: model=dp83932
+        netdevice: tap
+        console_device: ttyS0
+        no_kvm: True
+        append: "console=ttyS0 root=/dev/ram0"
+    configs:
+    tags:
+      - ko
   - name: qemu x86_64
     arch: x86_64
     devicetype: qemu
