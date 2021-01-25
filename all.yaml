@@ -1077,9 +1077,10 @@ templates:
     qemu:
         machine: mcimx7d-sabre
         cpu: cortex-a9
-        guestfs_interface: none
+        guestfs_interface: sd
         model: model=fec
         netdevice: tap
+        memory: 1024
         console_device: ttymxc0
         append: "console=ttymxc0 root=/dev/ram0 earlycon=ec_imx6q,mmio,0x30860000,115200n8"
         extra_options:
@@ -1088,6 +1089,7 @@ templates:
       - name: CONFIG_SOC_IMX6=y
         type: mandatory
       - name: CONFIG_AHCI_IMX=
+        type: test
       - name: CONFIG_SERIAL_IMX=y
         type: mandatory
       - name: CONFIG_SERIAL_IMX_CONSOLE=y
