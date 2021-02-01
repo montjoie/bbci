@@ -1213,6 +1213,7 @@ templates:
         model: model=pcnet
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
@@ -1344,7 +1345,11 @@ templates:
         machine: g3beige
         model: model=pcnet
         netdevice: tap
+        memory: 256
+        guestfs_interface: ide
+        console_device: ttyS0
         append: "console=ttyPZ0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_PPC_PMAC=y
         type: mandatory
@@ -1367,6 +1372,7 @@ templates:
         model: model=pcnet
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_44x=y
         type: mandatory
@@ -1389,6 +1395,7 @@ templates:
         model: model=virtio-net-pci
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
         extra_options:
         - '-device virtio-scsi-pci,id=scsi'
         - '-device scsi-hd,drive=lavatest'
@@ -1418,7 +1425,9 @@ templates:
         machine: mac99,via=pmu
         netdevice: tap
         model: model=sungem
+        guestfs_interface: ide
         append: "console=ttyPZ0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_PPC_PMAC=y
         type: mandatory
@@ -1439,6 +1448,7 @@ templates:
         guestfs_interface: none
         guestfs_driveid: lavatest
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
         extra_options:
         - '-device virtio-scsi-pci,id=scsi'
         - '-device scsi-hd,drive=lavatest'
@@ -1487,6 +1497,7 @@ templates:
         netdevice: tap
         guestfs_interface: none
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_MPC85x
         type: mandatory
@@ -1507,6 +1518,7 @@ templates:
         netdevice: tap
         guestfs_interface: none
         append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
     configs:
       - name: CONFIG_E500=y
         type: mandatory
