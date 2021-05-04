@@ -1599,6 +1599,47 @@ templates:
         type: mandatory
     tags:
       - ok
+  - name: QEMU s390
+    arch: s390
+    devicetype: qemu
+    devicename: qemu-s390
+    kernelfile: bzImage
+    mach: s390
+    qemu:
+        machine: s390-ccw-virtio
+        cpu: max,zpci=on
+        netdevice: tap
+        memory: 1024
+        smp: 2
+        guestfs_interface: virtio
+        append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
+    configs:
+      - name: CONFIG_S390=y
+        type: mandatory
+    tags:
+      - ok
+  - name: QEMU sh4
+    arch: sh
+    devicetype: qemu
+    devicename: qemu-sh4
+    kernelfile: zImage
+    mach: sh4
+    qemu:
+        machine: r2d
+        memory: 1024
+        model: model=rtl8139
+        netdevice: tap
+        guestfs_interface: virtio
+        append: "console=ttySC1"
+        no_kvm: True
+        extra_options:
+        - "-serial null -serial stdio -monitor null"
+    configs:
+      - name: CONFIG_CPU_SH4=y
+        type: mandatory
+    tags:
+      - ok
   - name: jetson-tk1
     arch: arm
     devicetype: jetson-tk1
@@ -2326,4 +2367,18 @@ templates:
     tags:
       - ok
       - rk
+      - crypto
+  - name: gemini-ns2502
+    arch: arm
+    larch: arm
+    devicetype: gemini-ns2502
+    kernelfile: zImage
+    mach: gemini
+    dtb: gemini-ns2502.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - gemini
       - crypto
