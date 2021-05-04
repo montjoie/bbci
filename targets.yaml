@@ -8,12 +8,96 @@ targets:
     flavour: defconfig
     defconfig: multi_v7_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
-    warnings: "-W1"
+    warnings: "W=1 C=1"
     tags: { defconfig }
     configs:
       - name: "CONFIG_PCIE_XILINX=y"
       - name: "CONFIG_XILINX_ZYNQMP_DMA=y"
       - name: "CONFIG_IMX_DMA=y"
+        disable: True
+  - name: ixp4xx_defconfig
+    larch: arm
+    subarch: ixp4xx
+    flavour: defconfig
+    defconfig: ixp4xx_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1"
+    tags: { defconfig }
+  - name: prodgemini_defconfig
+    larch: arm
+    subarch: gemini
+    flavour: prod
+    defconfig: prodgemini_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1"
+  - name: mygemini_defconfig
+    larch: arm
+    subarch: gemini
+    flavour: myconfig
+    defconfig: mygemini_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1"
+  - name: gemini_defconfig
+    larch: arm
+    subarch: gemini
+    flavour: defconfig
+    defconfig: gemini_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1"
+    tags: { defconfig }
+    configs:
+      - name: CONFIG_CMDLINE="console=ttyS0,19200n8 ip=dhcp initrdmem=0x800000,10M"
+      - name: CONFIG_CMDLINE_FORCE=y
+      - name: CONFIG_IP_PNP=y
+      - name: CONFIG_IP_PNP_DHCP=y
+      - name: CONFIG_INITRAMFS_SOURCE="rootfs.cpio.lzma"
+        disable: True
+      - name: CONFIG_PCI
+        disable: True
+      - name: CONFIG_NET_DSA
+        disable: True
+      - name: CONFIG_NET_SWITCHDEV=y
+        disable: True
+      - name: CONFIG_RD_LZO
+        disable: True
+      - name: CONFIG_RD_LZ4
+        disable: True
+      - name: CONFIG_RD_BZIP2
+        disable: True
+      - name: CONFIG_RD_ZSTD
+        disable: True
+      - name: CONFIG_RD_ZSTD
+        disable: True
+      - name: CONFIG_RD_XZ
+        disable: True
+      - name: CONFIG_XZ_DEC
+        disable: True
+      - name: CONFIG_DECOMPRESS_ZSTD
+        disable: True
+      - name: CONFIG_ZSTD_DECOMPRESS
+        disable: True
+      - name: CONFIG_INPUT_KEYBOARD
+        disable: True
+      - name: CONFIG_SERIO
+        disable: True
+      - name: CONFIG_USB_BELKIN
+        disable: True
+      - name: CONFIG_NET_ZAURUS
+        disable: True
+      - name: CONFIG_PACKET=y
+      - name: CONFIG_PACKET_DIAG=y
+      - name: CONFIG_ICPLUS_PHY=y
+      - name: CONFIG_MAGIC_SYSRQ=y
+      - name: CONFIG_DEBUG_KERNEL=y
+      - name: CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y
+      - name: CONFIG_CRYPTO_SEQIV=y
+      - name: CONFIG_CRYPTO_CHAINIV=y
+      - name: CONFIG_CRYPTO_USER=y
+      - name: CONFIG_CRYPTO_STATS=y
+      - name: CONFIG_EXT4_FS=y
+      - name: CONFIG_HIGHMEM
+        disable: True
+      - name: CONFIG_VLAN_8021Q
         disable: True
   - name: realview_defconfig
     larch: arm
@@ -89,9 +173,13 @@ targets:
     defconfig: defconfig
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "W=1"
-    configs:
-      - name: "CONFIG_USB_NET_DRIVERS=y"
-      - name: "CONFIG_USB_NET_DM9601=y"
+  - name: sunxi64_defconfig
+    larch: arm64
+    subarch: sunxi
+    flavour: defconfig
+    defconfig: sunxi64_defconfig
+    full_tgt: dtbs Image modules
+    warnings: "W=1"
   - name: exynos_defconfig
     larch: arm
     full_tgt: dtbs zImage modules
@@ -100,6 +188,7 @@ targets:
     defconfig: exynos_defconfig
     warnings: "-W1"
     configs:
+      - name: "CONFIG_MMC_SDHCI_PLTFM=y"
       - name: "CONFIG_ARM_EXYNOS_CPUIDLE"
         disable: True
       - name: "CONFIG_CPU_IDLE"
@@ -133,6 +222,16 @@ targets:
     defconfig: malta_kvm_defconfig
     full_tgt: vmlinux modules
     warnings: "-W0"
+  - name: malta64_defconfig
+    larch: mips
+    subarch: mips64
+    flavour: malta
+    defconfig: malta_kvm_guest_defconfig
+    full_tgt: vmlinux modules
+    warnings: "-W1"
+    bits: 64
+    configs:
+      - name: "CONFIG_64BIT=y"
   - name: indigo2
     larch: mips
     subarch: ip28
@@ -167,7 +266,7 @@ targets:
     larch: m68k
     subarch: default
     flavour: defconfig
-    defconfig: multi_defconfig
+    defconfig: mac_defconfig
     full_tgt: vmlinux modules
     warnings: "-W1"
   - name: malta_defconfig
@@ -237,7 +336,7 @@ targets:
     flavour: defconfig
     full_tgt: vmlinux modules
     warnings: "-W1"
-    defconfig: default_defconfig
+    defconfig: generic-32bit_defconfig
   - name: pmac_generic
     larch: powerpc
     subarch: pmac
@@ -253,6 +352,7 @@ targets:
     warnings: "-W1"
     configs:
      - name: "CONFIG_SERIAL_PMACZILOG=y"
+     - name: "CONFIG_SERIAL_PMACZILOG_CONSOLE=y"
   - name: ppc64_pseries
     larch: powerpc
     subarch: pseries
@@ -271,6 +371,22 @@ targets:
     full_tgt: vmlinux modules
     warnings: "-W1"
     bits: 64
+  - name: s390_defconfig
+    larch: s390
+    subarch: default
+    flavour: defconfig
+    full_tgt: bzImage modules
+    defconfig: defconfig
+  - name: sh_defconfig
+    larch: sh
+    subarch: default
+    flavour: defconfig
+    full_tgt: vmlinux modules zImage
+    defconfig: rts7751r2dplus_defconfig
+    configs:
+     - name: "CONFIG_SERIAL_SH_SCI_EARLYCON=y"
+     - name: CONFIG_CMDLINE_OVERWRITE
+       disable: true
   - name: sparc_generic
     larch: sparc
     full_tgt: vmlinux modules zImage
@@ -300,7 +416,11 @@ targets:
     flavour: defconfig
     defconfig: sunxi_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
-    warnings: "-W1"
+    warnings: "W=1"
+    configs:
+      - name: "CONFIG_SUN4I_GPADC=y"
+      - name: "CONFIG_GENERIC_ADC_THERMAL=y"
+      - name: "CONFIG_SENSORS_IIO_HWMON=y"
   - name: versatile_defconfig
     larch: arm
     subarch: versatile
@@ -330,6 +450,15 @@ targets:
     defconfig: x86_64_defconfig
     full_tgt: bzImage modules
     warnings: "W=1"
+  - name: laptop
+    larch: x86_64
+    flavour: defconfig
+    defconfig: x86_64_defconfig
+    full_tgt: bzImage modules
+    warnings: "W=1"
+    configs:
+      - name: "CONFIG_ATL1C=y"
+      - name: "CONFIG_ATH9K=y"
   - name: zoran
     larch: x86_64
     flavour: zoran
@@ -443,9 +572,10 @@ configoverlays:
         disable: True
   - name: debug
     list:
-      - config: CONFIG_DMA_API_DEBUG=y
-      - config: CONFIG_DEBUG_INFO=y
       - config: CONFIG_DEBUG_KERNEL=y
+      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_SG=y
+      - config: CONFIG_DMA_API_DEBUG=y
   - name: lavatest
     list:
       - config: CONFIG_SCSI=y
@@ -456,9 +586,72 @@ configoverlays:
       - config: CONFIG_VIRTIO_NET=y
       - config: CONFIG_ATA=y
       - config: CONFIG_PATA_CMD64X=y
+      - config: CONFIG_USB_NET_AX8817X=y
+      - config: CONFIG_USB_NET_AX88179_178A=y
+      - config: CONFIG_CRYPTO_XTS=y
+      - config: CONFIG_DM_CRYPT=y
+      - config: CONFIG_USB_STORAGE=y
+      - config: CONFIG_USB_UAS=m
+      - config: CONFIG_SCSI_DH=y
+      - config: CONFIG_CHR_DEV_SG=y
+  - name: ipsec
+    list:
+      - config: CONFIG_INET_AH=y
+      - config: CONFIG_INET_ESP=y
+      - config: CONFIG_INET_IPCOMP=y
+  - name: noipsec
+    list:
+      - config: CONFIG_NET_KEY
+        disable: True
+      - config: CONFIG_INET_AH
+        disable: True
+      - config: CONFIG_INET_ESP
+        disable: True
+      - config: CONFIG_INET_IPCOMP
+        disable: True
+      - config: CONFIG_XFRM_USER
+        disable: True
   - name: nosound
     list:
       - config: CONFIG_SOUND
+        disable: True
+  - name: nohid
+    list:
+      - config: CONFIG_HID_GENERIC
+        disable: True
+      - config: CONFIG_HID_A4TECH
+        disable: True
+      - config: CONFIG_HID_APPLE
+        disable: True
+      - config: CONFIG_HID_BELKIN
+        disable: True
+      - config: CONFIG_HID_CHERRY
+        disable: True
+      - config: CONFIG_HID_CHICONY
+        disable: True
+      - config: CONFIG_HID_CYPRESS
+        disable: True
+      - config: CONFIG_HID_EZKEY
+        disable: True
+      - config: CONFIG_HID_ITE
+        disable: True
+      - config: CONFIG_HID_KENSINGTON
+        disable: True
+      - config: CONFIG_HID_LOGITECH
+        disable: True
+      - config: CONFIG_HID_REDRAGON
+        disable: True
+      - config: CONFIG_HID_MICROSOFT
+        disable: True
+      - config: CONFIG_HID_MONTEREY
+        disable: True
+      - config: CONFIG_USB_HID
+        disable: True
+      - config: CONFIG_HID
+        disable: True
+  - name: nofb
+    list:
+      - config: CONFIG_FB
         disable: True
   - name: nodrm
     list:
@@ -546,6 +739,11 @@ configoverlays:
       - config: CONFIG_VIRTIO_PCI=y
       - config: CONFIG_VIRTIO_NET=y
       - config: CONFIG_HW_RANDOM_VIRTIO=y
+      - config: CONFIG_VIRTIO_BLK=y
+  - name: novirtio
+    list:
+      - config: CONFIG_VIRTIO_MENU
+        disable: True
   - name: cutdown
     list:
       - config: CONFIG_NET_VENDOR_MELLANOX
@@ -575,6 +773,8 @@ configoverlays:
       - config: CONFIG_ARCH_HISI
         disable: True
       - config: CONFIG_ARCH_BERLIN
+        disable: True
+      - config: CONFIG_ARCH_BCM4908
         disable: True
       - config: CONFIG_ARCH_ALPINE
         disable: True
@@ -616,13 +816,29 @@ configoverlays:
         disable: True
       - config: CONFIG_ARCH_THUNDER2
         disable: True
+      - config: CONFIG_ARCH_VISCONTI
+        disable: True
       - config: CONFIG_ARCH_XGENE
         disable: True
       - config: CONFIG_ARCH_ZX
         disable: True
       - config: CONFIG_TEGRA_HOST1X
         disable: True
-      - config: CONFIG_IPMI
+      - config: CONFIG_IPMI_SI
+        disable: True
+      - config: CONFIG_VIRTIO
+        disable: True
+      - config: CONFIG_XEN
+        disable: True
+  - name: osunxi
+    list:
+      - config: CONFIG_ARCH_TEGRA
+        disable: True
+      - config: CONFIG_ARCH_RENESAS
+        disable: True
+      - config: CONFIG_ARCH_EXYNOS
+        disable: True
+      - config: CONFIG_MFD_ROHM_BD718XX
         disable: True
   - name: nowireless
     list:
@@ -638,6 +854,8 @@ configoverlays:
         disable: True
       - config: CONFIG_WLAN_VENDOR_RALINK
         disable: True
+      - config: CONFIG_WLAN
+        disable: True
       - config: CONFIG_WIRELESS
         disable: True
       - config: CONFIG_BT
@@ -649,6 +867,8 @@ configoverlays:
       - config: CONFIG_CFG80211
         disable: True
       - config: CONFIG_MAC80211
+        disable: True
+      - config: CONFIG_NFC
         disable: True
   - name: nousb
     comment: disable power management
@@ -690,10 +910,29 @@ configoverlays:
         disable: True
   - name: kdebug
     list:
-      - config: CONFIG_CRYPTO_DEV_SUN8I_SS=y
       - config: CONFIG_KALLSYMS_ALL=y
-      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_FS=y
+      - config: CONFIG_DEBUG_KERNEL=y
       - config: CONFIG_DEBUG_SPINLOCK=y
+      - config: CONFIG_DEBUG_LL=y
+      - config: CONFIG_EARLY_PRINTK=y
+      - config: CONFIG_DEBUG_UNCOMPRESS=y
+      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_UART_8250_WORD=y
+  - name: nokdebug
+    list:
+      - config: CONFIG_DEBUG_KERNEL=y
+        disable: True
+      - config: CONFIG_DEBUG_INFO
+        disable: True
+      - config: CONFIG_FTRACE
+        disable: True
+      - config: CONFIG_TRACING
+        disable: True
+      - config: CONFIG_OPROFILE
+        disable: True
+      - config: CONFIG_KPROBES
+        disable: True
   - name: kexec
     list:
       - config: "CONFIG_SUSPEND=y"
@@ -753,6 +992,21 @@ configoverlays:
       - config: CONFIG_VIDEO_ZORAN_LML33R10=y
       - config: CONFIG_VIDEO_ZORAN_AVS6EYES=y
       - config: CONFIG_VIDEO_ZORAN_ZR36060=y
+      - config: CONFIG_CFG80211=m
+      - config: CONFIG_CFG80211_DEBUGFS=y
+      - config: CONFIG_CFG80211_WEXT=y
+      - config: CONFIG_CFG80211_DEVELOPER_WARNINGS=y
+      - config: CONFIG_WLCORE=m
+      - config: CONFIG_WL12XX=m
+      - config: CONFIG_WL1251=m
+      - config: CONFIG_WL18XX=m
+      - config: CONFIG_CIFS=y
+      - config: CONFIG_UFS_FS=y
+  - name: usbnet
+    list:
+      - config: CONFIG_USB_USBNET=y
+      - config: CONFIG_USB_NET_AX8817X=y
+      - config: CONFIG_USB_NET_AX88179_178A=y
   # configs for the server with adm1029
   - name: adm1029
     list:
@@ -762,6 +1016,9 @@ configoverlays:
       - config: CONFIG_SCSI_LOWLEVEL=y
       - config: CONFIG_I2C_PIIX4=y
       - config: CONFIG_SCSI_AIC7XXX=y
+  - name: drivetemp
+    list:
+      - config: CONFIG_SENSORS_DRIVETEMP=y
   - name: luks
     list:
       - config: CONFIG_BLK_DEV_LOOP=y
@@ -769,8 +1026,174 @@ configoverlays:
       - config: CONFIG_MD=y
       - config: CONFIG_BLK_DEV_DM=y
       - config: CONFIG_DM_CRYPT=y
+      - config: CONFIG_CRYPTO_XTS=y
       - config: CONFIG_CRYPTO_SHA256=y
   - name: luks2
     list:
       - config: CONFIG_CRYPTO_USER_API_HASH=y
       - config: CONFIG_CRYPTO_USER_API_SKCIPHER=y
+  - name: ftrace
+    list:
+      - config: CONFIG_FTRACE=y
+  - name: fuse
+    list:
+      - config: CONFIG_FUSE_FS=y
+  - name: rtkphy
+    list:
+      - config: CONFIG_REALTEK_PHY=y
+  - name: mywireless
+    list:
+      - config: CONFIG_WLAN=y
+      - config: CONFIG_WLAN_VENDOR_ATH=y
+      - config: CONFIG_ATH5K=m
+      - config: CONFIG_ATH5K_PCI=y
+      - config: CONFIG_ATH5K_DEBUG=y
+      - config: CONFIG_CFG80211=y
+      - config: CONFIG_MAC80211=y
+      - config: CONFIG_BRCMSMAC=y
+      - config: CONFIG_BRCMFMAC=y
+      - config: CONFIG_STAGING=y
+      - config: CONFIG_RTL8723BS=y
+  - name: mybt
+    list:
+      - config: CONFIG_BT=y
+      - config: CONFIG_SERIAL_DEV_BUS=y
+      - config: CONFIG_BT_HCIUART=y
+      - config: CONFIG_BT_HCIUART_BCM=y
+  - name: btcomone
+    list:
+      - config: CONFIG_BT=y
+      - config: CONFIG_SERIAL_DEV_BUS=y
+      - config: CONFIG_BT_HCIBTUSB=y
+      - config: CONFIG_BT_HCIBTUSB_BCM=y
+      - config: CONFIG_BT_HCIBTUSB_MTK=y
+      - config: CONFIG_BT_HCIBTUSB_RTL=y
+  - name: raid
+    list:
+      - config: CONFIG_DM_RAID=y
+      - config: CONFIG_MD_RAID0=y
+      - config: CONFIG_MD_RAID1=y
+      - config: CONFIG_MD_RAID10=y
+      - config: CONFIG_MD_RAID456=y
+      - config: CONFIG_VIRTIO_BLK=y
+  - name: qemut
+    list:
+      - config: CONFIG_NETFILTER_ADVANCED=y
+      - config: CONFIG_NETFILTER_XT_TARGET_LOG=y
+      - config: CONFIG_NETFILTER_XT_MATCH_OWNER=y
+      - config: CONFIG_IP_NF_NAT=y
+  - name: gentoo
+    list:
+      - config: CONFIG_DEVTMPFS=y
+      - config: CONFIG_BINFMT_SCRIPT=y
+      - config: CONFIG_CGROUPS=y
+      - config: CONFIG_EPOLL=y
+      - config: CONFIG_FILE_LOCKING=y
+      - config: CONFIG_INOTIFY_USER=y
+      - config: CONFIG_SIGNALFD=y
+      - config: CONFIG_TIMERFD=y
+  - name: cubie
+    list:
+      - config: CONFIG_CIFS=y
+      - config: CONFIG_TUN=y
+      - config: CONFIG_NLS_UTF8=y
+      - config: CONFIG_NLS_ISO8859_15=y
+      - config: CONFIG_NLS_CODEPAGE_850=y
+      - config: CONFIG_MAGIC_SYSRQ=y
+  - name: selinux
+    list:
+      - config: CONFIG_SECURITY_SELINUX_DISABLE
+        disable: True
+  - name: ntfs
+    list:
+      - config: CONFIG_NTFS_FS
+  - name: sparky
+    list:
+      - config: CONFIG_CMDLINE_BOOL=y
+      - config: CONFIG_CMDLINE="console=ttyS0,9600 root=/dev/sda1 ip=dhcp rootwait"
+      - config: CONFIG_SMP
+        disable: True
+      - config: CONFIG_I2C_CHARDEV=y
+      - config: CONFIG_I2C_ALI1535=y
+      - config: CONFIG_SENSORS_ADM1021=m
+      - config: CONFIG_NFS_FS=y
+      - config: CONFIG_SUNGEM=y
+      - config: CONFIG_BLK_DEV_DM
+        disable: True
+      - config: CONFIG_NET_VENDOR_AMD
+        disable: True
+      - config: CONFIG_NET_VENDOR_BROADCOM
+        disable: True
+      - config: CONFIG_NET_VENDOR_INTEL
+        disable: True
+      - config: CONFIG_PPP
+        disable: True
+      - config: CONFIG_SUNVNET
+        disable: True
+      - config: CONFIG_NIU
+        disable: True
+      - config: CONFIG_PATA_CMD64X
+        disable: True
+      - config: CONFIG_FB
+        disable: True
+      - config: CONFIG_USB_HID
+        disable: True
+      - config: CONFIG_HID
+        disable: True
+      - config: CONFIG_INPUT
+        disable: True
+      - config: CONFIG_HAPPYMEAL
+        disable: True
+      - config: CONFIG_VHOST_MENU
+        disable: True
+      - config: CONFIG_IOMMU
+        disable: True
+      - config: CONFIG_MD
+        disable: True
+      - config: CONFIG_SUNVDC
+        disable: True
+      - config: CONFIG_INPUT_MOUSE
+        disable: True
+      - config: CONFIG_DEBUG_KERNEL
+        disable: True
+      - config: CONFIG_IDE
+        disable: True
+      - config: CONFIG_ATA=y
+      - config: CONFIG_PATA_ALI=y
+      - config: CONFIG_ATA_OVER_ETH
+        disable: True
+      - config: CONFIG_LOCALVERSION_AUTO=y
+      - config: CONFIG_RTC_DRV_BQ4802
+        disable: True
+      - config: CONFIG_RTC_DRV_STARFIRE
+        disable: True
+      - config: CONFIG_RTC_DRV_SUN4V
+        disable: True
+      - config: CONFIG_CRYPTO_XCBC
+        disable: True
+      - config: CONFIG_CRYPTO_MD4
+        disable: True
+      - config: CONFIG_CRYPTO_MD5
+        disable: True
+      - config: CONFIG_CRYPTO_SHA1
+        disable: True
+  - name: noucrypto
+    list:
+      - config: CONFIG_CRYPTO_TWOFISH
+        disable: True
+      - config: CONFIG_CRYPTO_SERPENT
+        disable: True
+      - config: CONFIG_CRYPTO_SEED
+        disable: True
+      - config: CONFIG_CRYPTO_TEA
+        disable: True
+      - config: CONFIG_CRYPTO_KHAZAD
+        disable: True
+      - config: CONFIG_CRYPTO_CAST5
+        disable: True
+      - config: CONFIG_CRYPTO_CAST6
+        disable: True
+      - config: CONFIG_CRYPTO_CAMELLIA
+        disable: True
+      - config: CONFIG_CRYPTO_ANUBIS
+        disable: True
