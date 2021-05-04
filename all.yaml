@@ -764,7 +764,7 @@ templates:
       - name: CONFIG_CLK_BCM2835=y
         type: mandatory
     tags:
-      - broken
+      - ok
       - rpi
 # Cannot use virt due to https://bugzilla.redhat.com/show_bug.cgi?id=1633328
 # a virt can be created and depend on ARM_LPAE
