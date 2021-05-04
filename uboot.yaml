@@ -48,11 +48,15 @@ targets:
   - name: bananapi_m2_plus_h3_defconfig
     larch: arm
     defconfig: bananapi_m2_plus_h3_defconfig
+  - name: ci20
+    larch: mips
+    defconfig: ci20_mmc_defconfig
   - name: Sinovoip_BPI_M3_defconfig
     larch: arm
     defconfig: Sinovoip_BPI_M3_defconfig
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_BOOTDELAY=10'
   - name: chip
     larch: arm
@@ -81,6 +85,11 @@ targets:
   - name: libretech_all_h3_cc_h3_defconfig
     larch: arm
     defconfig: libretech_all_h3_cc_h3_defconfig
+  - name: Bananapi_M2_Ultra_defconfig
+    larch: arm
+    defconfig: Bananapi_M2_Ultra_defconfig
+    configs:
+      - name: 'CONFIG_BOOTDELAY=20'
   - name: libretech_all_h3_cc_h5_defconfig
     uarch: arm
     larch: arm64
@@ -97,10 +106,21 @@ targets:
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
-      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+#      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+  - name: orangepi_r1_defconfig
+    larch: arm
+    defconfig: orangepi_r1_defconfig
+    configs:
+      - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_BAUDRATE=9600'
   - name: h8_homlet_v2_defconfig
     larch: arm
     defconfig: h8_homlet_v2_defconfig
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+      - name: "CONFIG_NET_RETRY_COUNT=15"
   - name: orangepi_zero_defconfig
     larch: arm
     defconfig: orangepi_zero_defconfig
@@ -113,11 +133,20 @@ targets:
     atf: sun50i_h6
     configs:
       - name: "CONFIG_USB_HOST_ETHER=y"
-      - name: "CONFIG_USB_ETHER_DM9601=y"
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
       - name: "CONFIG_NET_RETRY_COUNT=15"
-      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_BOOTDELAY=20'
+  - name: orangepi_3_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: orangepi_3_defconfig
+    atf: sun50i_h6
+    configs:
+      - name: "CONFIG_USB_HOST_ETHER=y"
+      - name: "CONFIG_USB_ETHER_ASIX=y"
+      - name: "CONFIG_USB_ETHER_ASIX88179=y"
+      - name: "CONFIG_NET_RETRY_COUNT=15"
   - name: pine_h64_defconfig
     larch: arm64
     uarch: arm
@@ -135,6 +164,8 @@ targets:
     atf: sun50i_a64
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_BOOTDELAY=20'
   - name: pine64_plus_defconfig
     larch: arm64
     uarch: arm
@@ -164,7 +195,11 @@ targets:
     platform: sun50i_a64
     larch: arm64
     type: ATF
-  - name: ATF-sun50i_h6
+  - name: sun50i_h6
+    platform: sun50i_h6
+    larch: arm64
+    type: ATF
+  - name: sun50i_h6-opi3
     platform: sun50i_h6
     larch: arm64
     type: ATF
