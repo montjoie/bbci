@@ -491,7 +491,7 @@ templates:
         machine: cheetah
         netdevice: tap
         cpu: ti925t
-        memory: 256
+        memory: 32
         guestfs_interface: sd
         append: "console=ttyS0 root=/dev/mmcblk0 rootwait"
     configs:
@@ -555,7 +555,7 @@ templates:
         machine: sx1
         cpu: ti925t
         netdevice: tap
-        memory: 256
+        memory: 32
         guestfs_interface: sd
         append: "console=ttyS0 root=/dev/mmcblk0 rootwait"
     configs:
