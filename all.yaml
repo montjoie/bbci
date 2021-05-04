@@ -599,6 +599,7 @@ templates:
         machine: sun4u
         memory: 384
         model: model=sunhme
+        guestfs_interface: ide
         netdevice: tap
         console_device: ttyS0
         append: "console=ttyS0 root=/dev/ram0"
