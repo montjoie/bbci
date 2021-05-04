@@ -609,7 +609,7 @@ templates:
         type: test
       - name: CONFIG_RTC_DRV_M48T59=
         type: test
-      - name: CONFIG_PCNET32=
+      - name: CONFIG_HAPPYMEAL=
         type: test
     tags:
       - ok
