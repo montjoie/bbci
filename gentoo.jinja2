@@ -117,6 +117,7 @@ actions:
          - cd gentoo && tar xpf ../stage3*
          - echo 'hostname="gentooci"' > etc/conf.d/hostname
          - echo "rc_nocolor=YES" >> etc/rc.conf
+         - touch etc/inittab
          - sed -i 's,^s0,#s0,' etc/inittab
          - sed -i 's,^f0,#f0,' etc/inittab
          - echo "s0:12345:respawn:/sbin/agetty -L 115200 {{ console_device }} vt100" >> etc/inittab
@@ -132,9 +133,10 @@ actions:
 {%- if rootfs_method == "nfs" %}
          - tar cf ../gentoo.tar *
 {%- endif %}
+{# size must be a power of two for board which emulate sdcard #}
 {%- if rootfs_method == "vdisk" %}
          - du -ah --max-depth=1
-         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 1600M
+         - mke2fs -d . -m 0 -t ext2 ../gentoo.ext2 2G
 {%- endif %}
 {%- if rootfs_method == "nbd" %}
          - du -ah --max-depth=1
@@ -156,17 +158,25 @@ actions:
         compression: {{ ROOTFS_COMP }}
 {%- endif %}
 {%- if rootfs_method == "vdisk" %}
+{%- if qemu_machine == 'cubieboard' %}
+{% set stage3_interface = 'sd' %}
+{% set root_device = 'mmcblk0' %}
+{%- else %}
+{% set stage3_interface = guestfs_interface|default("ide") %}
+{%- endif %}
 {%- if guestfs_interface == "virtio" %}
 {% set root_device = 'vda' %}
-{% else %}
+{%- elif guestfs_interface == 'sd' %}
+{% set root_device = 'mmcblk0' %}
+{%- else %}
 {# ide scsi #}
-{% set root_device = 'sda' %}
-{% if MACH == 'alpha' %}
+{% set root_device = root_device|default('sda') %}
+{%- if MACH == 'alpha' %}
 {% set root_device = 'hda' %}
 {%- endif %}
 {%- endif %}
       stage3:
-        image_arg: '-drive format=raw,file={gentoo} -append "root=/dev/{{ root_device }} console={{ console_device }}"'
+        image_arg: '-drive format=raw,if={{stage3_interface}},file={gentoo} -append "root=/dev/{{ root_device }} console={{ console_device }}"'
         url: {{ ROOT_FQDN }}{{ rootfs_path }}
         compression: {{ ROOTFS_COMP }}
 {%- endif %}
@@ -212,7 +222,7 @@ actions:
 
 - boot:
     timeout:
-      minutes: 5
+      minutes: 10
     method: {{ boot_method }}
     media: {{ boot_media }}
 {%- if boot_commands is defined %}
@@ -296,7 +306,7 @@ actions:
 
 {% endif %}
 
-{%- if test_gentoo == 'True' %}
+{%- if test_gentoox == 'True' %}
 - test:
     timeout:
         minutes: 300
@@ -318,5 +328,16 @@ actions:
           name: distcc
           parameters:
             DISTCC_SRV: 192.168.1.100
+{% endif %}
+
+{%- if test_hw == 'True' %}
+- test:
+    timeout:
+        minutes: 30
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/hardware.yaml
+          name: Hardware
 {% endif %}
 
