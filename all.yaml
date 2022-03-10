@@ -2420,3 +2420,30 @@ templates:
       - ok
       - gemini
       - crypto
+  - name: pc-k10n78
+    arch: x86_64
+    larch: x86_64
+    devicetype: pc-k10n78
+    kernelfile: bzImage
+    mach: x86_64
+    boot-method: grub
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - zoran
+  - name: intel-ixp42x-welltech-epbx100
+    arch: arm
+    larch: arm
+    devicetype: intel-ixp42x-welltech-epbx100
+    kernelfile: zImage
+    mach: ixp4xx
+    dtb: intel-ixp42x-welltech-epbx100.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - ixp4xx
+      - crypto
