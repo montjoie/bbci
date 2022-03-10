@@ -2277,6 +2277,34 @@ templates:
     tags:
       - ok
       - hsdk
+  - name: am437x-idk-evm
+    arch: arm
+    larch: arm
+    devicetype: am437x-idk-evm
+    kernelfile: zImage
+    mach: omap
+    dtb: am437x-idk-evm.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - omap
+      - crypto
+  - name: am57xx-beagle-x15-revc
+    arch: arm
+    larch: arm
+    devicetype: am57xx-beagle-x15
+    kernelfile: zImage
+    mach: omap
+    dtb: am57xx-beagle-x15-revc.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - omap
+      - crypto
   - name: panda
     arch: arm
     larch: arm
