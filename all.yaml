@@ -1303,6 +1303,16 @@ templates:
     boot-method: grub
     tags:
       - ok
+  - name: i945gsex-qs
+    arch: x86
+    devicetype: i945gsex-qs
+    kernelfile: bzImage
+    mach: x86
+    configs:
+    boot-method: grub
+    console_device: ttyS0
+    tags:
+      - ok
   - name: qemu x86
     arch: x86
     devicetype: qemu
