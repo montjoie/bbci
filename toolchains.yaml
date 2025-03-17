@@ -8,7 +8,8 @@ toolchains:
     prefix: arm-buildroot-linux-gnueabihf-
   - name: Linaro ARM
     larch: arm
-    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf.tar.xz
+    vendor: linaro
+    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf.tar.xz
     prefix: arm-linux-gnueabihf-
   - name: Gentoo crossdev ARM
     larch: arm
@@ -17,8 +18,9 @@ toolchains:
     larch: arm64
     prefix: aarch64-unknown-linux-gnu-
   - name: Linaro ARM64
+    vendor: linaro
     larch: arm64
-    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
+    url: https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
     prefix: aarch64-linux-gnu-
   - name: Gentoo crossdev M68K
     larch: m68k
@@ -58,6 +60,11 @@ toolchains:
     larch: powerpc
     prefix: powerpc64-unknown-linux-gnu-
     bits: {32,64}
+#  - name: Bootlin sparc64
+#    larch: sparc
+#    url: https://toolchains.bootlin.com/downloads/releases/toolchains/sparc64/tarballs/sparc64--glibc--stable-2017.05-toolchains-1-1.tar.bz2
+#    prefix: sparc64-buildroot-linux-gnu-
+#    bits: {32,64}
   - name: Gentoo sparc
     larch: sparc
     prefix: sparc-unknown-linux-gnu-
@@ -87,9 +94,10 @@ toolchains:
     larch: microblaze
     prefix: microblazeel-buildroot-linux-uclibc-
   - name: Bootlin openrisc
-    url: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--uclibc--stable-2018.11-1.tar.bz2
+    urlold: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--uclibc--stable-2018.11-1.tar.bz2
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/openrisc/tarballs/openrisc--glibc--stable-2024.05-1.tar.xz
     larch: openrisc
-    prefix: or1k-buildroot-linux-uclibc-
+    prefix: or1k-buildroot-linux-gnu-
   - name: Gentoo alpha
     larch: alpha
     prefix: alpha-unknown-linux-gnu-
@@ -98,11 +106,11 @@ toolchains:
     path: $HOME/data/toolchains/alphaev4-unknown-linux-gnu
     prefix: alphaev4-unknown-linux-gnu-
   - name: Bootlin ARC
-    url: https://toolchains.bootlin.com/downloads/releases/toolchains/arcle-hs38/tarballs/arcle-hs38--uclibc--stable-2018.11-1.tar.bz2
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/arcle-hs38/tarballs/arcle-hs38--uclibc--stable-2020.08-1.tar.bz2
     larch: arc
     prefix: arc-buildroot-linux-uclibc-
   - name: Sinopsys ARC
-    url: https://github.com/foss-for-synopsys-dwc-arc-processors/toolchain/releases/download/arc-2019.03-rc1/arc_gnu_2019.03-rc1_prebuilt_elf32_le_linux_install.tar.gz
+    url: https://github.com/foss-for-synopsys-dwc-arc-processors/toolchain/releases/download/arc-2021.03-release/arc_gnu_2021.03_prebuilt_elf32_le_linux_install.tar.gz
     larch: arc
     prefix: arc-elf32-
   - name: Debian gcc-8-hppa64-linux-gnu
@@ -111,3 +119,15 @@ toolchains:
   - name: Gentoo hppa-unknown-linux-gnu
     larch: parisc
     prefix: hppa-unknown-linux-gnu-
+  - name: Bootlin RISCV
+    larch: riscv
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64/tarballs/riscv64--glibc--bleeding-edge-2020.02-2.tar.bz2
+    prefix: riscv64-buildroot-linux-gnu-
+    bits: {32,64}
+  - name: Gentoo s390
+    larch: s390
+    prefix: s390-ibm-linux-gnu-
+  - name: Bootlin sh4
+    larch: sh
+    prefix: sh4-buildroot-linux-gnu-
+    url: https://toolchains.bootlin.com/downloads/releases/toolchains/sh-sh4/tarballs/sh-sh4--glibc--stable-2020.08-1.tar.bz2

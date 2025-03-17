@@ -1,5 +1,6 @@
 config:
     builddir: $HOME/crossbuild
     toolchains: $HOME/data/toolchains
+    ubootstore: $HOME/ubootstore
     cache: $HOME/bbci/cache
     logdir: $HOME/bbci/logs

@@ -1,0 +1,41 @@
+---
+# yamllint disable rule:line-length
+name: Build and tests
+
+on:  # yamllint disable-line rule:truthy
+  push:
+  pull_request:
+
+jobs:
+  simpletest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cache sources
+        id: cache-source
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/sources
+          key: sources
+      - name: cache toolchains
+        id: cache-toolchains
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/toolchains
+          key: sources
+      - name: Run
+        run: |
+          sudo apt-get -y install libgnutls28-dev python3-pyelftools
+          # fix sources path
+          sed -i 's,/mnt/sources,$HOME/sources,' uboot.yaml
+          sed -i 's,bbci/cache,cache,' uboot.yaml
+          sed -i 's,bbci/logs,logs,' uboot.yaml
+          sed -i 's,data/toolchains,toolchains,' uboot.yaml
+          sed -i 's,/usr/src/uboot/uboot,$HOME/sources/uboot,' uboot.yaml
+          git diff
+          mkdir $HOME/cache
+          mkdir $HOME/ubootstore
+          ./uboot.py -s uboot -a update
+          ./uboot.py -s uboot -t orangepi_r1_defconfig -a build
+          ./uboot.py -s uboot -t all -a build
+          ls -l $HOME/ubootstore

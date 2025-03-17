@@ -4,9 +4,38 @@ config:
     cache: $HOME/bbci/cache
     logdir: $HOME/bbci/logs
 targets:
+  - name: starfive_jh7100_visionfive_smode_defconfig
+    larch: riscv
+    defconfig: starfive_jh7100_visionfive_smode_defconfig
+    configs:
+      - name: 'CONFIG_SYS_PROMPT="VisionFive#"'
+      - name: 'CONFIG_BOOTDELAY=10'
+      - name: 'CONFIG_AUTOBOOT'
+        disable: true
+    source: uboot-starfive
+  - name: hsdk_defconfig
+    larch: arc
+    defconfig: hsdk_defconfig
+    make_target: bsp-generate
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_MICREL=y"
+      - name: "CONFIG_PHY_MICREL_KSZ90X1=y"
+      - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: hsdk_4xd_defconfig
+    larch: arc
+    defconfig: hsdk_4xd_defconfig
+    make_target: bsp-generate
+# beagle bone black
   - name: am335x_evm_defconfig
     larch: arm
     defconfig: am335x_evm_defconfig
+    configs:
+      - name: 'CONFIG_BOOTDELAY=10'
+  - name: rock_defconfig
+    larch: arm
+    defconfig: rock_defconfig
   - name: A10-OLinuXino-Lime_defconfig
     larch: arm
     defconfig: A10-OLinuXino-Lime_defconfig
@@ -58,6 +87,7 @@ targets:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_BOOTDELAY=10'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: chip
     larch: arm
     defconfig: CHIP_defconfig
@@ -70,18 +100,26 @@ targets:
   - name: Cubieboard2_defconfig
     larch: arm
     defconfig: Cubieboard2_defconfig
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_BOOTDELAY=10'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: Cubieboard4_defconfig
     larch: arm
     defconfig: Cubieboard4_defconfig
     configs:
       - name: 'CONFIG_BOOTDELAY=0'
       - name: 'CONFIG_AUTOBOOT_KEYED=y'
-  - name: Cubieboard4_defconfig
-    larch: arm
-    defconfig: Cubieboard4_defconfig
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: libretech_all_h3_cc_h2_plus_defconfig
     larch: arm
     defconfig: libretech_all_h3_cc_h2_plus_defconfig
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: libretech_all_h3_cc_h3_defconfig
     larch: arm
     defconfig: libretech_all_h3_cc_h3_defconfig
@@ -89,30 +127,44 @@ targets:
     larch: arm
     defconfig: Bananapi_M2_Ultra_defconfig
     configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+    # H5 on ALL_H3_CC
   - name: libretech_all_h3_cc_h5_defconfig
     uarch: arm
     larch: arm64
     atf: sun50i_a64
     defconfig: libretech_all_h3_cc_h5_defconfig
-  - name: nanopi_neo_plus2_defconfig
-    uarch: arm
-    larch: arm64
-    atf: sun50i_a64
-    defconfig: nanopi_neo_plus2_defconfig
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: nanopi_m1_plus_defconfig
+    larch: arm
+    defconfig: nanopi_m1_plus_defconfig
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
   - name: orangepi_pc_defconfig
     larch: arm
     defconfig: orangepi_pc_defconfig
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
 #      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
   - name: orangepi_r1_defconfig
     larch: arm
     defconfig: orangepi_r1_defconfig
     configs:
       - name: 'CONFIG_BOOTDELAY=20'
-      - name: 'CONFIG_BAUDRATE=9600'
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: nanopi_m1_plus_defconfig
   - name: h8_homlet_v2_defconfig
     larch: arm
     defconfig: h8_homlet_v2_defconfig
@@ -126,46 +178,60 @@ targets:
     defconfig: orangepi_zero_defconfig
     configs:
       - name: 'CONFIG_BOOTDELAY=20'
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: orangepi_one_plus_defconfig
     larch: arm64
     uarch: arm
     defconfig: orangepi_one_plus_defconfig
-    atf: sun50i_h6
+    atf: sun50i_h6-opi3
     configs:
       - name: "CONFIG_USB_HOST_ETHER=y"
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: 'CONFIG_BOOTDELAY=20'
+    uboot_images:
+      - u-boot-sunxi-with-spl.bin
   - name: orangepi_3_defconfig
     larch: arm64
     uarch: arm
     defconfig: orangepi_3_defconfig
-    atf: sun50i_h6
+    atf: sun50i_h6-opi3
     configs:
       - name: "CONFIG_USB_HOST_ETHER=y"
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
       - name: "CONFIG_NET_RETRY_COUNT=15"
+    ubootname: OrangePi_3
+    uboot_images:
+      - u-boot-sunxi-with-spl.bin
   - name: pine_h64_defconfig
     larch: arm64
     uarch: arm
     defconfig: pine_h64_defconfig
     atf: sun50i_h6
+    crust: pine_h64
     configs:
       - name: "CONFIG_USB_HOST_ETHER=y"
       - name: "CONFIG_USB_ETHER_ASIX=y"
       - name: "CONFIG_USB_ETHER_ASIX88179=y"
       - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_BOOTDELAY=10'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: bananapi_m64_defconfig
     larch: arm64
     uarch: arm
     defconfig: bananapi_m64_defconfig
     atf: sun50i_a64
+    crust: crust-bananapi_m64_defconfig
     configs:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_BOOTDELAY=20'
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
   - name: pine64_plus_defconfig
     larch: arm64
     uarch: arm
@@ -182,6 +248,86 @@ targets:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
       - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+    ubootname: FriendlyARM_NanoPi_NEO_Plus2
+    uboot_images:
+      - u-boot-sunxi-with-spl.bin
+  - name: khadas_edge_v_rk3399_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: khadas-edge-v-rk3399_defconfig
+    atf: ATF-rk3399
+    atfbuild: rk3399
+    atfbl31: bl31/bl31.elf
+    bl31name: "bl31.elf"
+    makeopts: "all u-boot.itb"
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: roc-pc-rk3399_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: roc-pc-rk3399_defconfig
+    atf: ATF-rk3399
+    atfbuild: ATF-rk3399
+    atfbl31: bl31/bl31.elf
+    bl31name: "bl31.elf"
+    makeopts: "all u-boot.itb"
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: rock64-rk3328_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: rock64-rk3328_defconfig
+    atf: ATF-rk3328
+    atfbuild: rk3328
+    atfbl31: bl31/bl31.elf
+    makeopts: "all u-boot.itb"
+    bl31name: "bl31.elf"
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: rock5b-rk3588_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: rock5b-rk3588_defconfig
+    atf: ATF-rk3588
+    atfbuild: ATF-rk3399
+    atfbl31: bl31/bl31.elf
+    bl31name: "bl31.elf"
+    rockchip_tpl: "rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.18.bin"
+    makeopts: "all u-boot.itb"
+    uboot_images:
+      - idbloader.img
+      - u-boot.itb
+    ubootname: Radxa_ROCK_5B
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: beagleia64
+    larch: arm64
+    uarch: arm
+    defconfig: j721e_beagleboneai64_a72_defconfig
+    atf: ATF-beagleia64
+    optee: beagleia64
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+    extra:
+      BINMAN_INDIRS: ti-firmware
+    uboot_images:
+      - tispl.bin_unsigned
+      - u-boot.img_unsigned
   - name: imx8mq_evk_defconfig
     larch: arm64
     uarch: arm
@@ -191,7 +337,7 @@ targets:
     larch: arm64
     uarch: arm
     defconfig: rpi_4_defconfig
-  - name: ATF-sun50i_a64
+  - name: sun50i_a64
     platform: sun50i_a64
     larch: arm64
     type: ATF
@@ -203,15 +349,79 @@ targets:
     platform: sun50i_h6
     larch: arm64
     type: ATF
+    #makeopts: SUNXI_SETUP_REGULATORS=0
   - name: ATF-imx8mq
     platform: imx8mq
     larch: arm64
     type: ATF
+  - name: ATF-rk3328
+    platform: rk3328
+    larch: arm64
+    type: ATF
+    makeopts: DEBUG=1 bl31
+  - name: ATF-rk3399
+    platform: rk3399
+    larch: arm64
+    type: ATF
+    makeopts: bl31
+    hack: M0_CROSS_COMPILE
+  - name: ATF-rk3588
+    platform: rk3588
+    larch: arm64
+    type: ATF
+    makeopts: bl31
+    hack: M0_CROSS_COMPILE
+  - name: rpi_arm64_defconfig
+    platform: bcm2712
+    larch: arm64
+    uarch: arm64
+  - name: ATF-beagleia64
+    platform: k3
+    larch: arm64
+    spd: opteed
+    target_board: generic
+    type: ATF
+  - name: beagleia64
+    type: optee
+    larch: arm64
+    platform: k3-j721e
+  - name: a64
+    type: crust
+    config: defconfig
+  - name: crust-bananapi_m64_defconfig
+    type: crust
+    config: bananapi_m64_defconfig
+  - name: pine_h64
+    type: crust
+    config: pine_h64_defconfig
 sources:
   - name: uboot
-    directory: $HOME/uboot
+    directory: /usr/src/uboot/uboot
     gituri: http://git.denx.de/u-boot.git
+  - name: uboot-master
+    directory: /usr/src/uboot/uboot-master
+    gituri: http://git.denx.de/u-boot.git
+  - name: uboot-upstream
+    directory: /mnt/sources/uboot-upstream
+  - name: starfive
+    directory: /mnt/sources/uboot-starfive
   - name: ATF
     type: ATF
     directory: $HOME/arm-trusted-firmware
     gituri: https://github.com/ARM-software/arm-trusted-firmware
+  - name: optee
+    type: optee
+    directory: /mnt/sources/optee
+    gituri: https://github.com/OP-TEE/optee_os.git
+  - name: ti-firmware
+    gituri: https://git.ti.com/git/processor-firmware/ti-linux-firmware.git
+    directory: /mnt/sources/ti-linux-firmware
+    branch: ti-linux-firmware
+  - name: crust
+    directory: /mnt/sources/crust
+    gituri: https://github.com/crust-firmware/crust
+    branch: master
+    update: True
+  - name: rkbin
+    directory: /usr/src/uboot/rkbin
+    gituri: https://github.com/rockchip-linux/rkbin
