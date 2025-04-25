@@ -1161,6 +1161,7 @@ templates:
     tags:
       - ok
       - exynos
+      - notests
   - name: qemu-xilinx-zynq-a9
     arch: arm
     devicetype: qemu
@@ -1729,6 +1730,7 @@ templates:
       - a64
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-a64-pine64-plus
     arch: arm64
     larch: arm64
@@ -1744,6 +1746,7 @@ templates:
       - a64
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h5-libretech-all-h3-cc
     arch: arm64
     larch: arm64
@@ -1759,6 +1762,7 @@ templates:
       - h5
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h5-nanopi-neo-plus2
     arch: arm64
     larch: arm64
@@ -1774,6 +1778,7 @@ templates:
       - h5
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h6-orangepi-3
     arch: arm64
     larch: arm64
@@ -1790,6 +1795,7 @@ templates:
       - sun8i-ce
       - emce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h6-orangepi-one-plus
     arch: arm64
     larch: arm64
@@ -1806,6 +1812,7 @@ templates:
       - sun8i-ce
       - emce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h6-pine-h64
     arch: arm64
     larch: arm64
@@ -1823,6 +1830,7 @@ templates:
       - sun8i-ce
       - emce
       - allwinner
+      - dwmac_sun8i
   - name: sun50i-h6-pine-h64-model-b
     arch: arm64
     larch: arm64
@@ -1854,6 +1862,7 @@ templates:
       - a10
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
   - name: sun5i-a13-olinuxino-micro
     arch: arm
     devicetype: sun5i-a13-olinuxino-micro
@@ -1883,6 +1892,7 @@ templates:
       - a33
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
   - name: sun7i-a20-cubietruck
     arch: arm
     devicetype: cubietruck
@@ -1912,6 +1922,8 @@ templates:
       - a20
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
+      - test0
   - name: sun7i-a20-olinuxino-micro
     arch: arm
     devicetype: sun7i-a20-olinuxino-micro
@@ -1941,6 +1953,8 @@ templates:
       - a83t
       - sun8i-ss
       - allwinner
+      - dwmac_sun8i
+      - test0
   - name: sun8i-h2-plus-libretech-all-h3-cc
     arch: arm
     devicetype: sun8i-h2-plus-libretech-all-h3-cc
@@ -1970,6 +1984,8 @@ templates:
       - h2+
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
+      - test0
   - name: sun8i-h2-plus-orangepi-r1
     arch: arm
     devicetype: sun8i-h2-plus-orangepi-r1
@@ -1986,6 +2002,7 @@ templates:
       - h2+
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun8i-h3-libretech-all-h3-cc
     arch: arm
     devicetype: sun8i-h3-libretech-all-h3-cc
@@ -2000,6 +2017,7 @@ templates:
       - h3
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun8i-h3-orangepi-pc
     arch: arm
     devicetype: sun8i-h3-orangepi-pc
@@ -2014,6 +2032,8 @@ templates:
       - h3
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
+      - test0
   - name: sun8i-h3-bananapi-m2-plus
     arch: arm
     devicetype: sun8i-h3-bananapi-m2-plus
@@ -2028,6 +2048,7 @@ templates:
       - h3
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun8i-r40-bananapi-m2-ultra
     arch: arm
     larch: arm
@@ -2043,6 +2064,7 @@ templates:
       - r40
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun9i-a80-cubieboard4
     arch: arm
     larch: arm
@@ -2058,6 +2080,7 @@ templates:
       - a80
       - sun8i-ss
       - allwinner
+      - dwmac_sunxi
   - name: imx6q-sabrelite
     arch: arm
     larch: arm
@@ -2179,6 +2202,7 @@ templates:
       - meson
       - amlogic
       - crypto
+      - potato
   - name: meson-gxl-s805x-p241
     arch: arm64
     larch: arm64
@@ -2389,6 +2413,7 @@ templates:
     tags:
       - ok
       - renesas
+      - ccree
   - name: r8a7795-salvator-x
     arch: arm64
     larch: arm64
@@ -2404,6 +2429,7 @@ templates:
     tags:
       - ok
       - renesas
+      - ccree
   - name: r8a7796-m3ulcb
     arch: arm64
     larch: arm64
