@@ -1272,6 +1272,27 @@ templates:
     configs:
     tags:
       - ko
+  - name: qemu i386
+    arch: x86
+    devicetype: qemu
+    devicename: qemu-i386
+    kernelfile: bzImage
+    mach: x86
+    qemu:
+        machine: pc
+        memory: 2048
+        cpu: qemu32
+        netdevice: tap
+        model: model=e1000
+        console_device: ttyS0
+        append: "console=ttyS0 root=/dev/ram0"
+        extra_options:
+        - '-object cryptodev-backend-builtin,id=cryptodev0'
+        - '-device virtio-crypto-pci,id=crypto0,cryptodev=cryptodev0'
+        - '-vga virtio'
+    configs:
+    tags:
+      - ok
   - name: qemu x86_64
     arch: x86_64
     devicetype: qemu
