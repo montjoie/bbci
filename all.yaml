@@ -1706,7 +1706,7 @@ templates:
     devicetype: jetson-tk1
     kernelfile: zImage
     mach: tegra
-    dtb: tegra124-jetson-tk1.dtb
+    dtb: nvidia/tegra124-jetson-tk1.dtb
     configs:
       - name: CONFIG_ARCH_TEGRA=y
         type: mandatory
@@ -1868,12 +1868,13 @@ templates:
       - a13
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
   - name: sun8i-a33-olinuxino
     arch: arm
     devicetype: sun8i-a33-olinuxino
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-a33-olinuxino.dtb
+    dtb: allwinner/sun8i-a33-olinuxino.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -1896,12 +1897,13 @@ templates:
       - a20
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
   - name: sun7i-a20-cubieboard2
     arch: arm
     devicetype: sun7i-a20-cubieboard2
     kernelfile: zImage
     mach: sunxi
-    dtb: sun7i-a20-cubieboard2.dtb
+    dtb: allwinner/sun7i-a20-cubieboard2.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -1924,12 +1926,13 @@ templates:
       - a20
       - sun4i-ss
       - allwinner
+      - dwmac_sunxi
   - name: sun8i-a83t-bananapi-m3
     arch: arm
     devicetype: sun8i-a83t-bananapi-m3
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-a83t-bananapi-m3.dtb
+    dtb: allwinner/sun8i-a83t-bananapi-m3.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -1952,12 +1955,13 @@ templates:
       - h2+
       - sun8i-ce
       - allwinner
+      - dwmac_sun8i
   - name: sun8i-h2-plus-orangepi-zero
     arch: arm
     devicetype: sun8i-h2-plus-orangepi-zero
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-h2-plus-orangepi-zero.dtb
+    dtb: allwinner/sun8i-h2-plus-orangepi-zero.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -1971,7 +1975,7 @@ templates:
     devicetype: sun8i-h2-plus-orangepi-r1
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-h2-plus-orangepi-r1.dtb
+    dtb: allwinner/sun8i-h2-plus-orangepi-r1.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -2001,7 +2005,7 @@ templates:
     devicetype: sun8i-h3-orangepi-pc
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-h3-orangepi-pc.dtb
+    dtb: allwinner/sun8i-h3-orangepi-pc.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -2030,7 +2034,7 @@ templates:
     devicetype: sun8i-r40-bananapi-m2-ultra
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-r40-bananapi-m2-ultra.dtb
+    dtb: allwinner/sun8i-r40-bananapi-m2-ultra.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -2045,7 +2049,7 @@ templates:
     devicetype: sun9i-a80-cubieboard4
     kernelfile: zImage
     mach: sunxi
-    dtb: sun9i-a80-cubieboard4.dtb
+    dtb: allwinner/sun9i-a80-cubieboard4.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
