@@ -1639,6 +1639,27 @@ templates:
         type: mandatory
     tags:
       - ok
+  - name: QEMU riscv64
+    arch: riscv
+    devicetype: qemu
+    devicename: qemu-riscv64
+    kernelfile: Image
+    mach: riscv64
+    qemu:
+        machine: virt
+        netdevice: tap
+        memory: 1024
+        guestfs_interface: virtio
+        append: "console=ttyS0 root=/dev/ram0"
+        no_kvm: True
+        bios: default
+        extra_options:
+         - "-bios default -device virtio-net,netdev=main -netdev user,id=main"
+    configs:
+      - name: CONFIG_RISCV=y
+        type: mandatory
+    tags:
+      - ok
   - name: QEMU s390
     arch: s390
     devicetype: qemu
