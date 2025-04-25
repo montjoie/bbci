@@ -1848,6 +1848,23 @@ templates:
       - sun8i-ce
       - emce
       - allwinner
+      - dwmac_sun8i
+  - name: sun55i-a527-radxa-a5e
+    arch: arm64
+    larch: arm64
+    devicetype: sun55i-a527-radxa-a5e
+    kernelfile: Image
+    mach: sunxi
+    dtb: allwinner/sun55i-a527-radxa-a5e.dtb
+    configs:
+      - name: CONFIG_ARCH_SUNXI=y
+        type: mandatory
+    tags:
+      - ok
+      - a527
+      - sun8i-ce
+      - allwinner
+      - test0
   - name: sun4i-a10-olinuxino-lime
     arch: arm
     devicetype: sun4i-a10-olinuxino-lime
@@ -2221,6 +2238,24 @@ templates:
       - ok
       - meson
       - amlogic
+  - name: meson-gxl-s805x-libretech-ac
+    arch: arm64
+    larch: arm64
+    devicetype: meson-gxl-s805x-libretech-ac
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-gxl-s805x-libretech-ac.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
   - name: meson-gxm-khadas-vim2
     arch: arm64
     larch: arm64
@@ -2258,6 +2293,42 @@ templates:
       - meson
       - amlogic
       - yukawa
+  - name: meson-g12b-a311d-khadas-vim3
+    arch: arm64
+    larch: arm64
+    devicetype: meson-g12b-a311d-khadas-vim3
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-g12b-a311d-khadas-vim3.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
+  - name: meson-g12b-odroid-n2
+    arch: arm64
+    larch: arm64
+    devicetype: meson-g12b-odroid-n2
+    kernelfile: Image
+    mach: amlogic
+    dtb: amlogic/meson-g12b-odroid-n2.dtb
+    configs:
+      - name: CONFIG_ARCH_MESON=y
+        type: mandatory
+      - name: CONFIG_SERIAL_MESON=y
+        type: mandatory
+      - name: CONFIG_DWMAC_MESON=
+        type: test
+    tags:
+      - ok
+      - meson
+      - amlogic
   - name: meson-sm1-sei610
     arch: arm64
     larch: arm64
@@ -2487,13 +2558,55 @@ templates:
       - ok
       - rk
       - crypto
-  - name: gemini-ns2502
+  - name: rk3399-khadas-edge-v
+    arch: arm64
+    larch: arm64
+    devicetype: rk3399-khadas-edge-v
+    kernelfile: Image
+    mach: rockchip
+    dtb: rockchip/rk3399-khadas-edge-v.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - rk
+      - crypto
+  - name: rk3399-roc-pc
+    arch: arm64
+    larch: arm64
+    devicetype: rk3399-roc-pc
+    kernelfile: Image
+    mach: rockchip
+    dtb: rockchip/rk3399-roc-pc.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - rk
+      - crypto
+  - name: rk3588-rock-5b
+    arch: arm64
+    larch: arm64
+    devicetype: rk3588-rock-5b
+    kernelfile: Image
+    mach: rockchip
+    dtb: rockchip/rk3588-rock-5b.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - rk
+      - crypto
+  - name: gemini-ssi1328
     arch: arm
     larch: arm
-    devicetype: gemini-ns2502
+    devicetype: gemini-ssi1328
     kernelfile: zImage
     mach: gemini
-    dtb: gemini-ns2502.dtb
+    dtb: gemini-ssi1328.dtb
     configs:
       - name: CONFIG_SERIAL_8250=y
         type: mandatory
@@ -2528,3 +2641,68 @@ templates:
       - ok
       - ixp4xx
       - crypto
+  - name: armada-388-clearfog-pro
+    arch: arm
+    larch: arm
+    devicetype: armada-388-clearfog-pro
+    kernelfile: zImage
+    mach: mvebu
+    dtb: armada-388-clearfog-pro.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - armada
+      - crypto
+  - name: k3-am625-sk
+    arch: arm64
+    larch: arm64
+    devicetype: k3-am625-sk
+    kernelfile: Image
+    mach: ti
+    dtb: ti/k3-am625-sk.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+  - name: hifive-unleashed-a00
+    arch: riscv
+    larch: riscv
+    devicetype: hifive-unleashed-a00
+    kernelfile: Image
+    dtb: sifive/hifive-unleashed-a00.dtb
+    mach: riscv
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+  - name: jh7100-starfive-visionfive-v1
+    arch: riscv
+    larch: riscv
+    devicetype: jh7100-starfive-visionfive-v1
+    kernelfile: Image
+    dtb: starfive/jh7100-starfive-visionfive-v1.dtb
+    mach: riscv
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - crypto
+  - name: sun20i-d1-nezha
+    arch: riscv
+    larch: riscv
+    devicetype: sun20i-d1-nezha
+    kernelfile: Image
+    dtb: allwinner/sun20i-d1-nezha.dtb
+    mach: riscv
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - crypto
+      - dwmac_sun8i
