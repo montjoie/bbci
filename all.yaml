@@ -384,6 +384,7 @@ configoverlays:
     list:
       - config: CONFIG_DMA_API_DEBUG=y
       - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_INFO_DWARF4=y
       - config: CONFIG_DEBUG_KERNEL=y
   - name: lavatest
     list:
