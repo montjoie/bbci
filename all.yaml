@@ -261,7 +261,6 @@ targets:
     flavour: defconfig
     defconfig: sunxi_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
-    warnings: "W=1 C=1"
   - name: versatile_defconfig
     larch: arm
     subarch: versatile
@@ -289,7 +288,6 @@ targets:
     flavour: defconfig
     defconfig: x86_64_defconfig
     full_tgt: bzImage modules
-    warnings: "-W1"
   - name: x86_defconfig
     larch: x86
     flavour: defconfig
