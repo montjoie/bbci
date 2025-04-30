@@ -181,6 +181,9 @@ targets:
       - name: "CONFIG_NET_RETRY_COUNT=15"
       - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_LOCALVERSION="-clabbe"'
+    ubootname: Xunlong_Orange_Pi_Zero
+    uboot_images:
+      - u-boot-sunxi-with-spl.bin
   - name: orangepi_one_plus_defconfig
     larch: arm64
     uarch: arm
@@ -221,6 +224,22 @@ targets:
       - name: "CONFIG_PHY_REALTEK=y"
       - name: 'CONFIG_BOOTDELAY=10'
       - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: radxa-a5e_defconfig
+    larch: arm64
+    uarch: arm
+    atf: ATF-a523
+    defconfig: radxa-a5e_defconfig
+    configs:
+      - name: 'CONFIG_BOOTDELAY=20'
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+      - name: 'CONFIG_ENV_OVERWRITE=y'
+      - name: 'CONFIG_NET_RANDOM_ETHADDR'
+        disable: True
+    ubootname: Radxa_A5E
+    uboot_images:
+      - u-boot-sunxi-with-spl.bin
   - name: bananapi_m64_defconfig
     larch: arm64
     uarch: arm
@@ -265,6 +284,22 @@ targets:
       - name: "CONFIG_PHY_REALTEK=y"
       - name: "CONFIG_TFTP_BLOCKSIZE=1000"
       - name: 'CONFIG_LOCALVERSION="-clabbe"'
+  - name: khadas-edge2-rk3588s_defconfig
+    larch: arm64
+    uarch: arm
+    defconfig: khadas-edge2-rk3588s_defconfig
+    atf: ATF-rk3588
+    bl31name: "bl31.elf"
+    makeopts: "all u-boot.itb"
+    rockchip_tpl: "rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.18.bin"
+    configs:
+      - name: "CONFIG_NET_RETRY_COUNT=15"
+      - name: "CONFIG_PHY_REALTEK=y"
+      - name: "CONFIG_TFTP_BLOCKSIZE=1000"
+      - name: 'CONFIG_LOCALVERSION="-clabbe"'
+    uboot_images:
+      - idbloader.img
+      - u-boot.itb
   - name: roc-pc-rk3399_defconfig
     larch: arm64
     uarch: arm
@@ -298,8 +333,6 @@ targets:
     uarch: arm
     defconfig: rock5b-rk3588_defconfig
     atf: ATF-rk3588
-    atfbuild: ATF-rk3399
-    atfbl31: bl31/bl31.elf
     bl31name: "bl31.elf"
     rockchip_tpl: "rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.18.bin"
     makeopts: "all u-boot.itb"
@@ -381,6 +414,12 @@ targets:
     spd: opteed
     target_board: generic
     type: ATF
+  - name: ATF-a523
+    platform: sun55i_a523
+    larch: arm64
+    target_board: generic
+    type: ATF
+    source: ATF-jernejsk
   - name: beagleia64
     type: optee
     larch: arm64
@@ -398,9 +437,19 @@ sources:
   - name: uboot
     directory: /usr/src/uboot/uboot
     gituri: http://git.denx.de/u-boot.git
+    branch: v2025.04
   - name: uboot-master
     directory: /usr/src/uboot/uboot-master
     gituri: http://git.denx.de/u-boot.git
+    update: True
+  - name: uboot-a523
+    directory: /usr/src/uboot/a523
+    gituri: https://github.com/apritzel/u-boot
+    branch2: a523-beta
+  - name: uboot-jernej
+    directory: /usr/src/uboot/jernej-a523
+    gituri: https://github.com/jernejsk/u-boot
+    branch: a523
   - name: uboot-upstream
     directory: /mnt/sources/uboot-upstream
   - name: starfive
@@ -409,6 +458,11 @@ sources:
     type: ATF
     directory: $HOME/arm-trusted-firmware
     gituri: https://github.com/ARM-software/arm-trusted-firmware
+  - name: ATF-jernejsk
+    type: ATF
+    directory: /mnt/sources/arm-trusted-firmware-jernejsk
+    gituri: https://github.com/jernejsk/arm-trusted-firmware
+    branch: a523
   - name: optee
     type: optee
     directory: /mnt/sources/optee

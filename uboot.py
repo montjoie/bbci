@@ -214,7 +214,9 @@ class bbci:
 
         if "branch" in scfg:
             branch = scfg["branch"]
-            subprocess.run(f"git -C {sourcedir} checkout {branch}", shell = True)
+            ret = subprocess.run(f"git -C {sourcedir} checkout {branch}", shell = True)
+            if ret.returncode != 0:
+                return None
 
         if "update" in scfg:
             subprocess.run(f"git -C {sourcedir} pull", shell = True)
@@ -298,7 +300,11 @@ class bbci:
         if atf is None:
             return 1
         self.logger.info(f"DEBUG: found ATF {atf}")
-        atfdir = self.checkout("ATF")
+        if "source" in atf:
+            source = atf["source"]
+        else:
+            source = "ATF"
+        atfdir = self.checkout(source)
         if atfdir is None:
             return 1
         self.logger.info(f"INFO: compile ATF")
@@ -510,6 +516,8 @@ class bbci:
                 self.logger.debug(f"Final name is {fname}")
                 subprocess.run(f"cp {kdir}/{image} {ubootstore}/{fname}", shell=True)
                 subprocess.run(f"chmod 644 {ubootstore}/{fname}", shell=True)
+        else:
+            self.logger.info("No uboot_images")
 
     def actions(self, source, targetname, actions):
         self.logger.debug(f"CALLED with {source} {actions}")
