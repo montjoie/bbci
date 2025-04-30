@@ -36,10 +36,8 @@ metadata:
   job.nfsrootfs_url: {{ ROOT_FQDN }}{{ rootfs_path }}
 {% endif %}
   job.build_environment: {{ BUILD_TOOLCHAIN }}
-{%- if metadata_build %}
   build.overlays: {{ BUILD_OVERLAYS }}
   build.toolchain: {{ BUILD_TOOLCHAIN }}
-{% endif %}
 {%- if use_squad %}
   squad.path: {{ GIT_DESCRIBE }}+{{ BUILD_PROFILE }}+{{ BUILD_TOOLCHAIN }}+{{ BUILD_OVERLAYS }}/{{ DEVICETYPE }}
 {% endif %}
@@ -59,8 +57,16 @@ notify:
 
 device_type: {{ DEVICETYPE }}
 
+{% if LAVA_TAGS %}
+tags:
+ - potato
+{% endif %}
+
 context:
   extra_kernel_args: "ip=dhcp"
+{% if notset %}
+  extra_kernel_args: "ip=dhcp ftrace_dump_on_oops ftrace=function"
+{% endif %}
 
 job_name: {{ JOBNAME }}
 timeouts:
@@ -98,7 +104,7 @@ actions:
 {%- if rootfs_method == "ramdisk" %}
     ramdisk:
       url: {{ ROOT_FQDN }}{{ rootfs_path }}
-      compression: gz
+      compression: {{ ROOTFS_COMP }}
 {% endif %}
     modules:
       url: {{ BOOT_FQDN }}/{{ PATH }}/modules.tar.gz
@@ -138,6 +144,7 @@ actions:
     prompts:
       - '/ #'
       - '~ #'
+      - 'sh-5.1#'
 {%- if auto_login_password %}
     auto_login:
       login_prompt: "login:"
@@ -152,6 +159,77 @@ actions:
       unpack_command: tar -C / -zxf
 {% endif %}
 
+
+{%- if test_hc == 'True' %}
+- test:
+    timeout:
+      minutes: 1
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal HC test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - sleep 30
+            - lsusb
+            - ip a
+            - >
+                for level in warn err; do
+                  dmesg --level=$level --notime -x -k > dmesg.$level
+                done
+            - >
+                for level in crit alert emerg; do
+                  dmesg --level=$level --notime -x -k > dmesg.$level
+                  test -s dmesg.$level && res=fail || res=pass
+                  count=$(cat dmesg.$level | wc -l)
+                  lava-test-case $level \
+                    --result $res \
+                    --measurement $count \
+                    --units lines
+                done
+            - cat dmesg.emerg dmesg.alert dmesg.crit dmesg.err dmesg.warn
+      lava-signal: kmsg
+      from: inline
+      name: healthcheck
+      path: inline/hc.yaml
+{% endif %}
+
+{%- if test_miniip == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal IP test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - ip a
+            - udhcpc -i eth0
+            - mount -t debugfs none /sys/kernel/debug
+      lava-signal: kmsg
+      from: inline
+      name: regulator
+      path: inline/bootrr.yaml
+{% endif %}
+
+
 {%- if test_gentoo == 'True' %}
 - test:
     timeout:
@@ -161,8 +239,10 @@ actions:
           from: git
           path: execs/gentoo.yaml
           name: Gentoo
+          params:
+            DO_XFS: 1
+            DO_GUESTFS: 1
 {%- if portage_url %}
-          parameters:
             PORTAGE_URL: {{ portage_url }}
 {% endif %}
 {% endif %}
@@ -178,7 +258,6 @@ actions:
           name: Boot
 {% endif %}
 
-{%- if rootfs_method != "nbd" and rootfs_method != "nfs" %}
 {%- if test_network == 'True' %}
 - test:
     timeout:
@@ -189,6 +268,27 @@ actions:
           path: execs/network.yaml
           name: Network
 {% endif %}
+
+{%- if test_ipsec == 'True' %}
+- test:
+    timeout:
+        minutes: 120
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/ipsec.yaml
+          name: Network
+{% endif %}
+
+{%- if test_gemini == 'True' %}
+- test:
+    timeout:
+        minutes: 120
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/gemini.yaml
+          name: Gemini
 {% endif %}
 
 {%- if test_hw == 'True' %}
@@ -210,7 +310,30 @@ actions:
         - repository: https://github.com/montjoie/lava-tests.git
           from: git
           path: execs/crypto.yaml
-          name: Crypto
+          name: crypto
+{% endif %}
+
+{%- if test_infra == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/infra.yaml
+          name: infra
+{% endif %}
+
+
+{%- if test_luks == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/luks.yaml
+          name: luks
 {% endif %}
 
 {%- if test_misc == 'True' %}
@@ -223,5 +346,392 @@ actions:
           path: execs/misc.yaml
           name: Misc
 {% endif %}
+
+{%- if test_infra == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/infra.yaml
+          name: Infratests
 {% endif %}
 
+{%- if test_uboot == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/uboot.yaml
+          name: Misc
+          parameters:
+            UBOOT_BIN_URL: http://boot.montjoie.local/uboot/
+- boot:
+    method: bootloader
+    bootloader: u-boot
+    commands: ["printenv", "lmb show", "mii device", "mii info 1", "sleep 3"]
+    prompts:
+    - '=>'
+
+{% endif %}
+
+{%- if test_armbian == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/uboot.yaml
+          name: Misc
+          parameters:
+            OS_IMAGE_URL: https://mirrors.dotsrc.org/armbian-dl/lepotato/archive/Armbian_22.02.1_Lepotato_bullseye_current_5.10.102.img.xz
+            FLASH_OPTS: -n
+{% endif %}
+
+{%- if test_zoran == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/zoran.yaml
+          name: zoran
+{% endif %}
+
+{%- if test_bt == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/bt.yaml
+          name: BlueTooth
+{% endif %}
+
+{%- if distcc == 'True' %}
+- test:
+    timeout:
+        minutes: 90
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/distcc.yaml
+          name: distcc
+          parameters:
+            DISTCC_SRV: 192.168.1.22
+{% endif %}
+
+{%- if test_cryptolinaro == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/test-definitions.git
+          branch: crypto
+          from: git
+          path: automated/linux/crypto/crypto.yaml
+          name: crypto
+{% endif %}
+
+{%- if test_linaro_network == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/test-definitions.git
+          branch: master
+          from: git
+          path: automated/linux/network-basic/network-basic.yaml
+          name: network-basic
+{% endif %}
+
+{%- if test_ftrace == 'True' %}
+- test:
+    timeout:
+        minutes: 240
+    definitions:
+        - repository:
+            metadata:
+              format: Lava-Test Test Definition 1.0
+              name: use_ftrace
+              description: "Use ftrace"
+            run:
+              steps:
+              - mount -t debugfs none /sys/kernel/debug
+              - cd /sys/kernel/debug/tracing
+              - ls
+          from: inline
+          name: ftrace
+          path: inline/dm.yaml
+{% endif %}
+{%- if test_kmap == 'True' %}
+- test:
+    timeout:
+      minutes: 25
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "baseline test plan"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - cryptsetup benchmark
+            - dmesg
+      lava-signal: kmsg
+      from: inline
+      name: bootrr
+      path: inline/bootrr.yaml
+{% endif %}
+
+{%- if test_mcrypto == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal crypto test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - modprobe tcrypt || echo "ok1"
+            - modprobe tcrypt || echo "ok2"
+            - modprobe tcrypt || echo "ok3"
+            - modprobe tcrypt || echo "ok4"
+            - modprobe tcrypt || echo "ok5"
+            - modprobe tcrypt || echo "ok6"
+            - modprobe tcrypt || echo "ok7"
+            - modprobe tcrypt || echo "ok8"
+            - modprobe tcrypt || echo "ok9"
+            - modprobe tcrypt || echo "ok10"
+            - modprobe tcrypt || echo "ok11"
+            - modprobe tcrypt || echo "ok12"
+            - modprobe tcrypt || echo "ok13"
+            - modprobe tcrypt || echo "ok14"
+            - modprobe tcrypt || echo "ok15"
+            - dmesg
+            - mount -t debugfs none /sys/kernel/debug
+            - cat /sys/kernel/debug/sun*/stats
+      lava-signal: kmsg
+      from: inline
+      name: mcrypto
+      path: inline/bootrr.yaml
+{% endif %}
+
+{%- if test_cryptotest == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal crypto test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - mount -t debugfs none /sys/kernel/debug
+            - cat /sys/kernel/debug/sun*/stats || echo "ok"
+            - modprobe cryptotest || echo "ok"
+            - sleep 60
+            - cat /sys/kernel/debug/sun*/stats || echo "ok"
+            - dmesg
+      lava-signal: kmsg
+      from: inline
+      name: cryptotest
+      path: inline/bootrr.yaml
+{% endif %}
+
+{%- if test_libkcapi == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/libkcapi.yaml
+          name: libkcapi
+{% endif %}
+
+{%- if test_regu == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal regulator test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - mount -t debugfs none /sys/kernel/debug
+            - cat /sys/kernel/debug/regulator/regulator_summary
+            - ip a
+            - ping -c4 192.168.1.1
+            - ifdown eth0
+            - sleep 5
+            - ip a
+            - ifup eth0
+            - udhcpc -i eth0
+            - sleep 5
+            - ip a
+            - ping -c4 192.168.1.1
+            - dmesg
+      lava-signal: kmsg
+      from: inline
+      name: regulator
+      path: inline/bootrr.yaml
+{% endif %}
+
+{%- if test_clk == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal clk dump"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - mount -t debugfs none /sys/kernel/debug || echo "ko"
+            - cat /sys/kernel/debug/clk/clk_summary
+      lava-signal: kmsg
+      from: inline
+      name: clkdump
+      path: inline/bootrr.yaml
+{% endif %}
+{%- if test_ata == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "serial ATA test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - lspci
+            - fdisk -l
+            - mkdir -p /tmp/ntfs
+            - mount /dev/sda2 /tmp/ntfs
+            - umount /tmp/ntfs
+            - dmesg
+      lava-signal: kmsg
+      from: inline
+      name: atatest
+      path: inline/bootrr.yaml
+{% endif %}
+
+{%- if test_serial == 'True' %}
+- test:
+    timeout:
+        minutes: 60
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/serial.yaml
+          name: serial
+{% endif %}
+
+{%- if test_hwrng == 'True' %}
+- test:
+    timeout:
+        minutes: 120
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/hwrng.yaml
+          name: hwrng
+{% endif %}
+
+{%- if test_suspend == 'True' %}
+- test:
+    timeout:
+        minutes: 120
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/suspend.yaml
+          name: suspend
+{% endif %}
+
+{%- if test_bootstrap == 'True' %}
+- test:
+    timeout:
+      minutes: 30
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "bootstrap test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - lspci
+            - dmidecode
+            - i2cdetect -l
+            - decode-dimms
+            - cat /proc/cpuinfo
+            - sensors-detect --auto
+            - sensors
+            - dmesg
+      lava-signal: kmsg
+      from: inline
+      name: bootstraptest
+      path: inline/bootrr.yaml
+{% endif %}

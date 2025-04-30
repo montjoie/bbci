@@ -51,6 +51,9 @@ def lab_copy(lab, src, directory):
     if args.debug:
         print("DEBUG: copy %s to %s" % (src, destdir))
     shutil.copy(src, destdir)
+    result = subprocess.check_output("chmod -Rc o+rX %s" % destdir, shell=True)
+    if args.debug:
+        print(result)
 
 ###############################################################################
 ###############################################################################
@@ -81,6 +84,8 @@ def do_dtb_check(param):
     kdir = param["kdir"]
     make_opts = param["make_opts"]
     logdir = os.path.expandvars(tc["config"]["logdir"])
+    if args.logdir is not None:
+        logdir = args.logdir
 
     if args.nolog:
         logfile = sys.stdout
@@ -97,11 +102,22 @@ def do_dtb_check(param):
 
 ###############################################################################
 ###############################################################################
+def addr2line(param):
+    larch = param["larch"]
+    kdir = param["kdir"]
+
+    vmlinuxpath = "%s/vmlinux" % kdir
+    exe = "%saddr2line" % param["target"]["cross_compile"]
+    print("Will do %s on %s with %s\n" % (exe, vmlinuxpath, args.line))
+    subprocess.run("%s -e %s %s" % (exe, vmlinuxpath, args.line), shell=True)
+
+###############################################################################
+###############################################################################
 def build(param):
     larch = param["larch"]
     kdir = param["kdir"]
     make_opts = param["make_opts"] + " %s" % param["full_tgt"]
-    print("BUILD: %s to %s" % (larch, kdir))
+    print("BUILD: %s to %s makeopts=%s" % (larch, kdir, make_opts))
     if args.debug:
         print("DEBUG: makeopts=%s" % make_opts)
 
@@ -110,6 +126,8 @@ def build(param):
         return 0
 
     logdir = os.path.expandvars(tc["config"]["logdir"])
+    if args.logdir is not None:
+        logdir = args.logdir
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
@@ -121,7 +139,7 @@ def build(param):
     if args.nolog:
         logfile = sys.stdout
     else:
-        logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
+        logfile = open("%s/%s.build.log" % (logdir, param["targetname"]), 'w')
 
     if args.quiet:
         pbuild = subprocess.Popen("make %s" % make_opts, shell=True, stdout=subprocess.DEVNULL)
@@ -175,6 +193,8 @@ def boot(param):
     global qemu_boot_id
 
     logdir = os.path.expandvars(tc["config"]["logdir"])
+    if args.logdir is not None:
+        logdir = args.logdir
     cachedir = os.path.expandvars(tc["config"]["cache"])
     if not os.path.exists(logdir):
         os.mkdir(logdir)
@@ -182,6 +202,14 @@ def boot(param):
     arch_endian = None
 
     if os.path.exists("%s/.config" % kdir):
+        if args.reportdir:
+            print(f"DEBUG: copy config to {args.reportdir}")
+            kconfig = open("%s/.config" % kdir)
+            kconfigs = kconfig.read()
+            kconfig.close()
+            ckconfig = open("%s/%s.config" % (args.reportdir, args.target), 'w')
+            ckconfig.write(kconfigs)
+            ckconfig.close()
         kconfig = open("%s/.config" % kdir)
         kconfigs = kconfig.read()
         kconfig.close()
@@ -189,6 +217,10 @@ def boot(param):
             endian = "big"
         else:
             endian = "little"
+        if re.search("CONFIG_RISCV=", kconfigs):
+            arch = "riscv"
+            arch_endian = "riscv"
+            qarch = "riscv64"
         if re.search("CONFIG_PARISC=", kconfigs):
             arch = "parisc"
             arch_endian = "hppa"
@@ -218,7 +250,6 @@ def boot(param):
             qarch = "arm"
             if re.search("CONFIG_CPU_BIG_ENDIAN=y", kconfigs):
                 arch_endian = "armbe"
-                qarch = "unsupported"
             else:
                 arch_endian = "armel"
         if re.search("CONFIG_ARM64=", kconfigs):
@@ -272,6 +303,16 @@ def boot(param):
             else:
                 arch_endian = "microblazeel"
                 qarch = "microblazeel"
+        if re.search("CONFIG_S390=", kconfigs):
+            arch = "s390"
+            arch_endian = "s390"
+            qarch = "s390x"
+            larch = "s390"
+        if re.search("CONFIG_CPU_SH4=", kconfigs):
+            arch = "sh"
+            arch_endian = "sh"
+            qarch = "sh4"
+            larch = "sh"
         if re.search("CONFIG_X86_64=", kconfigs):
             arch = "x86_64"
             arch_endian = "x86_64"
@@ -362,7 +403,7 @@ def boot(param):
             continue
         if device["arch"] != arch:
             if args.debug:
-                print("SKIP: %s arch: %s vs %s" % (devicename, device["arch"], arch))
+                print("SKIP: %s device arch: %s vs arch=%s" % (devicename, device["arch"], arch))
             continue
         print("==============================================")
         print("CHECK: %s" % devicename)
@@ -381,7 +422,8 @@ def boot(param):
                     else:
                         print("\tINFO: missing %s" % config["name"])
                 else:
-                    print("DEBUG: found %s" % config["name"])
+                    if args.debug:
+                        print("DEBUG: found %s" % config["name"])
         if skip:
             continue
         goodtag = True
@@ -470,9 +512,12 @@ def boot(param):
         jobdict["BUILD_OVERLAYS"] = args.configoverlay
         jobdict["BUILD_PROFILE"] = "%s-%s-%s" % (larch, subarch, flavour)
         jobdict["BUILD_TOOLCHAIN"] = param["toolchaininuse"].replace(" ", "_")
+        jobdict["distcc"] = "False"
 
         if "boot-method" in device:
             jobdict["boot_method"] = device["boot-method"]
+        if "console_device" in device:
+            jobdict["console_device"] = device["console_device"]
         if args.rootfs == "nfs":
             jobdict["rootfs_method"] = "nfs"
             jobdict["boot_commands"] = "nfs"
@@ -499,6 +544,8 @@ def boot(param):
             jobdict["JOBNAME"] = args.jobtitle
         else:
             jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (%s,root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, spetial, jobdict["rootfs_method"])
+            if args.jobtitleextra:
+                jobdict["JOBNAME"] += args.jobtitleextra
             if len(jobdict["JOBNAME"]) > 200:
                 jobdict["JOBNAME"] = "AUTOTEST %s %s/%s/%s/%s on %s (root=%s)" % (git_describe, sourcename, larch, subarch, flavour, devicename, jobdict["rootfs_method"])
         nonetwork = False
@@ -515,6 +562,15 @@ def boot(param):
                 jobdict["test"] = "False"
                 if args.debug:
                     print("DEBUG: Remove test from job")
+        print("===============================================================")
+        if args.testsuite == "distcc":
+            print("DEBUG: test is distcc")
+            if jobdict["test"]:
+                jobdict["test"] = 'False'
+                jobdict["distcc"] = 'True'
+            else:
+                print("ERROR: test already disabled")
+                continue
         # test are still enabled check testsuite
         if jobdict["test"] and args.testsuite is not None:
             jobdict["TESTSUITES"] = args.testsuite
@@ -557,7 +613,7 @@ def boot(param):
             if "extra_options" in device["qemu"]:
                 jobdict["qemu_extra_options"] = device["qemu"]["extra_options"]
                 # with root on nfs/nbd, tests are not set on a storage, so we need to filter them
-                if args.rootfs == "nfs" or args.rootfs == "nbd":
+                if args.rootfs == "nfs" or args.rootfs == "nbd" or args.testsuite is None:
                     newextrao = []
                     for extrao in device["qemu"]["extra_options"]:
                         if re.search("lavatest", extrao):
@@ -603,9 +659,11 @@ def boot(param):
             if "dtb" in device:
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
                 if not os.path.isfile(dtbfile):
+                    print("SKIP: no dtb at %s" % dtbfile)
                     #try at base directory
                     dtbfile = "%s/%s" % (kdir, device["dtb"])
                     if not os.path.isfile(dtbfile):
+                        print("SKIP: no dtb at %s" % dtbfile)
                         # retry with basename
                         dtbfile = "%s/%s" % (kdir, os.path.basename(device["dtb"]))
                         if not os.path.isfile(dtbfile):
@@ -621,18 +679,24 @@ def boot(param):
             if "model" in device["qemu"]:
                 qemu_cmd += " -nic user,%s,mac=52:54:00:12:34:58" % device["qemu"]["model"]
             if not os.path.isfile("%s/disk.img" % cachedir):
-                subprocess.run("qemu-img create -f qcow2 %s/disk.img 10M" % cachedir, shell=True)
+                print("Generate disk.img")
+                #subprocess.run("qemu-img create -f qcow2 %s/disk.img 10M" % cachedir, shell=True)
+                subprocess.run("dd if=/dev/zero of=%s/disk.img bs=1M count=16" % cachedir, shell=True)
+                subprocess.run("mkfs.ext2 %s/disk.img" % cachedir, shell=True)
             guestfs_interface = 'ide'
             if "guestfs_interface" in device["qemu"]:
                 guestfs_interface = device["qemu"]["guestfs_interface"]
-            qemu_cmd += " -drive format=qcow2,file=%s/disk.img,if=%s,id=lavatest" % (cachedir, guestfs_interface)
+            qemu_cmd += " -drive format=raw,file=%s/disk.img,if=%s,id=lavatest" % (cachedir, guestfs_interface)
             # Add initrd
             for lab in tlabs["labs"]:
                 if "disabled" in lab and lab["disabled"]:
                     continue
                 datadir = lab["datadir"]
                 break
-            qemu_cmd += " -initrd %s/rootfs/%s/rootfs.cpio.gz" % (datadir, arch_endian)
+            if not "root" in device["qemu"]:
+                qemu_cmd += " -initrd %s/rootfs/%s/rootfs.cpio.gz" % (datadir, arch_endian)
+            elif device["qemu"]["root"] == "virtio":
+                qemu_cmd += " -drive format=raw,file=%s/rootfs/%s/rootfs.cpio.gz,if=virtio,id=rootfs -append 'root=/dev/vda'" % (datadir, arch_endian)
             print(qemu_cmd)
             qp = subprocess.Popen(qemu_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
@@ -649,6 +713,7 @@ def boot(param):
             normal_halt = False
             ret = 0
             last_error_line = ""
+            do_debug_disk = True
             while True:
                 try:
                     line = "x"
@@ -668,15 +733,24 @@ def boot(param):
                         if re.search("end Kernel panic - not syncing", line):
                             qtimeout = 490
                             failure = "panic"
+                        if re.search("/ #", line) and do_debug_disk:
+                            qp.stdin.write(b'ls -l /dev/mmc*\r\n')
+                            qp.stdin.flush()
+                            do_debug_disk = False
+                            continue
                         if re.search("/ #", line) and not poweroff_done:
                             qp.stdin.write(b'poweroff\r\n')
                             qp.stdin.flush()
                             poweroff_done = True
+                            continue
                         # System Halted, OK to turn off power
-                        if line == "Machine halt..." or re.search("reboot: System halted", line) or re.search("reboot: power down", line) or re.search("reboot: Power Down", line):
+                        if line == "Machine halt..." \
+                            or re.search("reboot: System halted", line) \
+                            or re.search("reboot: [Pp]ower [Dd]own", line):
                             if args.debug:
                                 print("DEBUG: detected machine halt")
                             normal_halt = True
+                            # the timeout is a bit less for capturing last messages
                             qtimeout = 490
                 except ValueError:
                     time.sleep(0.1)
@@ -746,7 +820,10 @@ def boot(param):
             server = xmlrpc.client.ServerProxy(lab["lavauri"])
             devlist = server.scheduler.devices.list()
             for labdevice in devlist:
-                if labdevice["type"] == device["devicetype"]:
+                if labdevice["type"] == device["devicetype"] \
+                    and labdevice["health"] != 'Retired' \
+                    and labdevice["health"] != 'Bad' \
+                    and labdevice["health"] != 'Maintenance':
                     send_to_lab = True
             alia_list = server.scheduler.aliases.list()
             for alias in alia_list:
@@ -773,9 +850,11 @@ def boot(param):
                 if len(dtbsubdir) > 1:
                     dtb_relpath = dtb_relpath + dtbsubdir[0]
                 if not os.path.isfile(dtbfile):
+                    print("SKIP: no dtb at %s" % dtbfile)
                     #try at base directory
                     dtbfile = "%s/%s" % (kdir, device["dtb"])
                     if not os.path.isfile(dtbfile):
+                        print("SKIP: no dtb at %s" % dtbfile)
                         # retry with basename
                         dtbfile = "%s/%s" % (kdir, os.path.basename(device["dtb"]))
                         if not os.path.isfile(dtbfile):
@@ -814,7 +893,13 @@ def boot(param):
             rfsm = rfs[args.rootfs]
             if args.rootfs_path is None:
                 if "rootfs_script" in rfsm:
-                    result = subprocess.check_output("%s/%s --arch %s --root %s --cachedir %s" % (bbci_dir, rfsm["rootfs_script"], arch_endian, args.rootfs, cachedir), shell=True)
+                    rootfs_option = ""
+                    if "rootfs_option" in rfsm:
+                        rootfs_option = rfsm["rootfs_option"]
+                    rcmd ="%s/%s --arch %s --root %s --cachedir %s %s" % (bbci_dir, rfsm["rootfs_script"], arch_endian, args.rootfs, cachedir, rootfs_option)
+                    if args.debug:
+                        print("CALL %s" % rcmd)
+                    result = subprocess.check_output(rcmd, shell=True)
                     for line in result.decode("utf-8").split("\n"):
                         what = line.split("=")
                         if what[0] == 'ROOTFS_PATH':
@@ -835,7 +920,19 @@ def boot(param):
                 print("DEBUG: rootfs is %s" % jobdict["rootfs_path"])
             else:
                 jobdict["rootfs_path"] = args.rootfs_path
+            # HACK IXP4XX and GEMINI boards
+            if args.dtag:
+                if "gemini-ssi1328" in args.dtag.split(","):
+                    jobdict["rootfs_path"] = "/rootfs/armel/gemini-rootfs.cpio.xz"
+                if "intel-ixp42x-welltech-epbx100" in args.dtag.split(","):
+                    jobdict["rootfs_path"] = "/rootfs/armbe/rootfs.cpio.ixp4xx.xz"
+            if args.target == "ixp4xx_defconfig":
+                jobdict["rootfs_path"] = "/rootfs/armbe/rootfs.cpio.ixp4xx.xz"
+
             jobdict["rootfs_path"] = jobdict["rootfs_path"].replace("__ARCH_ENDIAN__", arch_endian).replace("__ARCH__", arch)
+            if jobdict["distcc"] == 'True':
+                jobdict["rootfs_path"] = jobdict["rootfs_path"].replace("armel", "distcc-armel")
+                jobdict["auto_login_password"] = 'bob'
 
             if re.search("gz$", jobdict["rootfs_path"]):
                 jobdict["ROOTFS_COMP"] = "gz"
@@ -845,6 +942,11 @@ def boot(param):
                 jobdict["ROOTFS_COMP"] = "bz2"
             if args.rootfs_base is not None:
                 jobdict["ROOT_FQDN"] = args.rootfs_base
+            if args.testsuite is not None and "serial" in args.testsuite.split(','):
+                print("DEBUG: HACK serial")
+                jobdict["rootfs_path"] = "%s.serial" % jobdict["rootfs_path"]
+            if args.lavatags is not None:
+                jobdict["LAVA_TAGS"] = args.lavatags
 
             # initrd handling
             # by default the RAMDISK URI is the same as ROOT
@@ -857,6 +959,8 @@ def boot(param):
             if "initrd" in rfsm:
                 jobdict["initrd_path"] = rfsm["initrd"]
                 jobdict["initrd_path"] = jobdict["initrd_path"].replace("__ARCH_ENDIAN__", arch_endian).replace("__ARCH__", arch)
+            if jobdict["distcc"] == 'True':
+                jobdict["initrd_path"] = jobdict["initrd_path"].replace("armel", "distcc-armel")
             # HACK for device omap/sx1 omap/cheetah
             for dtag in device["tags"]:
                 if dtag == "noinitrd" or dtag == 'rootonsd':
@@ -872,7 +976,13 @@ def boot(param):
             fw.write(jobt)
             fw.close()
             if not args.noact:
-                jobid = server.scheduler.jobs.submit(jobt)
+                try:
+                    jobid = server.scheduler.jobs.submit(jobt)
+                except xmlrpc.client.Fault as e:
+                    print("FAIL to submit job on %s %s" % (lab["name"], e.faultCode))
+                    print(e)
+                    # TODO test error==400
+                    continue
                 print(jobid)
                 if lab["name"] not in boots:
                     boots[lab["name"]] = {}
@@ -883,6 +993,7 @@ def boot(param):
                 if "copyconfig" in tc["config"]:
                     copyconfig = tc["config"]["copyconfig"]
                 if os.path.exists("%s/.config" % kdir) and copyconfig:
+                    print("DEBUG: copy config from %s" % kdir)
                     if not os.path.exists("%s/configs" % cachedir):
                         os.mkdir("%s/configs" % cachedir)
                     if not os.path.exists("%s/configs/%s" % (cachedir, lab["name"])):
@@ -899,7 +1010,15 @@ def boot(param):
 
 ###############################################################################
 ###############################################################################
-def enable_config(param, econfig):
+def do_oldconfig(param):
+    make_opts = param["make_opts"]
+    kdir = param["kdir"]
+    pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
+    #subprocess.run(f"diff -u {kdir}/.config.old {kdir}/.config", shell=True)
+
+###############################################################################
+###############################################################################
+def enable_config(param, econfig, do_old = True):
     rawconfig = econfig.split("=")[0]
 
     if args.debug:
@@ -922,14 +1041,18 @@ def enable_config(param, econfig):
                 print("DEBUG: %s is already enabled" % econfig)
             return 0
         wconfig = re.sub("# %s is not set" % rawconfig, "%s=y" % econfig, wconfig)
+    # handle case where config is not present at all
+    if not re.search(rawconfig, wconfig):
+        wconfig += econfig + '\n'
     with open("%s/.config" % param["kdir"], 'w') as fconfig:
         fconfig.write(wconfig)
     make_opts = param["make_opts"]
-    if args.debug:
-        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
-    pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
-    if args.debug:
-        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+    if do_old:
+        if args.debug:
+            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+        pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
+        if args.debug:
+            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
 
 ###############################################################################
 ###############################################################################
@@ -955,32 +1078,55 @@ def disable_config(param, dconfig):
         if re.search("^%s=" % dconfig, wconfig):
             print("BADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
 
+def kconfig_replace(kdir, regex, replace):
+    with open(f"{kdir}/.config", 'r') as f:
+        data = f.read()
+    with open(f"{kdir}/.config.kold", 'w') as f:
+        f.write(data)
+    print(f"REGEX={regex}")
+    print(f"REPLACE={replace}")
+    newdata = re.sub(regex, replace, data)
+    with open(f"{kdir}/.config", 'w') as f:
+        f.write(newdata)
+    #subprocess.run(f"diff -u {kdir}/.config {kdir}/.config2", shell=True)
+
 ###############################################################################
 ###############################################################################
 def genconfig(sourcedir, param, defconfig):
+    if args.debug:
+        print("DEBUG: chdir to %s" % sourcedir)
     os.chdir(sourcedir)
 
     make_opts = param["make_opts"]
     if args.noact:
-        print("Will do make %s %s" % (make_opts, defconfig))
+        print("NOACT: Will do make %s %s" % (make_opts, defconfig))
         return 0
     if defconfig == "randconfig" and args.randconfigseed is not None:
         os.environ["KCONFIG_SEED"] = args.randconfigseed
 
     logdir = os.path.expandvars(tc["config"]["logdir"])
+    if args.logdir is not None:
+        logdir = args.logdir
     if not os.path.exists(logdir):
         os.mkdir(logdir)
 
     if args.nolog:
         logfile = sys.stdout
     else:
-        logfile = open("%s/%s.log" % (logdir, param["targetname"]), 'w')
+        logfile = open("%s/%s.genconfig.log" % (logdir, param["targetname"]), 'w')
+
+    if args.debug:
+        print("DEBUG: genconfig: run make %s %s" % (make_opts, defconfig))
 
     if args.quiet:
-        pbuild = subprocess.Popen("make %s %d" % (make_opts, defconfig), shell=True, stdout=subprocess.DEVNULL)
+        pbuild = subprocess.Popen("make %s %s" % (make_opts, defconfig), shell=True, stdout=subprocess.DEVNULL)
     else:
-        pbuild = subprocess.Popen("make %s %s 2>&1" % (make_opts, defconfig), shell=True, stdout=logfile)
+        print("DEBUG: gen initial config")
+        pbuild = subprocess.Popen("make %s %s -j1 2>&1" % (make_opts, defconfig), shell=True, stdout=logfile)
     outs, err = pbuild.communicate()
+    if err is not None:
+        print("ERROR: genconfig: %s" % err)
+        return err
 
     if args.configoverlay:
         for coverlay in args.configoverlay.split(","):
@@ -989,61 +1135,91 @@ def genconfig(sourcedir, param, defconfig):
                     print("DEBUG: skip all config overlays")
                 return 0
 
-    shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
+    #shutil.copy("%s/.config" % param["kdir"], "%s/.config.def" % param["kdir"])
     # add needed options for LAVA
     if args.debug:
         print("DEBUG: add LAVA configs")
-    enable_config(param, "CONFIG_BLK_DEV_INITRD")
-    enable_config(param, "CONFIG_BLK_DEV_RAM=y")
+    enable_config(param, "CONFIG_BLK_DEV_INITRD", do_old = False)
+    enable_config(param, "CONFIG_BLK_DEV_RAM=y", do_old = False)
     enable_config(param, "CONFIG_DEVTMPFS=y")
-    enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y")
+    enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y", do_old = False)
     enable_config(param, "CONFIG_MODULES=y")
     enable_config(param, "CONFIG_DEVTMPFS_MOUNT")
     enable_config(param, "CONFIG_IKCONFIG")
-    enable_config(param, "CONFIG_IKCONFIG_PROC")
+    enable_config(param, "CONFIG_IKCONFIG_PROC", do_old = False)
 
     if args.configoverlay:
+        if args.debug:
+            print("DEBUG: handling overlays")
         for coverlay in args.configoverlay.split(","):
             if coverlay == "nomodule":
                 subprocess.run("sed -i 's,=m$,=y,' %s/.config" % param["kdir"], shell=True)
             if coverlay == "fullsound":
                 enable_config(param, "CONFIG_SOUND")
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                kconfig_replace(param["kdir"], r'#\s*(CONFIG_SND_[A-Z0-9_]*) is not set', r'\1=m')
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
-                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
-                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                #pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                #pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
             if coverlay == "fulldrm":
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
+                kconfig_replace(param["kdir"], r'#\s*(CONFIG_DRM_[A-Z0-9_]*) is not set', r'\1=m')
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
             if coverlay == "fullcrypto":
                 enable_config(param, "CONFIG_DEBUG_KERNEL=y")
-                enable_config(param, "CONFIG_CRYPTO_CBC=y")
+                enable_config(param, "CONFIG_CRYPTO=y")
+                print("==================================================")
+                print("==================================================")
+                kconfig_replace(param["kdir"], r'#\s*(.*CRYPTO_[A-Z0-9_]*) is not set.*', r'\1=m')
+                do_oldconfig(param)
+                print("==================================================")
+                print("==================================================")
+                kconfig_replace(param["kdir"], r'#\s*(.*CRYPTO_[A-Z0-9_]*) is not set', r'\1=m')
+                do_oldconfig(param)
+                enable_config(param, "CONFIG_CRYPTO_CBC=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_USER=y")
                 enable_config(param, "CONFIG_MD=y")
-                enable_config(param, "CONFIG_BLK_DEV_DM=y")
-                enable_config(param, "CONFIG_BLK_DEV_LOOP=y")
-                enable_config(param, "CONFIG_DM_CRYPT=m")
+                enable_config(param, "CONFIG_BLK_DEV_DM=y", do_old = False)
+                enable_config(param, "CONFIG_BLK_DEV_LOOP=y", do_old = False)
+                enable_config(param, "CONFIG_DM_CRYPT=m", do_old = False)
+                enable_config(param, "CONFIG_FS_ENCRYPTION=y", do_old = False)
                 if args.debug:
                     subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_CRYPTO_USER=y")
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_CRYPTO_USER_API=y")
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*CRYPTO.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
-                #subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
+                enable_config(param, "CONFIG_CRYPTO_USER_API_HASH=y")
+                enable_config(param, "CONFIG_CRYPTO_USER_API_SKCIPHER=y")
+                subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
                 disable_config(param, "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS")
+                enable_config(param, "CONFIG_CRYPTO_SELFTESTS=y")
+                disable_config(param, "CONFIG_CRYPTO_BENCHMARK=y")
+                disable_config(param, "CONFIG_CRYPTO_BENCHMARK")
                 enable_config(param, "CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y")
                 enable_config(param, "CONFIG_CRYPTO_USER_API_RNG=y")
                 enable_config(param, "CONFIG_CRYPTO_ANSI_CPRNG=y")
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS=m")
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE=m")
                 enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL=m")
-                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL_DEBUG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE_DEBUG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_DEBUG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_PRNG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_PRNG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_TRNG=y")
+                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL_DEBUG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE_DEBUG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_DEBUG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_DEBUG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_PRNG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_PRNG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_TRNG=y", do_old = False)
+                enable_config(param, "CONFIG_CRYPTO_DEV_ROCKCHIP=m")
                 enable_config(param, "CONFIG_CRYPTO_DEV_VIRTIO=y")
+                #enable_config(param, "CONFIG_CRYPTO_SHA1_ARM=y")
+                #enable_config(param, "CONFIG_CRYPTO_AES_ARM=y")
+                #enable_config(param, "CONFIG_CRYPTO_SHA256_ARM=y")
+                #enable_config(param, "CONFIG_CRYPTO_SHA512_ARM=y")
+                #enable_config(param, "CONFIG_BLK_DEV_RAM=y")
+                #enable_config(param, "CONFIG_BLK_DEV_SR=y")
+                #enable_config(param, "CONFIG_SYSVIPC=y")
+                #enable_config(param, "CONFIG_SECCOMP=y")
+                #enable_config(param, "CONFIG_BLK_DEV_RAM_SIZE=65536")
                 disable_config(param, "CONFIG_CRYPTO_DEV_FSL_CAAM_DEBUG")
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
@@ -1070,6 +1246,9 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_NFS_V3=y")
                 enable_config(param, "CONFIG_NFS_V4=y")
                 enable_config(param, "CONFIG_ROOT_NFS=y")
+                enable_config(param, "CONFIG_USB_USBNET=y")
+                enable_config(param, "CONFIG_USB_NET_AX8817X=y")
+                enable_config(param, "CONFIG_USB_NET_AX88179_178A=y")
             if coverlay == "cpu_be":
                 subprocess.run("sed -i 's,^\(.*.CPU_LITTLE_ENDIAN*\)=,# \\1 is not set,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
@@ -1186,6 +1365,8 @@ def common(sourcename, targetname):
     #    sys.exit(1)
 
     make_opts = make_opts + " -j%d" % os.cpu_count()
+    if args.bwarn:
+        targets["warnings"] = "-W1 -C1 W=1 C=1"
     if "warnings" in target:
         make_opts = make_opts + " " + target["warnings"]
     make_opts = make_opts + " KBUILD_OUTPUT=%s INSTALL_HDR_PATH=%s" % (kdir, headers_dir)
@@ -1211,12 +1392,13 @@ def common(sourcename, targetname):
             param["error"] = 1
             return param
 
-    if "defconfig" in target and not args.hc:
+    if "defconfig" in target:
         param["configbase"] = target["defconfig"]
-        err = genconfig(sourcedir, param, target["defconfig"])
-        if err:
-            param["error"] = 1
-            return param
+        if not args.hc:
+            err = genconfig(sourcedir, param, target["defconfig"])
+            if err:
+                param["error"] = 1
+                return param
     if not os.path.exists("%s/.config" % kdir):
             print("No config in %s, cannot do anything" % kdir)
             param["error"] = 1
@@ -1233,12 +1415,39 @@ def common(sourcename, targetname):
             os.mkdir(modules_dir)
         modules_dir = "%s/modules/%s" % (builddir, targetname)
         make_opts = make_opts + " INSTALL_MOD_PATH=%s" % modules_dir
+        make_opts = make_opts + " INSTALL_MOD_STRIP=1"
         param["modules_dir"] = modules_dir
         param["make_opts"] = make_opts
     else:
         print("WARNING: no MODULES")
     return param
 
+###############################################################################
+###############################################################################
+# install build artifact somewhere
+def do_install(sourcename, targetname, param):
+    git_describe = subprocess.check_output('git describe --always', shell=True).strip().decode("utf-8")
+    if "tegra" in args.configoverlay.split(","):
+        print("TEGRA install for %s" % git_describe)
+        print("DO RSYNC from %s" % param["modules_dir"])
+        #ret = subprocess.run("rsync -avr %s/lib/modules/ root@192.168.1.45:/lib/modules/" % param["modules_dir"], shell=True)
+        ret = subprocess.run("rsync -avr %s/lib/modules/ root@192.168.1.22:/lib/modules/" % param["modules_dir"], shell=True)
+        ret = subprocess.run("ssh root@tegra mount /dev/mmcblk0p1 /boot", shell=True)
+        ret = subprocess.run("scp %s/arch/arm/boot/zImage root@192.168.1.22:/boot/" % (param["kdir"]), shell=True)
+        ret = subprocess.run("scp %s/arch/arm/boot/dts/tegra124-jetson-tk1.dtb root@192.168.1.22:/boot/" % (param["kdir"]), shell=True)
+        return 0
+    if "sparky" in args.configoverlay.split(","):
+        print("SPARC install for %s" % git_describe)
+        print("DO RSYNC from %s" % param["modules_dir"])
+        ret = subprocess.run("rsync -avr %s/lib/modules/ root@192.168.1.45:/lib/modules/" % param["modules_dir"], shell=True)
+        ret = subprocess.run("scp %s/vmlinux root@192.168.1.45:/boot/vmlinuz-%s" % (param["kdir"], git_describe), shell=True)
+        return 0
+    if "zoran" in args.configoverlay.split(","):
+        print("DO RSYNC from %s" % param["modules_dir"])
+        ret = subprocess.run("rsync -avr %s/lib/modules/ root@192.168.1.41:/lib/modules/" % param["modules_dir"], shell=True)
+        ret = subprocess.run("scp %s/arch/x86_64/boot/bzImage root@192.168.1.41:/boot/vmlinuz-%s" % (param["kdir"], git_describe), shell=True)
+
+    return 0
 ###############################################################################
 ###############################################################################
 def do_action(sourcename, targetname, action):
@@ -1262,6 +1471,13 @@ def do_action(sourcename, targetname, action):
         if "error" in p:
             return p["error"]
         build(p)
+        return 0
+    if action == "addr2line":
+        print("ADDR2LINE: %s" % targetname)
+        p = common(sourcename, targetname)
+        if "error" in p:
+            return p["error"]
+        addr2line(p)
         return 0
     if targetname in builds and "result" in builds[targetname] and builds[targetname]["result"] == 'FAIL':
         print("SKIP actions depending on build for %s" % targetname)
@@ -1290,6 +1506,12 @@ def do_action(sourcename, targetname, action):
         if "error" in p:
             return p["error"]
         do_dtb_check(p)
+        return 0
+    if action == "install":
+        p = common(sourcename, targetname)
+        if "error" in p:
+            return p["error"]
+        do_install(sourcename, targetname, p)
         return 0
     print("ERROR: unknow action %s" % action)
     return 1
@@ -1689,14 +1911,21 @@ parser.add_argument("--source", "-s", type=str, help="source to use separated by
 parser.add_argument("--target", "-t", type=str, help="target to use separated by comma (or all)")
 parser.add_argument("--ttag", "-T", type=str, help="Select target via some tags")
 parser.add_argument("--dtag", "-D", type=str, help="Select device via some tags")
-parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu")
+parser.add_argument("--lavatags", type=str, help="Select device via some LAVA tags")
+parser.add_argument("--line", "-l", type=str, help="For addr2line")
+parser.add_argument("--action", "-a", type=str, help="Comma separated list of actions to do between create, update, build, boot, download, qemu, addr2line")
 parser.add_argument("--testsuite", type=str, help="Comma separated list of testss to do", default = None)
+parser.add_argument("--callback", type=str, help="KernelCI callback", default = None)
+parser.add_argument("--callback-token", type=str, help="KernelCI callback token name", default = None)
 parser.add_argument("--jobtitle", type=str, help="Overrige job title", default = None)
+parser.add_argument("--jobtitleextra", type=str, help="Add extra info to job title", default = None)
 parser.add_argument("--debug", "-d", help="increase debug level", action="store_true")
 parser.add_argument("--hc", help="Hack: keep config", action="store_true")
 parser.add_argument("--nolog", help="Do not use logfile", action="store_true")
 parser.add_argument("--noclean", help="Do not clean before building", action="store_true")
 parser.add_argument("--rootfs", help="Select the location of rootfs, (ramdisk, nbd, nfs)", choices=['ramdisk', 'nfs', 'nbd', 'vdisk'], type=str, default="ramdisk")
+parser.add_argument("--logdir", help="Override logdir from config", type=str, default=None)
+parser.add_argument("--reportdir", help="Override reportdir from config", type=str, default=None)
 parser.add_argument("--rootfs_path", help="Select the path to rootfs", type=str, default=None)
 parser.add_argument("--rootfs_base", help="Select the base URL to rootfs", type=str, default=None)
 parser.add_argument("--rootfs_loc", help="Select the location of rootfs", type=str, default=None)
@@ -1707,6 +1936,9 @@ parser.add_argument("--randconfigseed", type=str, help="randconfig seed")
 parser.add_argument("--scandir", type=str, help="Directory to boot via bootdir action")
 parser.add_argument("--arch", type=str, help="Arch to boot via bootdir action", default=None)
 parser.add_argument("--waitforjobsend", "-W", help="Wait until all jobs ended", action="store_true")
+parser.add_argument("--upstatus", "-u", help="Update status", action="store_true")
+parser.add_argument("--compstatus", help="Compare with reference status", action="store_true")
+parser.add_argument("--bwarn", help="Enable build warnings and check", action="store_true")
 args = parser.parse_args()
 
 if args.source is None and args.action != "bootdir":
@@ -1787,8 +2019,77 @@ pprint.pprint(builds)
 with open('result-build.yml', 'w') as rfile:
     yaml.dump(builds, rfile, default_flow_style=False)
 
+def dump_joblog(reportdir, laburi, jobid):
+    print(f"DEBUG: dump joblog to {reportdir} for {jobid}")
+    server = xmlrpc.client.ServerProxy(laburi, allow_none=True)
+    try:
+        job_out_raw = server.scheduler.job_output(jobid)
+        job_out = yaml.safe_load(job_out_raw.data)
+    except xmlrpc.client.Fault:
+        print("ERROR: no job output")
+        return
+
+    flog = open(f"{reportdir}/{jobid}.log", 'w')
+    flogh = open(f"{reportdir}/{jobid}.html", 'w')
+    flogh.write('<html><head><link rel="stylesheet" href="/lava/log.css" type="text/css" /></head><body>')
+    for line in job_out:
+                #if "lvl" in line and (line["lvl"] == "info" or line["lvl"] == "debug" or line["lvl"] == "target" or line["lvl"] == "feedback"):
+        for msg in line["msg"]:
+            flog.write(msg)
+            flogh.write(msg)
+        flog.write("\n")
+        flogh.write("<br>\n")
+    flogh.write("</body></html>")
+    flog.close()
+    flogh.close()
+
+def do_report(labname, jobid, laburi):
+    if args.reportdir is None:
+        return
+    reportdir = args.reportdir
+    print(f"DEBUG: create job report in {reportdir}")
+    server = xmlrpc.client.ServerProxy(laburi, allow_none=True)
+    job_detail = server.scheduler.job_details(jobid)
+    device_type = job_detail["requested_device_type_id"]
+    job_health = server.scheduler.job_health(jobid)
+    fhtml = f"{reportdir}/{args.target}.html"
+    fjob = open(fhtml, 'a')
+
+    fjob.write('<div class="job">\n')
+    fjob.write('<div class="device_type">\n')
+    fjob.write(device_type)
+    fjob.write("</div>\n")
+    fjob.write('<div class="jobname">\n')
+    fjob.write(job_detail["description"])
+    fjob.write("</div>\n")
+    fjob.write('<div class="health">\n')
+    fjob.write(job_health["job_health"])
+    fjob.write("</div>\n")
+    fjob.write(f'<br><a href="{jobid}.html">See logs</a>')
+    #fjob.write(f'<br><a href="{jobid}.config">See config</a>')
+    testjob_results_raw = server.results.get_testjob_results_yaml(jobid)
+    #print(testjob_results_raw)
+    testjob_results = yaml.safe_load(testjob_results_raw)
+    for test in testjob_results:
+        if test["suite"] == "lava":
+            #print("DEBUG: SKIP: lava")
+            continue
+        if test["result"] == 'pass':
+            fjob.write('<div class="test pass">\n')
+        elif test["result"] == 'skip':
+            fjob.write('<div class="test skip">\n')
+        else:
+            fjob.write('<div class="test fail">\n')
+        fjob.write(test["name"])
+        #print(test["name"])
+        #print(test)
+        fjob.write("</div>\n")
+    fjob.write("</div>\n")
+    fjob.close()
+    dump_joblog(reportdir, laburi, jobid)
+
 pprint.pprint(boots)
-if args.waitforjobsend:
+if len(boots) > 0 and (args.waitforjobsend or args.upstatus or args.compstatus):
     all_jobs_ended = False
     while not all_jobs_ended:
         time.sleep(60)
@@ -1806,14 +2107,155 @@ if args.waitforjobsend:
                         all_jobs_ended = False
                         print("Wait for job %d" % jobid)
                         print(jobd)
-                    else:
+                    elif "health" not in boots[labname][jobid]:
+                        print("job %d end" % jobid)
+                        do_report(lab["name"], jobid, lab["lavauri"])
                         boots[labname][jobid]["health"] = jobd["health"]
                         boots[labname][jobid]["state"] = jobd["state"]
+                        boots[labname][jobid]["tests"] = []
+                        testjob_results_raw = server.results.get_testjob_results_yaml(jobid)
+                        testjob_results = yaml.safe_load(testjob_results_raw)
+                        for test in testjob_results:
+                            #if test["suite"] == "lava":
+                            #    continue
+                            r = {}
+                            r["suite"] = test["suite"]
+                            r["name"] = test["name"]
+                            r["result"] = test["result"]
+                            boots[labname][jobid]["tests"].append(r)
                 except OSError as e:
                     print(e)
                 except TimeoutError as e:
                     print(e)
 with open('result-boots.yml', 'w') as rfile:
     yaml.dump(boots, rfile, default_flow_style=False)
+
+# store in $cache/reference/$arch/$defconfig/$board.yaml
+# need to store CONFIGs
+if args.upstatus:
+    print("INFO: update reference status")
+    with open('result-boots.yml', 'r') as rfile:
+        boots = yaml.safe_load(rfile)
+    refdir = "%s/reference/" % cachedir
+    if not os.path.isdir(refdir):
+        os.mkdir(refdir)
+    for labname in boots:
+        for lab in tlabs["labs"]:
+            if lab["name"] == labname:
+                break;
+        for jobid in boots[labname]:
+            devicename = boots[labname][jobid]["devicename"]
+            if boots[labname][jobid]["health"] != 'Complete':
+                print("ERROR: cannot reference bad job")
+                continue
+            if boots[labname][jobid]["state"] != 'Finished':
+                print("ERROR: cannot reference bad job")
+                continue
+            try:
+                with open('%s/%s.yml' % (refdir, devicename), 'r') as state_yaml_file:
+                    state = yaml.safe_load(state_yaml_file)
+            except FileNotFoundError:
+                state = {}
+            server = xmlrpc.client.ServerProxy(lab["lavauri"], allow_none=True)
+            jobdef_r = server.scheduler.jobs.definition(jobid)
+            jobdef = yaml.safe_load(jobdef_r)
+            jobdesc = jobdef["metadata"]["git.describe"]
+            print(jobdesc)
+            jobversion = re.sub("-[0-9][0-9]-[a-z0-9]*$", "", jobdesc)
+            jobversion = re.sub("-[0-9][0-9][0-9][0-9]-[a-z0-9]*$", "", jobversion)
+            testjob_results_raw = server.results.get_testjob_results_yaml(jobid)
+            try:
+                testjob_results = yaml.load(testjob_results_raw)
+            except:
+                testjob_results = yaml.unsafe_load(testjob_results_raw)
+            # find more recent version
+            pattern = "^next-"
+            if re.search("^v[0-9]", jobversion):
+                pattern = "^v[0-9]"
+            last = None
+            for version in state:
+                if not re.search(pattern, version):
+                    print("DEBUG: Ignore %s" % version)
+                    continue
+                if last is None:
+                    last = version
+                else:
+                    print("DEBUG: compare last=%s with %s" % (last, version))
+                    if LooseVersion(last) < LooseVersion(version):
+                        last = version
+            if jobversion not in state and args.upstatus:
+                state[jobversion] = {}
+                for test in testjob_results:
+                    if test["suite"] == "lava":
+                        #print("DEBUG: SKIP: lava")
+                        continue
+                    if not test["suite"] in state[jobversion]:
+                        state[jobversion][test["suite"]] = {}
+                    state[jobversion][test["suite"]][test["name"]] = {}
+                    state[jobversion][test["suite"]][test["name"]]["result"] = test["result"]
+                with open('%s/%s.yml' % (refdir, devicename), 'w') as state_yaml_file:
+                    yaml.dump(state, state_yaml_file, default_flow_style=False)
+                cs = state[jobversion]
+            else:
+                print("DEBUG: %s already registred" % jobversion)
+                tstate = {}
+                for test in testjob_results:
+                    if test["suite"] == "lava":
+                        continue
+                    if not test["suite"] in tstate:
+                        tstate[test["suite"]] = {}
+                    tstate[test["suite"]][test["name"]] = {}
+                    tstate[test["suite"]][test["name"]]["result"] = test["result"]
+                cs = tstate
+
+            if last is None:
+                continue
+            print("DEBUG: compare with %s" % last)
+            os = state[last]
+            for suite in cs:
+                if suite not in os:
+                    print("INFO: New suite %s" % suite)
+                    continue
+            for suite in os:
+                if suite not in cs:
+                    print("INFO: Missing suite %s" % suite)
+                    continue
+                for otest in os[suite]:
+                    if otest in cs[suite]:
+                        if "result" not in cs[suite][otest]:
+                            print("Missing result in current %s" % otest)
+                        if "result" not in os[suite][otest]:
+                            print("Missing result in old %s" % otest)
+                        if os[suite][otest]["result"] != cs[suite][otest]["result"]:
+                            print("DEBUG: %s changed from %s to %s" % (otest, os[suite][otest]["result"], cs[suite][otest]["result"]))
+                    else:
+                        print("INFO: %s disappaeared in %s" % (otest, jobversion))
+                for ctest in cs[suite]:
+                    if ctest not in os[suite]:
+                        print("INFO: %s new in %s" % (ctest, jobversion))
+
+    sys.exit(0)
+    statusfile = open("%s/status.yaml" % cachedir)
+    status = yaml.safe_load(statusfile)
+    pprint.pprint(status)
+    for boot in boots["qemu"]:
+        arch = boots["qemu"][boot]["arch"]
+        devicename = boots["qemu"][boot]["devicename"]
+        targetname = boots["qemu"][boot]["targetname"]
+        sourcename = boots["qemu"][boot]["sourcename"]
+        print("DEBUG: check %s %s %s %s" % (arch, devicename, sourcename, targetname))
+        if status["status"] is None:
+            status["status"] = {}
+        if not arch in status["status"]:
+            status["status"][arch] = {}
+        if not devicename in status["status"][arch]:
+            status["status"][arch][devicename] = {}
+        if not sourcename in status["status"][arch][devicename]:
+            status["status"][arch][devicename][sourcename] = {}
+        if not targetname in status["status"][arch][devicename][sourcename]:
+            status["status"][arch][devicename][sourcename][targetname] = {}
+        status["status"][arch][devicename][sourcename][targetname] = boots["qemu"][boot]["result"]
+    with open('%s/status.yaml' % cachedir, 'w') as outfile:
+        yaml.dump(status, outfile, default_flow_style=False)
 
 sys.exit(0)

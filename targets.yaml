@@ -8,13 +8,24 @@ targets:
     flavour: defconfig
     defconfig: multi_v7_defconfig
     full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
-    warnings: "W=1 C=1"
     tags: { defconfig }
     configs:
       - name: "CONFIG_PCIE_XILINX=y"
       - name: "CONFIG_XILINX_ZYNQMP_DMA=y"
       - name: "CONFIG_IMX_DMA=y"
         disable: True
+  - name: rpi_defconfig
+    larch: arm
+    flavour: rpi
+    defconfig: rpi_defconfig
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
+    tags: { defconfig }
+  - name: multi_v7_debug
+    larch: arm
+    flavour: debug
+    defconfig: multi_v7_defconfig debug.config
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
+    tags: { defconfig }
   - name: ixp4xx_defconfig
     larch: arm
     subarch: ixp4xx
@@ -23,11 +34,19 @@ targets:
     full_tgt: dtbs zImage modules
     warnings: "W=1"
     tags: { defconfig }
-  - name: prodgemini_defconfig
+  - name: ixp4xx_defdebug
+    larch: arm
+    subarch: ixp4xx
+    flavour: defdebug
+    defconfig: ixp4xx_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1 C=2 CHECK=smatch"
+    tags: { defconfig }
+  - name: ns2502_defconfig
     larch: arm
     subarch: gemini
     flavour: prod
-    defconfig: prodgemini_defconfig
+    defconfig: ns2502_defconfig
     full_tgt: dtbs zImage modules
     warnings: "W=1"
   - name: mygemini_defconfig
@@ -38,6 +57,14 @@ targets:
     full_tgt: dtbs zImage modules
     warnings: "W=1"
   - name: gemini_defconfig
+    larch: arm
+    subarch: gemini
+    flavour: defconfig
+    defconfig: gemini_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "W=1"
+    tags: { defconfig }
+  - name: gemini2_defconfig
     larch: arm
     subarch: gemini
     flavour: defconfig
@@ -114,6 +141,13 @@ targets:
     defconfig: tegra_defconfig
     full_tgt: dtbs zImage modules
     warnings: "-W1"
+  - name: mytegra_defconfig
+    larch: arm
+    subarch: tegra
+    flavour: mydefconfig
+    defconfig: mytegra_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "-W1"
   - name: arm64_generic
     larch: arm64
     full_tgt: dtbs Image modules
@@ -134,6 +168,12 @@ targets:
     defconfig: bcm2711_defconfig
     full_tgt: dtbs Image modules
     warnings: "-W1"
+  - name: rockchip_linux_defconfig
+    larch: arm64
+    subarch: rk3588
+    flavour: defconfig
+    defconfig: rockchip_linux_defconfig
+    full_tgt: dtbs Image modules
   - name: alpha_clipper
     larch: alpha
     subarch: clipper
@@ -173,11 +213,39 @@ targets:
     defconfig: defconfig
     full_tgt: dtbs Image modules LOADADDR=0x40008000
     warnings: "W=1"
+  - name: dtb64_defconfig
+    larch: arm64
+    subarch: default
+    flavour: dtb64
+    defconfig: defconfig
+    full_tgt: dtbs_check dtbs
+    warnings: "W=1"
+  - name: arm64_debug
+    larch: arm64
+    subarch: default
+    flavour: debug
+    defconfig: defconfig debug.config
+    full_tgt: dtbs Image modules LOADADDR=0x40008000
+    warnings: "W=1"
+  - name: meson64_defconfig
+    larch: arm64
+    subarch: amlogic
+    flavour: defconfig
+    defconfig: meson64_defconfig
+    full_tgt: dtbs Image modules
+    warnings: "W=1"
   - name: sunxi64_defconfig
     larch: arm64
     subarch: sunxi
     flavour: defconfig
     defconfig: sunxi64_defconfig
+    full_tgt: dtbs Image modules
+    warnings: "W=1"
+  - name: sunxi64_debug
+    larch: arm64
+    subarch: sunxi
+    flavour: debug
+    defconfig: sunxi64_defconfig debug.config
     full_tgt: dtbs Image modules
     warnings: "W=1"
   - name: exynos_defconfig
@@ -226,7 +294,7 @@ targets:
     larch: mips
     subarch: mips64
     flavour: malta
-    defconfig: malta_kvm_guest_defconfig
+    defconfig: malta_defconfig
     full_tgt: vmlinux modules
     warnings: "-W1"
     bits: 64
@@ -237,6 +305,7 @@ targets:
     subarch: ip28
     full_tgt: vmlinux modules
     warnings: "-W1"
+    defconfig: ip28_defconfig
   - name: omap1_defconfig
     larch: arm
     subarch: omap1
@@ -273,7 +342,7 @@ targets:
     larch: mips
     subarch: mips32
     flavour: defconfig
-    defconfig: malta_kvm_guest_defconfig
+    defconfig: malta_defconfig
     full_tgt: vmlinux vmlinuz modules
     warnings: "-W1"
   - name: mips_generic
@@ -405,8 +474,17 @@ targets:
     larch: sparc
     subarch: sparc64
     flavour: defconfig
-    full_tgt: vmlinux modules tftpboot.img
+    full_tgt: vmlinux modules tftpboot.img zImage
     defconfig: sparc64_defconfig
+    bits: 64
+    configs:
+      - name: "CONFIG_PCNET32=y"
+  - name: ultra80_defconfig
+    larch: sparc
+    subarch: sparc64
+    flavour: ultra80
+    full_tgt: vmlinux modules tftpboot.img
+    defconfig: ultra80_defconfig
     bits: 64
     configs:
       - name: "CONFIG_PCNET32=y"
@@ -421,6 +499,13 @@ targets:
       - name: "CONFIG_SUN4I_GPADC=y"
       - name: "CONFIG_GENERIC_ADC_THERMAL=y"
       - name: "CONFIG_SENSORS_IIO_HWMON=y"
+  - name: sunxi_debug
+    larch: arm
+    flavour: debug
+    defconfig: sunxi_defconfig debug.config
+    full_tgt: dtbs uImage zImage modules LOADADDR=0x40008000
+    warnings: "W=1 C=1"
+    tags: { defconfig }
   - name: versatile_defconfig
     larch: arm
     subarch: versatile
@@ -449,7 +534,7 @@ targets:
     flavour: defconfig
     defconfig: x86_64_defconfig
     full_tgt: bzImage modules
-    warnings: "W=1"
+    warnings: "-W1"
   - name: laptop
     larch: x86_64
     flavour: defconfig
@@ -459,11 +544,35 @@ targets:
     configs:
       - name: "CONFIG_ATL1C=y"
       - name: "CONFIG_ATH9K=y"
+  - name: zoran_defconfig
+    larch: x86_64
+    flavour: zoran
+    full_tgt: bzImage modules
+    warnings: "W=1"
+    defconfig: zoran_defconfig
   - name: zoran
     larch: x86_64
     flavour: zoran
     full_tgt: bzImage modules
     warnings: "W=1 C=1"
+  - name: lava_qemu_defconfig
+    larch: x86_64
+    flavour: lava
+    full_tgt: bzImage modules
+    warnings: "W=1 C=1"
+    defconfig: lava_qemu_defconfig
+  - name: 486_defconfig
+    larch: x86
+    flavour: "486"
+    defconfig: 486_defconfig
+    full_tgt: bzImage modules
+    warnings: "-W1"
+  - name: p3_defconfig
+    larch: x86
+    flavour: "p3"
+    defconfig: p3_defconfig
+    full_tgt: bzImage modules
+    warnings: "-W1"
   - name: x86_defconfig
     larch: x86
     flavour: defconfig
@@ -472,6 +581,12 @@ targets:
     warnings: "-W1"
   - name: x86_generic
     larch: x86
+    full_tgt: bzImage modules
+    warnings: "-W1"
+  - name: zardoz_defconfig
+    larch: x86
+    flavour: zardoz
+    defconfig: zardoz_defconfig
     full_tgt: bzImage modules
     warnings: "-W1"
   - name: generic_kc705_defconfig
@@ -550,6 +665,33 @@ targets:
     full_tgt: bzImage modules
     warnings: "-W1"
     randconfig: True
+  - name: i386_randconfig
+    larch: x86
+    subarch: default
+    flavour: randconfig
+    full_tgt: bzImage modules
+    warnings: "-W1"
+    randconfig: True
+  - name: nezha_defconfig
+    larch: riscv
+    subarch: default
+    flavour: default
+    full_tgt: vmlinux dtbs Image modules
+    defconfig: nezha_defconfig
+  - name: visionfive_defconfig
+    larch: riscv
+    subarch: default
+    flavour: visionfive
+    full_tgt: vmlinux dtbs Image modules
+    warnings: "-W1"
+    defconfig: visionfive_defconfig
+  - name: riscv_defconfig
+    larch: riscv
+    subarch: default
+    flavour: defconfig
+    full_tgt: vmlinux dtbs Image modules
+    warnings: "-W1"
+    defconfig: defconfig
 configoverlays:
   - name: crypto
     list:
@@ -570,6 +712,14 @@ configoverlays:
         disable: True
       - config: CONFIG_CRYPTO_AES_ARM64
         disable: True
+  - name: minidebug
+    list:
+      - config: CONFIG_DEBUG_KERNEL=y
+      - config: CONFIG_DEBUG_SG=y
+      - config: CONFIG_DEBUG_MUTEXES=y
+      - config: CONFIG_DEBUG_SPINLOCK=y
+      - config: CONFIG_DEBUG_ATOMIC_SLEEP=y
+      - config: CONFIG_DMA_API_DEBUG=y
   - name: debug
     list:
       - config: CONFIG_DEBUG_KERNEL=y
@@ -603,6 +753,9 @@ configoverlays:
       - config: CONFIG_USB_UAS=m
       - config: CONFIG_SCSI_DH=y
       - config: CONFIG_CHR_DEV_SG=y
+  - name: ppp
+    list:
+      - config: CONFIG_PPP=y
   - name: ipsec
     list:
       - config: CONFIG_INET_AH=y
@@ -719,6 +872,7 @@ configoverlays:
       - config: CONFIG_NFSD_V4
       - config: CONFIG_USB_SERIAL_PL2303=y
       - config: CONFIG_USB_SERIAL_CH341=y
+      - config: CONFIG_USB_SERIAL_CH348=y
       - config: CONFIG_USB_SERIAL_CP210X=y
   - name: usbdmux
     list:
@@ -871,6 +1025,10 @@ configoverlays:
         disable: True
       - config: CONFIG_MFD_ROHM_BD718XX
         disable: True
+  - name: noethernet
+    list:
+      - config: CONFIG_ETHERNET
+        disable: True
   - name: nowireless
     list:
       - config: CONFIG_WLAN_VENDOR_ATH
@@ -910,11 +1068,24 @@ configoverlays:
         disable: True
       - config: CONFIG_USB_PHY
         disable: True
+  - name: noapparmor
+    comment: disable app armor
+    list:
+      - config: CONFIG_SECURITY_APPARMOR
+        disable: True
   - name: nonet
-    comment: disable power management
+    comment: Remove net
     list:
       - config: CONFIG_NETDEVICES
         disable: True
+      - config: CONFIG_NET
+        disable: True
+  - name: pmdebug
+    list:
+      - config: CONFIG_PM
+      - config: CONFIG_SUSPEND
+      - config: CONFIG_PM_DEBUG
+      - config: CONFIG_PM_TEST_SUSPEND
   - name: nopm
     comment: disable power management
     list:
@@ -938,6 +1109,8 @@ configoverlays:
     comment: disable netfiler
     list:
       - config: CONFIG_NETFILTER
+        disable: True
+      - config: CONFIG_IP_NF_IPTABLES
         disable: True
   - name: nommc
     comment: disable all MMC
@@ -984,6 +1157,16 @@ configoverlays:
   - name: tegrausb
     list:
       - config: CONFIG_EXTRA_FIRMWARE="nvidia/tegra124/xusb.bin"
+  - name: tegra
+    list:
+      - config: CONFIG_TEGRA_SOCTHERM=y
+      - config: CONFIG_TEGRA30_TSENSOR=y
+      - config: CONFIG_VUB300
+        disable: True
+      - config: CONFIG_USB_MON=y
+  - name: usbsdmux
+    list:
+      - config: CONFIG_CHR_DEV_SG=y
   - name: arm-xilinx
     list:
       - config: "CONFIG_PCIE_XILINX=y"
@@ -1008,6 +1191,12 @@ configoverlays:
     list:
       - config: CONFIG_SND_HDA=y
       - config: CONFIG_SND_HDA_INTEL=y
+      - config: CONFIG_SND_HDA_GENERIC=y
+      - config: CONFIG_SND_HDA_CODEC_REALTEK=y
+      - config: CONFIG_SND_HDA_RECONFIG=y
+      - config: CONFIG_SND_PCM_OSS=y
+      - config: CONFIG_SND_PCM_OSS_PLUGINS=y
+      - config: CONFIG_SND_SEQUENCER_OSS=y
   - name: lpae
     list:
       - config: CONFIG_ARM_LPAE=y
@@ -1047,6 +1236,14 @@ configoverlays:
       - config: CONFIG_MEDIA_USB_SUPPORT=y
       - config: CONFIG_MEDIA_ANALOG_TV_SUPPORT=y
       - config: CONFIG_VIDEO_CX231XX=y
+      - config: CONFIG_HFS_FS=y
+      - config: CONFIG_HFSPLUS_FS=y
+      - config: CONFIG_DM_SNAPSHOT=m
+      - config: CONFIG_PARTITION_ADVANCED=y
+      - config: CONFIG_MAC_PARTITION=y
+      - config: CONFIG_USB_GSPCA=y
+      - config: CONFIG_USB_VIDEO_CLASS=y
+      - config: CONFIG_TUN=y
   - name: cryptostat
     list:
       - config: CONFIG_CRYPTO_USER=y
@@ -1056,6 +1253,10 @@ configoverlays:
       - config: CONFIG_USB_USBNET=y
       - config: CONFIG_USB_NET_AX8817X=y
       - config: CONFIG_USB_NET_AX88179_178A=y
+  - name: nousbnet
+    list:
+      - config: CONFIG_USB_USBNET
+        disable: true
   # configs for the server with adm1029
   - name: adm1029
     list:
@@ -1084,6 +1285,38 @@ configoverlays:
   - name: ftrace
     list:
       - config: CONFIG_FTRACE=y
+  - name: upsquare
+    list:
+      - config: CONFIG_MFD_INTEL_LPSS_PCI=y
+      - config: CONFIG_MFD_INTEL_LPSS_ACPI=y
+      - config: CONFIG_X86_INTEL_LPSS=y
+      - config: CONFIG_SERIAL_8250_DW=y
+      - config: CONFIG_LOCALVERSION_AUTO=y
+  - name: upsquareold
+    list:
+      - config: CONFIG_X86_INTEL_MID=y
+      - config: CONFIG_INTEL_PMC_CORE=y
+      - config: CONFIG_INTEL_IDLE=y
+      - config: CONFIG_INTEL_IOMMU_SVM=y
+      - config: CONFIG_INTEL_IOMMU_DEFAULT_ON_INTGPU_OFF=y
+      - config: CONFIG_INTEL_TXT=y
+      - config: CONFIG_INTEL_RST=y
+      - config: CONFIG_INTEL_TH=y
+      - config: CONFIG_PINCTRL_BAYTRAIL=y
+      - config: CONFIG_PINCTRL_CHERRYVIEW=y
+      - config: CONFIG_PINCTRL_BROXTON=y
+      - config: CONFIG_PINCTRL_CANNONLAKE=y
+      - config: CONFIG_PINCTRL_CEDARFORK=y
+      - config: CONFIG_PINCTRL_DENVERTON=y
+      - config: CONFIG_PINCTRL_GEMINILAKE=y
+      - config: CONFIG_PINCTRL_ICELAKE=y
+      - config: CONFIG_PINCTRL_LEWISBURG=y
+      - config: CONFIG_PINCTRL_SUNRISEPOINT=y
+      - config: CONFIG_PINCTRL_TIGERLAKE=y
+      - config: CONFIG_INTEL_IOMMU_DEFAULT_ON=y
+      - config: CONFIG_ACPI_PCI_SLOT=y
+      - config: CONFIG_ACPI_HED=y
+      - config: CONFIG_ACPI_HMAT=y
   - name: fuse
     list:
       - config: CONFIG_FUSE_FS=y
@@ -1141,6 +1374,9 @@ configoverlays:
       - config: CONFIG_INOTIFY_USER=y
       - config: CONFIG_SIGNALFD=y
       - config: CONFIG_TIMERFD=y
+  - name: cifs
+    list:
+      - config: CONFIG_CIFS=y
   - name: cubie
     list:
       - config: CONFIG_CIFS=y
@@ -1156,6 +1392,24 @@ configoverlays:
   - name: ntfs
     list:
       - config: CONFIG_NTFS_FS
+  - name: noata
+    list:
+      - config: CONFIG_ATA
+        disable: True
+  - name: nocrypto
+    list:
+      - config: CONFIG_CRYPTO_DEV_SUN8I_SS
+        disable: True
+      - config: CONFIG_CRYPTO_DEV_SUN8I_CE
+        disable: True
+      - config: CONFIG_CRYPTO_DEV
+        disable: True
+  - name: xtest
+    list:
+      - config: CONFIG_HWMON=y
+      - config: CONFIG_SENSORS_ACPI_POWER=y
+      - config: CONFIG_ACPI_DEBUG=y
+      - config: CONFIG_ACPI_DEBUGGER=y
   - name: sparky
     list:
       - config: CONFIG_CMDLINE_BOOL=y
@@ -1246,6 +1500,18 @@ configoverlays:
         disable: True
       - config: CONFIG_CRYPTO_ANUBIS
         disable: True
+  - name: nocgroup
+    list:
+      - config: CONFIG_SCHED_AUTOGROUP
+        disable: True
+      - config: CONFIG_CGROUPS_SCHED
+        disable: True
+      - config: CONFIG_CGROUPS_PIDS
+        disable: True
+      - config: CONFIG_BLK_CGROUPS
+        disable: True
+      - config: CONFIG_CGROUPS
+        disable: True
   - name: infra
     list:
       - config: CONFIG_MFD_SUN4I_GPADC=m
@@ -1279,3 +1545,84 @@ configoverlays:
   - name: dongle
     list:
       - config: CONFIG_USB_STORAGE=m
+  - name: regulator_debug
+    list:
+      - config: CONFIG_REGULATOR_DEBUG=y
+  - name: pmac
+    list:
+      - config: CONFIG_AGP=y
+  - name: spd
+    list:
+      - config: CONFIG_EEPROM_AT24=y
+  - name: i2c
+    list:
+      - config: CONFIG_I2C_CHARDEV=y
+  - name: dhcp
+    list:
+      - config: CONFIG_IP_PNP=y
+      - config: CONFIG_IP_PNP_DHCP=y
+  - name: debugx
+    list:
+      - config: CONFIG_DEBUG_KERNEL=y
+      - config: CONFIG_DEBUG_BUGVERBOSE=y
+      - config: CONFIG_DEBUG_INFO=y
+      - config: CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y
+      - config: CONFIG_DEBUG_UBSAN=y
+      - config: CONFIG_DEBUG_UBSAN_BOOL=y
+      - config: CONFIG_DEBUG_UBSAN_BOUNDS=y
+      - config: CONFIG_DEBUG_UBSAN_ENUM=y
+      - config: CONFIG_DEBUG_UBSAN_UNREACHABLE=y
+      - config: CONFIG_DEBUG_KASAN_SHIFT=y
+      - config: CONFIG_DEBUG_KASAN_GENERIC=y
+      - config: CONFIG_DEBUG_KASAN_INLINE=y
+      - config: CONFIG_DEBUG_KASAN_VMALLOC=y
+      - config: CONFIG_DEBUG_PAGE_EXTENSION=y
+      - config: CONFIG_DEBUG_PAGE_OWNER=y
+      - config: CONFIG_DEBUG_SG=y
+      - config: CONFIG_DEBUG_MUTEXES=y
+      - config: CONFIG_DEBUG_SPINLOCK=y
+      - config: CONFIG_DEBUG_ATOMIC_SLEEP=y
+      - config: CONFIG_DMA_API_DEBUG=y
+      - config: CONFIG_PROVE_LOCKING=y
+      - config: CONFIG_DYNAMUC_FRACE=y
+      - config: CONFIG_FRACE=y
+      - config: CONFIG_FUNCTION_TRACER=y
+  - name: rk3588
+    list:
+      - config: CONFIG_INITRAMFS_SOURCE=/var/www/boot.montjoie.local/htdocs/rootfs/arm64/rootfs.cpio.gz
+  - name: ixp4xx
+    list:
+      - config: CONFIG_ATM
+        disable: True
+      - config: CONFIG_I2C
+        disable: True
+      - config: CONFIG_X25
+        disable: True
+      - config: CONFIG_ATALK
+        disable: True
+      - config: CONFIG_STP
+        disable: True
+      - config: CONFIG_BRIDGE
+        disable: True
+      - config: CONFIG_IP_VS
+        disable: True
+      - config: CONFIG_WAN
+        disable: True
+      - config: CONFIG_LAPB
+        disable: True
+      - config: CONFIG_VLAN_8021Q
+        disable: True
+      - config: CONFIG_IP_ADVANCED_ROUTER
+        disable: True
+      - config: CONFIG_SQUASHFS
+        disable: True
+      - config: CONFIG_NET_SCHED
+        disable: True
+      - config: CONFIG_CRYPTO_DEV_SAFEXCEL
+        disable: True
+      - config: CONFIG_CRYPTO_DEV_CCREE
+        disable: True
+      - config: CONFIG_CRYPTO_DEV_AMLOGIC_GXL
+        disable: True
+      - config: CONFIG_CRYPTO_DEV_HIFN_795X
+        disable: True

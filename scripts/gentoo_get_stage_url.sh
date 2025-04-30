@@ -2,7 +2,8 @@
 
 DEBUG=0
 CACHEDIR=$(pwd)
-RFS_BASE=http://gentoo.mirrors.ovh.net
+RFS_BASE=http://gentoo.mirrors.ovh.net/gentoo-distfiles/
+RFS_BASE=http://ftp.free.fr/mirrors/ftp.gentoo.org/
 SELINUX=0
 ARCH_OPTION=""
 
@@ -21,7 +22,7 @@ do
 	;;
 	--selinux)
 		SELINUX=1
-		ARCH_OPTION="-hardened-selinux+nomultilib"
+		ARCH_OPTION="-hardened-nomultilib-selinux"
 		shift
 	;;
 	--arch)
@@ -39,6 +40,9 @@ do
 		armbe)
 			echo "ERROR: armbe not supported by gentoo"
 			exit 1
+		;;
+		powerpc)
+			ARCH=ppc
 		;;
 		esac
 		if [ "$ARCH" = 'x86_64' ];then
@@ -89,14 +93,14 @@ CHECK_SIG=1
 
 found_latest()
 {
-	RFS_BPATH=/gentoo-distfiles/releases/$ARCH/autobuilds
+	RFS_BPATH=/releases/$ARCH/autobuilds
 	BASEURL=$RFS_BASE$RFS_BPATH
 	case $ARCH in
 	arm)
 		SARCH=armv7a_hardfp
 	;;
 	arm64)
-		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH
+		RFS_BPATH=/experimental/$ARCH
 		BASEURL=$RFS_BASE$RFS_BPATH
 		wget -q "$BASEURL/"
 		if [ ! -e index.html ];then
@@ -110,37 +114,46 @@ found_latest()
 		return 0
 	;;
 	sparc64)
-		RFS_BPATH=/gentoo-distfiles/releases/sparc/autobuilds
+		RFS_BPATH=/releases/sparc/autobuilds
 		BASEURL=$RFS_BASE$RFS_BPATH
 	;;
 	ppc64)
-		RFS_BPATH=/gentoo-distfiles/releases/ppc/autobuilds
+		RFS_BPATH=/releases/ppc/autobuilds
 		BASEURL=$RFS_BASE$RFS_BPATH
 	;;
 	hppa)
 		ARCH_OPTION="1.1"
 	;;
 	m68k)
-		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH/
+		RFS_BPATH=/experimental/$ARCH/
 		BASEURL=$RFS_BASE$RFS_BPATH
 		LATEST="stage3-m68k-20130509.tar.bz2"
 		CHECK_SIG=0
 		return
 	;;
 	mips)
-		RFS_BPATH=/gentoo-distfiles/experimental/$ARCH/autobuilds
+		RFS_BPATH=/experimental/$ARCH/autobuilds
 		BASEURL=$RFS_BASE$RFS_BPATH
 		# TODO
 		exit 1
 	;;
+	x86)
+		SARCH=i686
+	;;
 	esac
 
-	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}.txt"
+	LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}-openrc.txt"
 	wget -q "$BASEURL/$LATEST_TXT"
 	RET=$?
+	grep -q '404 - Not Found' $LATEST_TXT && RET=1
 	if [ $RET -ne 0 ];then
-		echo "ERROR: fail to grab $BASEURL/$LATEST_TXT"
-		exit 1
+		LATEST_TXT="latest-stage3-${SARCH}${ARCH_OPTION}"
+		wget -q "$BASEURL/$LATEST_TXT"
+		RET=$?
+		if [ $RET -ne 0 ];then
+			echo "ERROR: fail to grab $BASEURL/$LATEST_TXT"
+			exit 1
+		fi
 	fi
 	echo "ROOTFS_LATEST=$BASEURL/$LATEST_TXT"
 	LATEST=$(grep -v ^# $LATEST_TXT | cut -d' ' -f1)
@@ -151,30 +164,34 @@ found_latest || exit $?
 
 debug "Found latest success"
 
-wget -q "$BASEURL/$LATEST.DIGESTS"
+echo "INFO: download $BASEURL/$LATEST.DIGESTS"
+wget -N -q "$BASEURL/$LATEST.DIGESTS"
 if [ $? -ne 0 ];then
 	echo "ERROR: fail to download $BASEURL/$LATEST.DIGESTS"
 	rm $LATEST_TXT
 	exit 1
 fi
 
-DIGESTS_ASC=$(basename "$LATEST.DIGESTS.asc")
+DIGESTS_ASC=$(basename "$LATEST.asc")
 DIGESTS=$(basename "$LATEST.DIGESTS")
 
 if [ $CHECK_SIG -eq 1 ];then
-	wget -q "$BASEURL/$LATEST.DIGESTS.asc"
+	echo "INFO: download $BASEURL/$LATEST.asc"
+	wget -N -q "$BASEURL/$LATEST.asc"
 	RET=$?
 	if [ $RET -ne 0 ];then
-		echo "ERROR: fail to download $BASEURL/$LATEST.DIGESTS.asc"
+		echo "ERROR: fail to download $BASEURL/$LATEST.asc"
 		rm latest-stage3-$SARCH.txt
 		rm latest-stage3-$SARCH.DIGESTS
 		exit 1
 	fi
 
-	gpg --batch -q --verify "$DIGESTS_ASC" >gpg.out 2>gpg.err
+	wget -N -q "$BASEURL/$LATEST"
+
+	gpg --batch -q --verify "$DIGESTS_ASC" "$(basename $LATEST)" >gpg.out 2>gpg.err
 	RET=$?
 	if [ $RET -ne 0 ];then
-		echo "ERROR: GPG fail to verify"
+		echo "ERROR: GPG fail to verify $DIGESTS_ASC"
 		cat gpg.out
 		cat gpg.err
 		rm gpg.err gpg.out
@@ -210,4 +227,3 @@ fi
 if [ -e "$LATEST_TXT" ];then
 	rm "$LATEST_TXT"
 fi
-echo "PORTAGE_URL=$RFS_BASE/gentoo-distfiles/snapshots/portage-latest.tar.bz2"

@@ -10,8 +10,10 @@ metadata:
   kernel.defconfig: {{ K_DEFCONFIG }}
   kernel.defconfig_base: {{ K_DEFCONFIG }}
   kernel.arch_defconfig: {{ K_DEFCONFIG }}
+  build.overlays: {{ BUILD_OVERLAYS }}
+  build.toolchain: {{ BUILD_TOOLCHAIN }}
   platform.fastboot: false
-  platform.name: qemu
+  platform.name: {{ qemu_machine }}
   platform.mach: {{ MACH }}
   test.plan: boot
   git.commit: {{ GIT_LASTCOMMIT }}
@@ -19,7 +21,7 @@ metadata:
   git.branch: {{ GIT_BRANCH }}
   git.url: http://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
   device.type: {{ DEVICETYPE }}
-  job.arch: {{ qemu_arch }}
+  job.arch: {{ ARCH }}
   job.name: {{ JOBNAME }}
   job.kernel_url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
   job.kernel_image: {{ KERNELFILE }}
@@ -45,6 +47,12 @@ timeouts:
       seconds: 30
 priority: high
 visibility: public
+
+{%- if rootfs_method == "nbd" %}
+protocols:
+  lava-xnbd:
+    port: auto
+{%- endif %}
 
 {%- if DEVICETYPE == "qemu" %}
 context:
@@ -83,6 +91,12 @@ context:
 
 actions:
 - deploy:
+{%- if rootfs_method == "nbd" %}
+    protocols:
+      lava-xnbd:
+      - action: nbd-deploy
+        request: set_port
+{%- endif %}
     timeout:
       minutes: 3
     to: {{ boot_media }}
@@ -109,6 +123,7 @@ actions:
 {%- endif %}
         url: {{ BOOT_FQDN }}{{ dtb_path }}
 {%- endif %}
+
 {%- if rootfs_method == "nfs" %}
       ramdisk:
 {%- if image_arg is defined %}
@@ -121,6 +136,43 @@ actions:
         url: {{ ROOT_FQDN }}/{{ rootfs_path }}
         compression: {{ ROOTFS_COMP }}
 {% endif %}
+
+{%- if rootfs_method == "nbd" %}
+      ramdisk:
+{%- if image_arg is defined %}
+        image_arg: '{{ image_arg }}'
+{% else %}
+        image_arg: '-initrd {ramdisk}'
+{%- endif %}
+        url: {{ RAMD_FQDN }}{{ initrd_path }}
+      nbdrootfs:
+        url: {{ ROOT_FQDN }}/{{ rootfs_path }}
+        compression: {{ ROOTFS_COMP }}
+{% endif %}
+
+{%- if test_raid == 'True' %}
+      sda:
+        url: http://boot.montjoie.local/drives/q-sda.img.gz
+        image_arg: '-drive format=raw,file={sda}'
+        compression: gz
+      sdb:
+        url: http://boot.montjoie.local/drives/q-sdb.img.gz
+        image_arg: '-drive format=raw,if=virtio,file={sdb}'
+        compression: gz
+      sdc:
+        url: http://boot.montjoie.local/drives/q-sdc.img.gz
+        image_arg: '-drive format=raw,if=virtio,file={sdc}'
+        compression: gz
+      sdd:
+        url: http://boot.montjoie.local/drives/q-sdd.img.gz
+        image_arg: '-drive format=raw,if=virtio,file={sdd}'
+        compression: gz
+      sde:
+        url: http://boot.montjoie.local/drives/q-sde.img.gz
+        image_arg: '-drive format=raw,if=virtio,file={sde}'
+        compression: gz
+{% endif %}
+
 
 - boot:
     timeout:
@@ -201,4 +253,92 @@ actions:
           path: execs/misc.yaml
           name: Misc
 {%- endif %}
+{%- if test_luks == 'True' %}
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/luks.yaml
+          name: luks
+{% endif %}
+{%- if test_infra == 'True' %}
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/infra.yaml
+          name: infra
+{% endif %}
+
 {%- endif %}
+
+{%- if test_raid == 'True' %}
+- test:
+    timeout:
+        minutes: 30
+    definitions:
+        - repository: https://github.com/montjoie/lava-tests.git
+          from: git
+          path: execs/mdadm.yaml
+          name: mdadm
+{% endif %}
+
+{%- if test_dma_api == 'True' %}
+- test:
+    timeout:
+        minutes: 240
+    definitions:
+        - repository:
+            metadata:
+              format: Lava-Test Test Definition 1.0
+              name: test_dma_api
+              description: "test DMA API debugfs"
+            run:
+              steps:
+              - mount -t debugfs none /sys/kernel/debug
+              - ls -l /sys/kernel/debug
+          from: inline
+          name: testdmaapi
+          path: inline/dm.yaml
+{% endif %}
+
+{%- if test_hc == 'True' %}
+- test:
+    timeout:
+      minutes: 1
+    definitions:
+    - repository:
+        metadata:
+          format: Lava-Test Test Definition 1.0
+          name: baseline
+          description: "Minimal HC test"
+          os:
+            - debian
+          scope:
+            - functional
+          environment:
+            - lava-test-shell
+        run:
+          steps:
+            - sleep 30
+            - lsusb
+            - modprobe dwmac-sunxi
+            - modprobe dwmac-sun8i
+            - modprobe asix
+            - ip a
+            - >
+                for level in warn err; do
+                  dmesg --level=$level --notime -x -k > dmesg.$level
+                done
+            - >
+                for level in crit alert emerg; do
+                  dmesg --level=$level --notime -x -k > dmesg.$level
+                  test -s dmesg.$level && res=fail || res=pass
+                  count=$(cat dmesg.$level | wc -l)
+                  lava-test-case $level \
+                    --result $res \
+                    --measurement $count \
+                    --units lines
+                done
+            - cat dmesg.emerg dmesg.alert dmesg.crit dmesg.err dmesg.warn
+      lava-signal: kmsg
+      from: inline
+      name: healthcheck
+      path: inline/hc.yaml
+{% endif %}

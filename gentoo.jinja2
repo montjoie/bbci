@@ -109,7 +109,7 @@ actions:
     to: downloads
     postprocess:
       docker:
-        image: debian:buster
+        image: debian:bullseye
         steps:
          - ls -l
          - mkdir gentoo
@@ -200,6 +200,11 @@ actions:
         url: {{ BOOT_FQDN }}/{{ PATH }}/{{ KERNELFILE }}
         type: {{ KERNELTYPE }}
         sha256sum: {{ KERNEL_SHA256 }}
+{%- if rootfs_method == "vdisk" %}
+    initrd:
+      url: {{ RAMD_FQDN }}{{ initrd_path }}
+      compression: gz
+{%- endif %}
 {%- if dtb_path is defined %}
       dtb:
         image_arg: '-dtb {dtb}'
@@ -306,7 +311,7 @@ actions:
 
 {% endif %}
 
-{%- if test_gentoox == 'True' %}
+{%- if test_gentoo == 'True' %}
 - test:
     timeout:
         minutes: 300

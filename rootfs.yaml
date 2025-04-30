@@ -32,6 +32,9 @@ rootfs:
     nbd:
       initrd: /initrd/nbd-__ARCH_ENDIAN__/rootfs.cpio.gz
       rootfs_script: ./scripts/gentoo_get_stage_url.sh --selinux
+    vdisk:
+      initrd: /initrd/nfs-__ARCH_ENDIAN__/rootfs.cpio.gz
+      rootfs_script: ./scripts/gentoo_get_stage_url.sh --selinux
   kernelci:
     ramdisk:
       rootfs_script: ./scripts/kci_get_rootfs.sh

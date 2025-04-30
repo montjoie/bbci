@@ -11,6 +11,11 @@ debug() {
 	fi
 }
 
+usage() {
+	$0 [-d] --arch arch --root [ramdisk|nfs] [--debian]
+	exit 0
+}
+
 while [ $# -ge 1 ]
 do
 	case $1 in
@@ -39,6 +44,9 @@ do
 		ramdisk)
 			RFS_FILE="rootfs.cpio.gz"
 		;;
+		nfs)
+			RFS_FILE="rootfs.tar.xz"
+		;;
 		*)
 			exit 1
 		;;
@@ -52,7 +60,7 @@ do
 			exit 1
 		fi
 		CACHEDIR=$1
-		cd $CACHEDIR || exit $?
+		cd "$CACHEDIR" || exit $?
 		#echo "DEBUG: go to $CACHEDIR"
 		shift
 	;;
@@ -68,7 +76,7 @@ do
 	--debian)
 		shift
 		TYPE=debian/buster
-		shift
+		RFS_FILE="full.$RFS_FILE"
 	;;
 	*)
 		echo "ERROR: unknow argument $1"
@@ -93,13 +101,15 @@ fi
 case $TYPE in
 'debian/buster')
 DIRE=$(grep -o 'href="20[0-9a-z\.\-]*/' index.html | cut -d'"' -f2 | sort -n | tail -n1)
+echo "DEBUG: $DIRE"
+RFS_BPATH="/images/rootfs/debian/buster/$DIRE/$ARCH/"
 ;;
 *)
 DIRE=$(grep -o 'href="kci-20[0-9a-z\.\-]*/' index.html | cut -d'"' -f2 | sort -n | tail -n1)
+RFS_BPATH="/images/rootfs/buildroot/$DIRE$ARCH/base"
 ;;
 esac
 rm index.html
-RFS_BPATH="/images/rootfs/buildroot/$DIRE$ARCH/base"
 
 
 echo "ROOTFS_URL=$RFS_BASE/$DIRE$ARCH/base/$RFS_FILE"

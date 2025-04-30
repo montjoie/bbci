@@ -4,6 +4,9 @@ sources:
     gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     update_script: ./scripts/git-stable
     ltag: next-
+  - name: linux-next
+    directory: /mnt/sources/linux-next/
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
   - name: linux
     directory: /usr/src/linux-master
     gituri: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
@@ -12,9 +15,81 @@ sources:
     directory: $HOME/linux-stable
     gituri: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
     update_script: ./scripts/git-stable
-    ltag: v5.2
+    ltag: v5.5
   - name: gentoo-4.20
     directory: $HOME/gentoo/linux-4.20
     ltag: "4.20"
     create_script: ./scripts/gentoo_add_sources.py
     update_script: ./scripts/gentoo_add_sources.py
+  - name: gentoo-5.5
+    directory: $HOME/gentoo/linux-5.5
+    ltag: "5.5"
+    create_script: ./scripts/gentoo_add_sources.py
+    update_script: ./scripts/gentoo_add_sources.py
+  - name: next-test
+    directory: $HOME/data/linux-next
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    update_script: ./scripts/git-stable
+    ltag: next-
+  - name: linux-test
+    directory: /usr/src/linux-test
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    update_command: "git pull"
+  - name: bisect
+    directory: /mnt/sources/linux-bisect
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    update_command: "git pull"
+  - name: zoran
+    directory: /usr/src/linux-zoran
+  - name: rpi
+    directory: $HOME/data/rpi
+    gituri: https://github.com/raspberrypi/linux.git
+    update_command: "git pull"
+  - name: rpi54
+    directory: $HOME/data/rpi-5.4
+    gituri: https://github.com/raspberrypi/linux.git
+    update_command: "git pull"
+    ltag: v5.4
+  - name: ti-5.10
+    directory: /mnt/sources/ti-5.10
+    gituri: git://git.ti.com/ti-linux-kernel/ti-linux-kernel.git
+    update_command: "git pull"
+    ltag: origin/ti-linux-5.10.y
+  - name: ti-4.19
+    directory: /mnt/sources/ti-4.19
+    gituri: git://git.ti.com/ti-linux-kernel/ti-linux-kernel.git
+    update_command: "git pull"
+    ltag: origin/ti-linux-4.19.y
+  - name: linux-smaeul
+    directory: /mnt/sources/linux-smaeul/
+    gituri: https://github.com/smaeul/linux.git
+    update_command: "git pull"
+    ltag: riscv/d1-wip
+  - name: linux-starfive
+    directory: /mnt/sources/linux-starfive/
+    gituri: https://github.com/starfive-tech/linux
+    update_command: "git pull"
+    ltag: visionfive
+  - name: cryptodev
+    directory: /mnt/sources/cryptodev/
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/herbert/cryptodev-2.6.git
+  - name: linux-radxa
+    directory: /mnt/sources/radxa-linux/
+    gituri: https://github.com/radxa/kernel
+    update_command: "git pull"
+    ltag: stable-5.10-rock5
+  - name: linux-rk3588-sre
+    directory: /mnt/sources/linux-rk3588-sre/
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/sre/linux-misc.git
+    update_command: "git pull"
+    ltag: rk3588
+  - name: rsatest
+    directory: /mnt/backup/testbranch
+  - name: nextgithub
+    directory: /mnt/sources/linux-next/
+    gituri: https://git.kernel.org/pub/scm/linux/kernel/git/sre/linux-misc.git
+    update_command: "git pull"
+  - name: ch348
+    directory: /mnt/sources/ch348/linux-stable
+  - name: jernej
+    directory: /mnt/sources/linux-jernej
