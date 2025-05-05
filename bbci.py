@@ -840,6 +840,9 @@ def boot(param):
             # copy kernel
             lab_copy(lab, kfile, data_relpath)
             # copy dtb
+            # tap/tun/user qemu hack
+            if "qemu_netdevice" in lab:
+                jobdict["qemu_netdevice"] = lab["qemu_netdevice"]
             # TODO dtb metadata
             if "dtb" in device:
                 jobdict["dtb_path"] = "/%s/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, git_describe, device["dtb"])
