@@ -596,7 +596,7 @@ templates:
     mach: sparc64
     qemu:
         machine: sun4u
-        memory: 384
+        memory: 1024
         model: model=sunhme
         guestfs_interface: ide
         netdevice: tap
@@ -612,6 +612,8 @@ templates:
         type: test
     tags:
       - ok
+      - cryptotest0
+      - qemubase
   - name: QEMU cubieboard
     arch: arm
     larch: arm
@@ -763,7 +765,7 @@ templates:
       - name: CONFIG_CLK_BCM2835=y
         type: mandatory
     tags:
-      - ok
+      - ko
       - rpi
 # Cannot use virt due to https://bugzilla.redhat.com/show_bug.cgi?id=1633328
 # a virt can be created and depend on ARM_LPAE
@@ -798,6 +800,7 @@ templates:
     tags:
       - ok
       - virt
+      - qemubase
   - name: qemu-vexpress-a9
     arch: arm
     devicetype: qemu
@@ -1234,7 +1237,7 @@ templates:
     tags:
       - ok
   - name: malta64
-    arch: mips64
+    arch: mips
     larch: mips
     devicetype: qemu
     devicename: qemu-malta64
@@ -1247,6 +1250,8 @@ templates:
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
     configs:
+      - name: "CONFIG_64BIT=y"
+        type: mandatory
       - name: CONFIG_MIPS_MALTA=y
         type: mandatory
       - name: CONFIG_PCNET
@@ -1254,6 +1259,7 @@ templates:
       - name: CONFIG_PIIX
     tags:
       - ok
+      - qemubase
   - name: qemu q800
     arch: m68k
     devicetype: qemu
@@ -1294,6 +1300,7 @@ templates:
     configs:
     tags:
       - ok
+      - qemubase
   - name: qemu x86_64
     arch: x86_64
     devicetype: qemu
@@ -1302,9 +1309,8 @@ templates:
     mach: x86_64
     qemu:
         machine: pc
-        memory: 1024
+        memory: 2048
         cpu: qemu64
-        netdevice: tap
         model: model=e1000
         netdevice: tap
         console_device: ttyS0
@@ -1312,9 +1318,35 @@ templates:
         extra_options:
         - '-object cryptodev-backend-builtin,id=cryptodev0'
         - '-device virtio-crypto-pci,id=crypto0,cryptodev=cryptodev0'
+        - '-vga virtio'
+        - '-device usb-ehci -device virtio-rng-pci -device qemu-xhci -device usb-tablet -device usb-kbd'
     configs:
     tags:
       - ok
+      - qemubase
+  - name: qemu x86_64-igb
+    arch: x86_64
+    devicetype: qemu
+    devicename: qemu-x86_64
+    kernelfile: bzImage
+    mach: x86_64
+    qemu:
+        machine: pc
+        memory: 2048
+        cpu: qemu64
+        model: model=igb
+        netdevice: tap
+        console_device: ttyS0
+        append: "console=ttyS0 root=/dev/ram0"
+        extra_options:
+        - '-object cryptodev-backend-builtin,id=cryptodev0'
+        - '-device virtio-crypto-pci,id=crypto0,cryptodev=cryptodev0'
+        - '-vga virtio'
+        - '-device usb-ehci -device virtio-rng-pci -device qemu-xhci -device usb-tablet -device usb-kbd'
+    configs:
+    tags:
+      - ok
+      - igb
   - name: d2500cc
     arch: x86_64
     devicetype: d2500cc
@@ -1655,12 +1687,14 @@ templates:
         no_kvm: True
         bios: default
         extra_options:
-         - "-bios default -device virtio-net,netdev=main -netdev user,id=main"
+         - "-bios default -device virtio-net,netdev=main -netdev user,id=main -device intel-hda -device hda-duplex -device usb-ehci -device virtio-rng-pci -device qemu-xhci -device usb-tablet -device usb-kbd "
     configs:
       - name: CONFIG_RISCV=y
         type: mandatory
     tags:
       - ok
+      - cryptotest0
+      - qemubase
   - name: QEMU s390
     arch: s390
     devicetype: qemu
@@ -1715,6 +1749,8 @@ templates:
         type: mandatory
     tags:
       - ok
+      - tegra
+      - cryptotest0
   - name: sun50i-a64-bananapi-m64
     arch: arm64
     larch: arm64
@@ -1731,6 +1767,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-a64-pine64-plus
     arch: arm64
     larch: arm64
@@ -1747,6 +1784,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-h5-libretech-all-h3-cc
     arch: arm64
     larch: arm64
@@ -1763,6 +1801,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-h5-nanopi-neo-plus2
     arch: arm64
     larch: arm64
@@ -1779,6 +1818,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-h6-orangepi-3
     arch: arm64
     larch: arm64
@@ -1796,6 +1836,7 @@ templates:
       - emce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-h6-orangepi-one-plus
     arch: arm64
     larch: arm64
@@ -1813,6 +1854,7 @@ templates:
       - emce
       - allwinner
       - dwmac_sun8i
+      - sun50i
   - name: sun50i-h6-pine-h64
     arch: arm64
     larch: arm64
@@ -1831,6 +1873,9 @@ templates:
       - emce
       - allwinner
       - dwmac_sun8i
+      - test0
+      - arm64sha1
+      - sun50i
   - name: sun50i-h6-pine-h64-model-b
     arch: arm64
     larch: arm64
@@ -1849,13 +1894,14 @@ templates:
       - emce
       - allwinner
       - dwmac_sun8i
-  - name: sun55i-a527-radxa-a5e
+      - sun50i
+  - name: sun55i-a527-cubie-a5e
     arch: arm64
     larch: arm64
-    devicetype: sun55i-a527-radxa-a5e
+    devicetype: sun55i-a527-cubie-a5e
     kernelfile: Image
     mach: sunxi
-    dtb: allwinner/sun55i-a527-radxa-a5e.dtb
+    dtb: allwinner/sun55i-a527-cubie-a5e.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -1865,6 +1911,9 @@ templates:
       - sun8i-ce
       - allwinner
       - test0
+      - arm64sha1
+      - sun50i
+      - stmmac
   - name: sun4i-a10-olinuxino-lime
     arch: arm
     devicetype: sun4i-a10-olinuxino-lime
@@ -1972,6 +2021,7 @@ templates:
       - allwinner
       - dwmac_sun8i
       - test0
+      - stmmac
   - name: sun8i-h2-plus-libretech-all-h3-cc
     arch: arm
     devicetype: sun8i-h2-plus-libretech-all-h3-cc
@@ -1987,6 +2037,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - stmmac
   - name: sun8i-h2-plus-orangepi-zero
     arch: arm
     devicetype: sun8i-h2-plus-orangepi-zero
@@ -2003,6 +2054,7 @@ templates:
       - allwinner
       - dwmac_sun8i
       - test0
+      - stmmac
   - name: sun8i-h2-plus-orangepi-r1
     arch: arm
     devicetype: sun8i-h2-plus-orangepi-r1
@@ -2020,6 +2072,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - stmmac
   - name: sun8i-h3-libretech-all-h3-cc
     arch: arm
     devicetype: sun8i-h3-libretech-all-h3-cc
@@ -2035,6 +2088,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - stmmac
   - name: sun8i-h3-orangepi-pc
     arch: arm
     devicetype: sun8i-h3-orangepi-pc
@@ -2051,6 +2105,7 @@ templates:
       - allwinner
       - dwmac_sun8i
       - test0
+      - stmmac
   - name: sun8i-h3-bananapi-m2-plus
     arch: arm
     devicetype: sun8i-h3-bananapi-m2-plus
@@ -2066,6 +2121,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - stmmac
   - name: sun8i-r40-bananapi-m2-ultra
     arch: arm
     larch: arm
@@ -2082,6 +2138,7 @@ templates:
       - sun8i-ce
       - allwinner
       - dwmac_sun8i
+      - stmmac
   - name: sun9i-a80-cubieboard4
     arch: arm
     larch: arm
@@ -2220,6 +2277,7 @@ templates:
       - amlogic
       - crypto
       - potato
+      - stmmac
   - name: meson-gxl-s805x-p241
     arch: arm64
     larch: arm64
@@ -2647,7 +2705,7 @@ templates:
     devicetype: armada-388-clearfog-pro
     kernelfile: zImage
     mach: mvebu
-    dtb: armada-388-clearfog-pro.dtb
+    dtb: marvell/armada-388-clearfog-pro.dtb
     configs:
       - name: CONFIG_SERIAL_8250=y
         type: mandatory
