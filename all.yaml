@@ -2710,7 +2710,11 @@ templates:
     devicetype: intel-ixp42x-welltech-epbx100
     kernelfile: zImage
     mach: ixp4xx
-    dtb: intel-ixp42x-welltech-epbx100.dtb
+    dtb: intel/ixp/intel-ixp42x-welltech-epbx100.dtb
+    dtbhack:
+      ethernet:
+        type: hhx
+        what: "'/soc/ethernet@c8009000' 'local-mac-address' 00 03 47 df 32 a8"
     configs:
       - name: CONFIG_SERIAL_8250=y
         type: mandatory

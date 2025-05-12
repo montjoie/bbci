@@ -848,10 +848,9 @@ def boot(param):
                 jobdict["dtb_path"] = "/%s/%s/%s/%s/%s/dts/%s" % (sourcename, larch, subarch, flavour, git_describe, device["dtb"])
                 jobdict["DTB"] = device["dtb"]
                 dtbfile = "%s/arch/%s/boot/dts/%s" % (kdir, larch, device["dtb"])
-                dtbsubdir = device["dtb"].split('/')
+                dtbdirname = os.path.dirname(device["dtb"])
                 dtb_relpath = "/dts/"
-                if len(dtbsubdir) > 1:
-                    dtb_relpath = dtb_relpath + dtbsubdir[0]
+                dtb_relpath += dtbdirname
                 if not os.path.isfile(dtbfile):
                     print("SKIP: no dtb at %s" % dtbfile)
                     #try at base directory
@@ -863,6 +862,15 @@ def boot(param):
                         if not os.path.isfile(dtbfile):
                             print("SKIP: no dtb at %s" % dtbfile)
                             continue
+                if "dtbhack" in device:
+                    for dhack in device["dtbhack"]:
+                        print(dhack)
+                        fdtargs = ""
+                        if "type" in device["dtbhack"][dhack]:
+                            fdtargs += f'--type {device["dtbhack"][dhack]["type"]}'
+                        fdtargs += f' {device["dtbhack"][dhack]["what"]}'
+                        print(f"FINAL FTDARGS {fdtargs}")
+                        subprocess.run(f"fdtput {dtbfile} {fdtargs}", shell=True)
                 lab_copy(lab, dtbfile, "%s/%s" % (data_relpath, dtb_relpath))
                 with open(dtbfile, "rb") as fdtb:
                     jobdict["DTB_SHA256"] = hashlib.sha256(fdtb.read()).hexdigest()
