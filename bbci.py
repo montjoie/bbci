@@ -19,6 +19,7 @@ import time
 import xmlrpc.client
 import yaml
 import jinja2
+import logging
 
 ###############################################################################
 ###############################################################################
@@ -54,6 +55,8 @@ def lab_copy(lab, src, directory):
     result = subprocess.check_output("chmod -Rc o+rX %s" % destdir, shell=True)
     if args.debug:
         print(result)
+    if 'postcmd' in lab:
+        subprocess.run(lab['postcmd'], shell=True)
 
 ###############################################################################
 ###############################################################################
@@ -813,9 +816,9 @@ def boot(param):
         # now try to boot on LAVA
         for lab in tlabs["labs"]:
             send_to_lab = False
-            print("\tCheck %s on %s" % (devicename, lab["name"]))
             if "disabled" in lab and lab["disabled"]:
                 continue
+            print("\tCheck %s on %s" % (devicename, lab["name"]))
         # LAB dependant DATA
             server = xmlrpc.client.ServerProxy(lab["lavauri"])
             devlist = server.scheduler.devices.list()
@@ -864,12 +867,12 @@ def boot(param):
                             continue
                 if "dtbhack" in device:
                     for dhack in device["dtbhack"]:
-                        print(dhack)
+                        logger.debug(f"DTB HACK: for {dhack}")
                         fdtargs = ""
                         if "type" in device["dtbhack"][dhack]:
                             fdtargs += f'--type {device["dtbhack"][dhack]["type"]}'
                         fdtargs += f' {device["dtbhack"][dhack]["what"]}'
-                        print(f"FINAL FTDARGS {fdtargs}")
+                        logger.debug(f"FINAL FTDARGS {fdtargs}")
                         subprocess.run(f"fdtput {dtbfile} {fdtargs}", shell=True)
                 lab_copy(lab, dtbfile, "%s/%s" % (data_relpath, dtb_relpath))
                 with open(dtbfile, "rb") as fdtb:
@@ -1021,21 +1024,21 @@ def boot(param):
 
 ###############################################################################
 ###############################################################################
-def do_oldconfig(param):
+def do_oldconfig(param, logfile=sys.stdout):
     make_opts = param["make_opts"]
     kdir = param["kdir"]
-    pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
+    pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True, stdout=logfile)
     #subprocess.run(f"diff -u {kdir}/.config.old {kdir}/.config", shell=True)
 
 ###############################################################################
 ###############################################################################
-def enable_config(param, econfig, do_old = True):
+def enable_config(param, econfig, do_old = True, logfile=sys.stdout):
     rawconfig = econfig.split("=")[0]
 
     if args.debug:
         print("=================================================== %s" % econfig)
         print("DEBUG: Try enable config %s" % econfig)
-        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
     with open("%s/.config" % param["kdir"], 'r') as fconfig:
         wconfig = fconfig.read()
     if re.search("=", econfig):
@@ -1060,29 +1063,29 @@ def enable_config(param, econfig, do_old = True):
     make_opts = param["make_opts"]
     if do_old:
         if args.debug:
-            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
-        pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True)
+            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
+        pbuild = subprocess.run("make %s olddefconfig > /dev/null" % make_opts, shell=True, stdout=logfile)
         if args.debug:
-            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+            subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
 
 ###############################################################################
 ###############################################################################
-def disable_config(param, dconfig):
+def disable_config(param, dconfig, logfile=sys.stdout):
     if args.debug:
         print("=================================================== %s" % dconfig)
-        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
+        subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
     with open("%s/.config" % param["kdir"], 'r') as fconfig:
         wconfig = fconfig.read()
         if not re.search("%s=" % dconfig, wconfig):
-            print("DEBUG: %s is already disabled" % dconfig)
+            logger.debug("DEBUG: %s is already disabled" % dconfig)
             return 0
     wconfig = re.sub("%s.*" % dconfig, "# %s is not set" % dconfig, wconfig)
     with open("%s/.config" % param["kdir"], 'w') as fconfig:
         fconfig.write(wconfig)
     if args.debug:
-        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+        subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
     make_opts = param["make_opts"]
-    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+    pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True, stdout=logfile)
     # verify it is still disabled
     with open("%s/.config" % param["kdir"], 'r') as fconfig:
         wconfig = fconfig.read()
@@ -1094,8 +1097,8 @@ def kconfig_replace(kdir, regex, replace):
         data = f.read()
     with open(f"{kdir}/.config.kold", 'w') as f:
         f.write(data)
-    print(f"REGEX={regex}")
-    print(f"REPLACE={replace}")
+    logger.debug(f"REGEX={regex}")
+    logger.debug(f"REPLACE={replace}")
     newdata = re.sub(regex, replace, data)
     with open(f"{kdir}/.config", 'w') as f:
         f.write(newdata)
@@ -1138,6 +1141,7 @@ def genconfig(sourcedir, param, defconfig):
     if err is not None:
         print("ERROR: genconfig: %s" % err)
         return err
+    logfile.flush()
 
     if args.configoverlay:
         for coverlay in args.configoverlay.split(","):
@@ -1150,14 +1154,14 @@ def genconfig(sourcedir, param, defconfig):
     # add needed options for LAVA
     if args.debug:
         print("DEBUG: add LAVA configs")
-    enable_config(param, "CONFIG_BLK_DEV_INITRD", do_old = False)
-    enable_config(param, "CONFIG_BLK_DEV_RAM=y", do_old = False)
-    enable_config(param, "CONFIG_DEVTMPFS=y")
-    enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y", do_old = False)
-    enable_config(param, "CONFIG_MODULES=y")
-    enable_config(param, "CONFIG_DEVTMPFS_MOUNT")
-    enable_config(param, "CONFIG_IKCONFIG")
-    enable_config(param, "CONFIG_IKCONFIG_PROC", do_old = False)
+    enable_config(param, "CONFIG_BLK_DEV_INITRD", do_old = False, logfile=logfile)
+    enable_config(param, "CONFIG_BLK_DEV_RAM=y", do_old = False, logfile=logfile)
+    enable_config(param, "CONFIG_DEVTMPFS=y", logfile=logfile)
+    enable_config(param, "CONFIG_DEVTMPFS_MOUNT=y", do_old = False, logfile=logfile)
+    enable_config(param, "CONFIG_MODULES=y", logfile=logfile)
+    enable_config(param, "CONFIG_DEVTMPFS_MOUNT", logfile=logfile)
+    enable_config(param, "CONFIG_IKCONFIG", logfile=logfile)
+    enable_config(param, "CONFIG_IKCONFIG_PROC", do_old = False, logfile=logfile)
 
     if args.configoverlay:
         if args.debug:
@@ -1166,10 +1170,10 @@ def genconfig(sourcedir, param, defconfig):
             if coverlay == "nomodule":
                 subprocess.run("sed -i 's,=m$,=y,' %s/.config" % param["kdir"], shell=True)
             if coverlay == "fullsound":
-                enable_config(param, "CONFIG_SOUND")
+                enable_config(param, "CONFIG_SOUND", logfile=logfile)
                 kconfig_replace(param["kdir"], r'#\s*(CONFIG_SND_[A-Z0-9_]*) is not set', r'\1=m')
                 #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
-                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True, stdout=logfile)
                 #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
                 #pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
                 #subprocess.run("sed -i 's,^#[[:space:]]\(.*SND.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
@@ -1177,51 +1181,54 @@ def genconfig(sourcedir, param, defconfig):
             if coverlay == "fulldrm":
                 kconfig_replace(param["kdir"], r'#\s*(CONFIG_DRM_[A-Z0-9_]*) is not set', r'\1=m')
                 #subprocess.run("sed -i 's,^#[[:space:]]\(.*DRM.*\) is not set,\\1=m,' %s/.config" % param["kdir"], shell=True)
-                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True)
+                pbuild = subprocess.run("make %s olddefconfig" % make_opts, shell=True, stdout=logfile)
+            if coverlay == "fullhwmon":
+                kconfig_replace(param["kdir"], r'#\s*(.*SENSORS_[A-Z0-9_]*) is not set.*', r'\1=m')
+                enable_config(param, "CONFIG_SENSORS_AD7314=y", logfile=logfile)
             if coverlay == "fullcrypto":
-                enable_config(param, "CONFIG_DEBUG_KERNEL=y")
-                enable_config(param, "CONFIG_CRYPTO=y")
+                enable_config(param, "CONFIG_DEBUG_KERNEL=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO=y", logfile=logfile)
                 print("==================================================")
                 print("==================================================")
                 kconfig_replace(param["kdir"], r'#\s*(.*CRYPTO_[A-Z0-9_]*) is not set.*', r'\1=m')
-                do_oldconfig(param)
+                do_oldconfig(param, logfile=logfile)
                 print("==================================================")
                 print("==================================================")
                 kconfig_replace(param["kdir"], r'#\s*(.*CRYPTO_[A-Z0-9_]*) is not set', r'\1=m')
-                do_oldconfig(param)
-                enable_config(param, "CONFIG_CRYPTO_CBC=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_USER=y")
-                enable_config(param, "CONFIG_MD=y")
-                enable_config(param, "CONFIG_BLK_DEV_DM=y", do_old = False)
-                enable_config(param, "CONFIG_BLK_DEV_LOOP=y", do_old = False)
-                enable_config(param, "CONFIG_DM_CRYPT=m", do_old = False)
-                enable_config(param, "CONFIG_FS_ENCRYPTION=y", do_old = False)
+                do_oldconfig(param, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_CBC=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER=y", logfile=logfile)
+                enable_config(param, "CONFIG_MD=y", logfile=logfile)
+                enable_config(param, "CONFIG_BLK_DEV_DM=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_BLK_DEV_LOOP=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_DM_CRYPT=m", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_FS_ENCRYPTION=y", do_old = False, logfile=logfile)
                 if args.debug:
-                    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
-                enable_config(param, "CONFIG_CRYPTO_USER=y")
-                enable_config(param, "CONFIG_CRYPTO_USER_API=y")
-                enable_config(param, "CONFIG_CRYPTO_USER_API_HASH=y")
-                enable_config(param, "CONFIG_CRYPTO_USER_API_SKCIPHER=y")
-                subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True)
-                disable_config(param, "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS")
-                enable_config(param, "CONFIG_CRYPTO_SELFTESTS=y")
-                disable_config(param, "CONFIG_CRYPTO_BENCHMARK=y")
-                disable_config(param, "CONFIG_CRYPTO_BENCHMARK")
-                enable_config(param, "CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y")
-                enable_config(param, "CONFIG_CRYPTO_USER_API_RNG=y")
-                enable_config(param, "CONFIG_CRYPTO_ANSI_CPRNG=y")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS=m")
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE=m")
-                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL=m")
-                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL_DEBUG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE_DEBUG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_DEBUG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_DEBUG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_PRNG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_PRNG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_TRNG=y", do_old = False)
-                enable_config(param, "CONFIG_CRYPTO_DEV_ROCKCHIP=m")
-                enable_config(param, "CONFIG_CRYPTO_DEV_VIRTIO=y")
+                    subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER_API=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER_API_HASH=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER_API_SKCIPHER=y", logfile=logfile)
+                subprocess.run("sed -i 's,^CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=y,# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set,' %s/.config" % param["kdir"], shell=True, stdout=logfile)
+                disable_config(param, "CONFIG_CRYPTO_MANAGER_DISABLE_TESTS", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_SELFTESTS=y", logfile=logfile)
+                disable_config(param, "CONFIG_CRYPTO_BENCHMARK=y", logfile=logfile)
+                disable_config(param, "CONFIG_CRYPTO_BENCHMARK", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_MANAGER_EXTRA_TESTS=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_USER_API_RNG=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_ANSI_CPRNG=y", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS=m", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE=m", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL=m", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_AMLOGIC_GXL_DEBUG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_CE_DEBUG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_DEBUG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_DEBUG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN4I_SS_PRNG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_PRNG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_SUN8I_SS_TRNG=y", do_old = False, logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_ROCKCHIP=m", logfile=logfile)
+                enable_config(param, "CONFIG_CRYPTO_DEV_VIRTIO=y", logfile=logfile)
                 #enable_config(param, "CONFIG_CRYPTO_SHA1_ARM=y")
                 #enable_config(param, "CONFIG_CRYPTO_AES_ARM=y")
                 #enable_config(param, "CONFIG_CRYPTO_SHA256_ARM=y")
@@ -1231,22 +1238,22 @@ def genconfig(sourcedir, param, defconfig):
                 #enable_config(param, "CONFIG_SYSVIPC=y")
                 #enable_config(param, "CONFIG_SECCOMP=y")
                 #enable_config(param, "CONFIG_BLK_DEV_RAM_SIZE=65536")
-                disable_config(param, "CONFIG_CRYPTO_DEV_FSL_CAAM_DEBUG")
+                disable_config(param, "CONFIG_CRYPTO_DEV_FSL_CAAM_DEBUG", logfile=logfile)
                 if args.debug:
-                    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
+                    subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True, stdout=logfile)
                 continue
             if coverlay == "fulldebug":
                 if args.debug:
                     subprocess.run("cp %s/.config %s/.config.old" % (param["kdir"], param["kdir"]), shell=True)
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*DEBUG.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                #TORETRY#subprocess.run("sed -i 's,^#[[:space:]]\(.*DEBUG.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
                 if args.debug:
                     subprocess.run("diff -u %s/.config.old %s/.config" % (param["kdir"], param["kdir"]), shell=True)
                 continue
             if coverlay == "nfs":
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*DWMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("sed -i 's,^#[[:space:]]\(.*STMMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("sed -i 's,^\(.*DWMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
-                subprocess.run("sed -i 's,^\(.*STMMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*DWMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                #subprocess.run("sed -i 's,^#[[:space:]]\(.*STMMAC.*\) is not set,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                #subprocess.run("sed -i 's,^\(.*DWMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
+                #subprocess.run("sed -i 's,^\(.*STMMAC.*\)=m,\\1=y,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_STMMAC_PLATFORM=y")
                 enable_config(param, "CONFIG_STMMAC_ETH=y")
                 enable_config(param, "CONFIG_DWMAC_MESON=y")
@@ -1261,7 +1268,7 @@ def genconfig(sourcedir, param, defconfig):
                 enable_config(param, "CONFIG_USB_NET_AX8817X=y")
                 enable_config(param, "CONFIG_USB_NET_AX88179_178A=y")
             if coverlay == "cpu_be":
-                subprocess.run("sed -i 's,^\(.*.CPU_LITTLE_ENDIAN*\)=,# \\1 is not set,' %s/.config" % param["kdir"], shell=True)
+                subprocess.run("sed -i 's,CONFIG_CPU_LITTLE_ENDIAN=y,# CONFIG_CPU_LITTLE_ENDIAN is not set,' %s/.config" % param["kdir"], shell=True)
                 enable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
             if coverlay == "cpu_el":
                 disable_config(param, "CONFIG_CPU_BIG_ENDIAN=y")
@@ -1281,9 +1288,9 @@ def genconfig(sourcedir, param, defconfig):
                 if overlay["name"] == coverlay:
                     for oconfig in overlay["list"]:
                         if "disable" in oconfig:
-                            disable_config(param, oconfig["config"])
+                            disable_config(param, oconfig["config"], logfile=logfile)
                         else:
-                            enable_config(param, oconfig["config"])
+                            enable_config(param, oconfig["config"], logfile=logfile)
 
     if "configs" in param["target"]:
         for tconfig in param["target"]["configs"]:
@@ -1294,17 +1301,17 @@ def genconfig(sourcedir, param, defconfig):
 
     if args.enable_configs:
         for econfig in args.enable_configs.split(","):
-            enable_config(param, econfig)
+            enable_config(param, econfig, logfile=logfile)
     if args.disable_configs:
         for econfig in args.disable_configs.split(","):
-            disable_config(param, econfig)
+            disable_config(param, econfig, logfile=logfile)
 
     #subprocess.check_output("sed -i 's,^\(CONFIG_SERIAL.*=\)m,\\1y,' %s/.config" % param["kdir"], shell = True)
 
     if args.debug:
         print("DEBUG: do olddefconfig")
     pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
-    subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell=True)
+    #TORETRY#subprocess.check_output("sed -i 's,^.*\(CONFIG_SERIAL.*CONSOLE\).*,\\1=y,' %s/.config" % param["kdir"], shell=True)
     if args.debug:
         print("DEBUG: do olddefconfig")
     pbuild = subprocess.run("make %s olddefconfig >/dev/null" % make_opts, shell=True)
@@ -1951,6 +1958,12 @@ parser.add_argument("--upstatus", "-u", help="Update status", action="store_true
 parser.add_argument("--compstatus", help="Compare with reference status", action="store_true")
 parser.add_argument("--bwarn", help="Enable build warnings and check", action="store_true")
 args = parser.parse_args()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('bbci')
+logger.setLevel(logging.INFO)
+if args.debug:
+    logger.setLevel(logging.DEBUG)
 
 if args.source is None and args.action != "bootdir":
     parser.print_help()
