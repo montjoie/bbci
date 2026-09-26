@@ -518,6 +518,17 @@ targets:
       - name: "CONFIG_PCI_VERSATILE=y"
       - name: "CONFIG_SCSI=y"
       - name: "CONFIG_SCSI_SYM53C8XX_2=y"
+  - name: integrator_defconfig
+    larch: arm
+    subarch: integrator
+    flavour: defconfig
+    defconfig: integrator_defconfig
+    full_tgt: dtbs zImage modules
+    warnings: "-W1"
+    configs:
+      - name: "CONFIG_PCI=y"
+      - name: "CONFIG_SCSI=y"
+      - name: "CONFIG_SCSI_SYM53C8XX_2=y"
   - name: virtex5_defconfig
     larch: powerpc
     subarch: 44x
@@ -535,6 +546,11 @@ targets:
     defconfig: x86_64_defconfig
     full_tgt: bzImage modules
     warnings: "-W1"
+  - name: upsquare_defconfig
+    larch: x86_64
+    flavour: defconfig
+    defconfig: upsquare_defconfig
+    full_tgt: bzImage modules
   - name: laptop
     larch: x86_64
     flavour: defconfig
@@ -753,6 +769,10 @@ configoverlays:
       - config: CONFIG_USB_UAS=m
       - config: CONFIG_SCSI_DH=y
       - config: CONFIG_CHR_DEV_SG=y
+      - config: CONFIG_I2C_PIIX4=y
+      - config: CONFIG_I2C_CHARDEV=y
+      - config: CONFIG_EEPROM_AT24=y
+      - config: CONFIG_EEPROM_EE1004=y
   - name: ppp
     list:
       - config: CONFIG_PPP=y
@@ -963,8 +983,6 @@ configoverlays:
         disable: True
       - config: CONFIG_ARCH_ALPINE
         disable: True
-      - config: CONFIG_ARCH_MEDIATEK
-        disable: True
       - config: CONFIG_ARCH_QCOM
         disable: True
       - config: CONFIG_ARCH_LG1K
@@ -1130,7 +1148,7 @@ configoverlays:
       - config: CONFIG_DEBUG_UART_8250_WORD=y
   - name: nokdebug
     list:
-      - config: CONFIG_DEBUG_KERNEL=y
+      - config: CONFIG_DEBUG_KERNEL
         disable: True
       - config: CONFIG_DEBUG_INFO
         disable: True
@@ -1244,6 +1262,7 @@ configoverlays:
       - config: CONFIG_USB_GSPCA=y
       - config: CONFIG_USB_VIDEO_CLASS=y
       - config: CONFIG_TUN=y
+      - config: CONFIG_VIDEO_FAKECAM=y
   - name: cryptostat
     list:
       - config: CONFIG_CRYPTO_USER=y
@@ -1287,11 +1306,34 @@ configoverlays:
       - config: CONFIG_FTRACE=y
   - name: upsquare
     list:
+      - config: CONFIG_X86_INTEL_LPSS=y
       - config: CONFIG_MFD_INTEL_LPSS_PCI=y
       - config: CONFIG_MFD_INTEL_LPSS_ACPI=y
-      - config: CONFIG_X86_INTEL_LPSS=y
       - config: CONFIG_SERIAL_8250_DW=y
       - config: CONFIG_LOCALVERSION_AUTO=y
+      - config: CONFIG_LEDS_INTEL_SS4200=y
+      - config: CONFIG_FB=y
+      - config: CONFIG_FB_EFI=y
+      - config: CONFIG_BOOT_VESA_SUPPORT=y
+      - config: CONFIG_DRM_FBDEV_EMULATION=y
+      - config: CONFIG_FB_VGA16
+        status: notsure
+      - config: CONFIG_FTRACE
+        disable: true
+      - config: CONFIG_PROFILING
+        disable: true
+      - config: CONFIG_KEXEC
+        disable: true
+      - config: CONFIG_VIRTIO
+        disable: true
+      - config: CONFIG_AGP
+        disable: true
+      - config: CONFIG_YENTA
+        disable: true
+      - config: CONFIG_SECURITY
+        disable: true
+      - config: CONFIG_DRM_I915
+        disable: true
   - name: upsquareold
     list:
       - config: CONFIG_X86_INTEL_MID=y
@@ -1520,6 +1562,7 @@ configoverlays:
       - config: CONFIG_SENSORS_IIO_HWMON=m
       - config: CONFIG_I2C_CHARDEV=m
       - config: CONFIG_I2C_PIIX4=m
+      - config: CONFIG_SENSORS_K10TEMP=m
       - config: CONFIG_SENSORS_CORETEMP=m
       - config: CONFIG_SENSORS_DRIVETEMP=m
       - config: CONFIG_SENSORS_IT87=m
@@ -1533,7 +1576,7 @@ configoverlays:
       - config: CONFIG_ATH5K_PCI=y
       - config: CONFIG_ATH5K_DEBUG=y
       - config: CONFIG_CFG80211=m
-      - config: CONFIG_CFG80211_WEXT=m
+      - config: CONFIG_CFG80211_WEXT=y
       - config: CONFIG_MAC80211=m
       - config: CONFIG_BRCMSMAC=m
       - config: CONFIG_BRCMFMAC=m
@@ -1542,6 +1585,18 @@ configoverlays:
       - config: CONFIG_DRM_NOUVEAU=m
       - config: CONFIG_RFKILL_GPIO=m
       - config: CONFIG_CFG80211_WEXT=y
+      - config: CONFIG_IGB=y
+      - config: CONFIG_IGB_HWMON=y
+      - config: CONFIG_LM90=m
+      - config: CONFIG_USB_EHCI_HCD=y
+      - config: CONFIG_USB_XHCI_HCD=y
+      - config: CONFIG_USB_UHCI_HCD=y
+      - config: CONFIG_USB_XHCI_PLATFORM=y
+      - config: CONFIG_USB_EHCI_HCD_PLATFORM=y
+      - config: CONFIG_USB_OHCI_HCD_PLATFORM=y
+      - config: CONFIG_USB_SL811_HCD=y
+      - config: CONFIG_EEPROM_AT24=m
+      - config: CONFIG_EEPROM_EE1004=m
   - name: dongle
     list:
       - config: CONFIG_USB_STORAGE=m
@@ -1561,6 +1616,10 @@ configoverlays:
     list:
       - config: CONFIG_IP_PNP=y
       - config: CONFIG_IP_PNP_DHCP=y
+  - name: riscv
+    list:
+      - config: CONFIG_I2C_OCORES=y
+      - config: CONFIG_I2C_CHARDEV=y
   - name: debugx
     list:
       - config: CONFIG_DEBUG_KERNEL=y
@@ -1594,8 +1653,6 @@ configoverlays:
     list:
       - config: CONFIG_ATM
         disable: True
-      - config: CONFIG_I2C
-        disable: True
       - config: CONFIG_X25
         disable: True
       - config: CONFIG_ATALK
@@ -1618,6 +1675,12 @@ configoverlays:
         disable: True
       - config: CONFIG_NET_SCHED
         disable: True
+      - config: CONFIG_NET_PKTGEN
+        disable: True
+      - config: CONFIG_DUMMY
+        disable: True
+      - config: CONFIG_EEPROM_93CX6
+        disable: True
       - config: CONFIG_CRYPTO_DEV_SAFEXCEL
         disable: True
       - config: CONFIG_CRYPTO_DEV_CCREE
@@ -1625,4 +1688,68 @@ configoverlays:
       - config: CONFIG_CRYPTO_DEV_AMLOGIC_GXL
         disable: True
       - config: CONFIG_CRYPTO_DEV_HIFN_795X
+        disable: True
+      - config: CONFIG_KERNEL_XZ
+        disable: True
+      - config: CONFIG_RTC_CLASS
+        disable: True
+      - config: CONFIG_HWMON
+        disable: True
+      - config: CONFIG_USB_STORAGE
+        disable: True
+      - config: CONFIG_FTRACE
+        disable: True
+      - config: CONFIG_XZ_DEC_ARM64
+        disable: True
+      - config: CONFIG_XZ_DEC_POWERPC
+        disable: True
+      - config: CONFIG_XZ_DEC_SPARC
+        disable: True
+      - config: CONFIG_XZ_DEC_RISCV
+        disable: True
+      - config: CONFIG_XZ_DEC_X86
+        disable: True
+      - config: CONFIG_OVERLAY_FS
+        disable: True
+      - config: CONFIG_EXT4_FS_POSIX_ACL
+        disable: True
+      - config: CONFIG_EXT2_FS_XATTR
+        disable: True
+      - config: CONFIG_TMPFS_XATTR
+        disable: True
+      - config: CONFIG_TMPFS_POSIX_ACL
+        disable: True
+      - config: CONFIG_SERIAL_8250_EXAR
+        disable: True
+      - config: CONFIG_SERIAL_8250_FSL
+        disable: True
+      - config: CONFIG_SERIAL_8250_PERICOM
+        disable: True
+      - config: CONFIG_SERIAL_8250_PCI
+        disable: True
+      - config: CONFIG_CGROUPS
+        disable: True
+      - config: CONFIG_MAGIC_SYSRQ
+        disable: True
+      - config: CONFIG_RD_LZO
+        disable: True
+      - config: CONFIG_RD_LZ4
+        disable: True
+      - config: CONFIG_RD_LZMA
+        disable: True
+      - config: CONFIG_EFI_PARTITION
+        disable: True
+      - config: CONFIG_MSDOS_PARTITION
+        disable: True
+      - config: CONFIG_VGA_ARB
+        disable: True
+      - config: CONFIG_IP_MULTICAST
+        disable: True
+      - config: CONFIG_SWAP
+        disable: True
+      - config: CONFIG_SLUB_DEBUG
+        disable: True
+      - config: CONFIG_SCHED_DEBUG
+        disable: True
+      - config: CONFIG_MODULES
         disable: True
