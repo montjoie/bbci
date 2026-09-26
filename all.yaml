@@ -620,7 +620,7 @@ templates:
     devicetype: qemu
     devicename: qemu-cubieboard
     kernelfile: zImage
-    dtb: sun4i-a10-cubieboard.dtb
+    dtb: allwinner/sun4i-a10-cubieboard.dtb
     mach: sunxi
     qemu:
         cpu: cortex-a8
@@ -644,13 +644,16 @@ templates:
       - ok
       - cubieboard
       - a10
+      - sun4i-ss
+      - cryptotest0
+      - qemubase
   - name: QEMU orangepi-pc
     arch: arm
     larch: arm
     devicetype: qemu
     devicename: qemu-orangepi-pc
     kernelfile: zImage
-    dtb: sun8i-h3-orangepi-pc.dtb
+    dtb: allwinner/sun8i-h3-orangepi-pc.dtb
     mach: sunxi
     qemu:
         cpu: cortex-a7
@@ -667,6 +670,10 @@ templates:
     tags:
       - ok
       - h3
+      - qemu-h3
+      - sun8i-ce
+      - cryptotest0
+      - qemubase
   - name: qemu-arm64-virt
     arch: arm64
     devicetype: qemu
@@ -681,6 +688,8 @@ templates:
         netdevice: tap
         console_device: ttyAMA0
         append: "console=ttyAMA0 root=/dev/ram0"
+        extra_options:
+        - "-device intel-hda -device hda-duplex -device usb-ehci -device virtio-rng-pci -device VGA,vgamem_mb=64,edid=on -device qemu-xhci -device usb-tablet -device usb-kbd "
     configs:
       - name: RTC_DRV_PL031
         type: test
@@ -688,6 +697,7 @@ templates:
       - ok
       - virt
       - virtio
+      - qemubase
   - name: qemu-arm64-xlnx-versal-virt
     arch: arm64
     devicetype: qemu
@@ -780,7 +790,7 @@ templates:
     mach: qemu
     qemu:
         machine: virt-2.11
-        memory: 4096
+        memory: 6096
         smp: 2
         cpu: cortex-a15
         netdevice: tap
@@ -792,6 +802,74 @@ templates:
         - "-device intel-hda -device hda-duplex -device usb-ehci -device virtio-rng-pci -device VGA,vgamem_mb=64,edid=on -device qemu-xhci -device usb-tablet -device usb-kbd "
     configs:
       - name: CONFIG_ARCH_VIRT=y
+        type: mandatory
+      - name: CONFIG_SERIAL_AMBA_PL011=y
+        type: mandatory
+      - name: CONFIG_PCI_HOST_GENERIC=
+        type: test
+      - name: CONFIG_RTC_DRV_PL031=
+        type: test
+      - name: CONFIG_GPIO_PL061=
+    tags:
+      - ok
+      - virt
+      - virtio
+      - qemubase
+  - name: qemu-arm-virt-10.0
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-arm-virt-10.0
+    kernelfile: zImage
+    mach: qemu
+    qemu:
+        machine: virt-10.0,highmem=off
+        memory: 1024
+        smp: 2
+        cpu: cortex-a15
+        netdevice: tap
+        guestfs_interface: virtio
+        console_device: ttyAMA0
+        append: "console=ttyAMA0 root=/dev/ram0"
+        audio: "none"
+        extra_options:
+        - "-device intel-hda -device hda-duplex -device usb-ehci -device virtio-rng-pci -device VGA,vgamem_mb=64,edid=on -device qemu-xhci -device usb-tablet -device usb-kbd "
+    configs:
+      - name: CONFIG_ARCH_VIRT=y
+        type: mandatory
+      - name: CONFIG_SERIAL_AMBA_PL011=y
+        type: mandatory
+      - name: CONFIG_PCI_HOST_GENERIC=
+        type: test
+      - name: CONFIG_RTC_DRV_PL031=
+        type: test
+      - name: CONFIG_GPIO_PL061=
+    tags:
+      - ok
+      - virt
+      - virtio
+      - qemubase
+  - name: qemu-arm-virt-10.0-lpae
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-arm-virt-10.0-lpae
+    kernelfile: zImage
+    mach: qemu
+    qemu:
+        machine: virt-10.0
+        memory: 4096
+        smp: 2
+        cpu: cortex-a15
+        netdevice: tap
+        guestfs_interface: virtio
+        console_device: ttyAMA0
+        append: "console=ttyAMA0 root=/dev/ram0"
+        audio: "none"
+        extra_options:
+        - "-device intel-hda -device hda-duplex -device usb-ehci -device virtio-rng-pci -device VGA,vgamem_mb=64,edid=on -device qemu-xhci -device usb-tablet -device usb-kbd "
+    configs:
+      - name: CONFIG_ARCH_VIRT=y
+        type: mandatory
+      - name: CONFIG_ARM_LPAE=y
         type: mandatory
       - name: CONFIG_SERIAL_AMBA_PL011=y
         type: mandatory
@@ -866,7 +944,7 @@ templates:
     devicetype: qemu
     devicename: qemu-versatilepb
     kernelfile: zImage
-    dtb: versatile-pb.dtb
+    dtb: arm/versatile-pb.dtb
     mach: qemu
     qemu:
         machine: versatilepb
@@ -886,6 +964,31 @@ templates:
     tags:
       - ok
       - versatile
+  - name: qemu-integratorcp
+    arch: arm
+    devicetype: qemu
+    devicename: qemu-integratorcp
+    kernelfile: zImage
+    dtb: arm/integratorcp.dtb
+    mach: qemu
+    qemu:
+        machine: integratorcp
+        cpu: arm926
+        memory: 256
+        model: model=smc91c111
+        netdevice: tap
+        guestfs_interface: sd
+        append: "console=ttyAMA0 root=/dev/ram0"
+    configs:
+      - name: CONFIG_ARCH_INTEGRATOR
+        type: mandatory
+      - name: CONFIG_SMC91X
+        type: test
+      - name: RTC_DRV_PL031
+        type: test
+    tags:
+      - ok
+      - integratorcp
   - name: qemu-realview-eb
     arch: arm
     devicetype: qemu
@@ -1212,6 +1315,7 @@ templates:
     mach: qemu
     qemu:
         machine: midway
+        #cpu: cortex-a15
         guestfs_interface: none
         netdevice: tap
         append: "console=ttyAMA0 root=/dev/ram0"
@@ -1230,7 +1334,7 @@ templates:
     mach: mips
     qemu:
         machine: malta
-        memory: 256
+        memory: 512
         model: model=pcnet
         netdevice: tap
         append: "console=ttyS0 root=/dev/ram0"
@@ -1243,6 +1347,7 @@ templates:
       - name: CONFIG_PIIX=
     tags:
       - ok
+      - qemubase
   - name: malta64
     arch: mips
     larch: mips
@@ -1276,6 +1381,7 @@ templates:
     qemu:
         machine: q800
         cpu: m68040
+        memory: 512M
         netdevice: tap
         guestfs_interface: scsi
         model: model=dp83932
@@ -1285,7 +1391,8 @@ templates:
         append: "console=ttyS0 root=/dev/ram0"
     configs:
     tags:
-      - ko
+      - ok
+      - qemubase
   - name: qemu i386
     arch: x86
     devicetype: qemu
@@ -1304,6 +1411,7 @@ templates:
         - '-object cryptodev-backend-builtin,id=cryptodev0'
         - '-device virtio-crypto-pci,id=crypto0,cryptodev=cryptodev0'
         - '-vga virtio'
+        - '-device usb-ehci -device virtio-rng-pci -device qemu-xhci -device usb-tablet -device usb-kbd'
     configs:
     tags:
       - ok
@@ -1335,8 +1443,8 @@ templates:
       - virtio
   - name: qemu x86_64-igb
     arch: x86_64
-    devicetype: qemu
-    devicename: qemu-x86_64
+    devicetype: qemuxxxx
+    devicename: qemu-x86_64-igb
     kernelfile: bzImage
     mach: x86_64
     qemu:
@@ -1385,22 +1493,6 @@ templates:
     console_device: ttyS0
     tags:
       - ok
-  - name: qemu x86
-    arch: x86
-    devicetype: qemu
-    devicename: qemu-x86
-    kernelfile: bzImage
-    mach: x86
-    qemu:
-        machine: pc
-        cpu: qemu32
-        netdevice: tap
-        model: model=e1000
-        netdevice: tap
-        append: "console=ttyS0 root=/dev/ram0"
-    configs:
-    tags:
-      - ok
   - name: QEMU alpha DP264/CLIPPER
     arch: alpha
     devicetype: qemu
@@ -1428,7 +1520,7 @@ templates:
         machine: g3beige
         model: model=pcnet
         netdevice: tap
-        memory: 256
+        memory: 512
         guestfs_interface: ide
         console_device: ttyS0
         append: "console=ttyPZ0 root=/dev/ram0"
@@ -1441,6 +1533,7 @@ templates:
     tags:
       - ok
       - g3beige
+      - qemubase
   - name: QEMU PPC virtex-ml507
     arch: powerpc
     devicetype: qemu
@@ -1559,6 +1652,7 @@ templates:
         machine: pseries
         cpu: POWER8
         model: model=e1000
+        memory: 512
         netdevice: tap
         guestfs_interface: scsi
         console_device: hvc0
@@ -1566,6 +1660,8 @@ templates:
         no_kvm: True
     configs:
       - name: CONFIG_PPC_PSERIES=y
+        type: mandatory
+      - name: CONFIG_CPU_BIG_ENDIAN=y
         type: mandatory
     tags:
       - ok
@@ -1728,6 +1824,7 @@ templates:
         type: mandatory
     tags:
       - ok
+      - qemubase
       - virtio
   - name: QEMU sh4
     arch: sh
@@ -1970,6 +2067,10 @@ templates:
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
+    dtbhack:
+      usb_host:
+        type: s
+        what: "'/soc/usb@1c19000/' 'dr_mode' host"
     tags:
       - ok
       - a33
@@ -2045,7 +2146,7 @@ templates:
     devicetype: sun8i-h2-plus-libretech-all-h3-cc
     kernelfile: zImage
     mach: sunxi
-    dtb: sun8i-h2-plus-libretech-all-h3-cc.dtb
+    dtb: allwinner/sun8i-h2-plus-libretech-all-h3-cc.dtb
     configs:
       - name: CONFIG_ARCH_SUNXI=y
         type: mandatory
@@ -2443,6 +2544,48 @@ templates:
       - ok
       - meson
       - amlogic
+  - name: bcm2835-rpi-b-rev2
+    arch: arm
+    larch: arm
+    devicetype: bcm2835-rpi-b-rev2
+    kernelfile: Image
+    mach: broadcom
+    dtb: broadcom/bcm2835-rpi-b-rev2.dtb
+    configs:
+      - name: CONFIG_ARCH_BCM2835=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250_BCM2835AUX=y
+        type: mandatory
+      - name: CONFIG_USB_NET_SMSC95XX=y
+        type: test
+      - name: CONFIG_PINCTRL_BCM2835=y
+        type: mandatory
+    tags:
+      - ok
+      - rpi1
+  - name: bcm2712-rpi-5-b
+    arch: arm64
+    larch: arm64
+    devicetype: bcm2712-rpi-5-b
+    kernelfile: Image
+    mach: broadcom
+    dtb: broadcom/bcm2712-rpi-5-b.dtb
+    configs:
+      - name: CONFIG_ARCH_BCM2835=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250_BCM2835AUX=y
+        type: mandatory
+      - name: CONFIG_USB_NET_SMSC95XX=y
+        type: test
+      - name: CONFIG_PINCTRL_BCM2835=y
+        type: mandatory
+    tags:
+      - ok
+      - rpi5
   - name: bcm2711-rpi-4-b
     arch: arm64
     larch: arm64
@@ -2608,6 +2751,21 @@ templates:
     tags:
       - ok
       - renesas
+  - name: r8a779g3-sparrow-hawk
+    arch: arm64
+    larch: arm64
+    devicetype: r8a779g3-sparrow-hawk
+    kernelfile: Image
+    mach: renesas
+    dtb: renesas/r8a779g3-sparrow-hawk.dtb
+    configs:
+      - name: CONFIG_ARCH_RENESAS=y
+        type: mandatory
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+      - renesas
   - name: rk3328-rock64
     arch: arm64
     larch: arm64
@@ -2621,6 +2779,7 @@ templates:
     tags:
       - ok
       - rk
+      - rk3328
   - name: rk3288-miqi
     arch: arm
     larch: arm
@@ -2634,6 +2793,7 @@ templates:
     tags:
       - ok
       - rk
+      - rk3288
       - crypto
   - name: rk3399-khadas-edge-v
     arch: arm64
@@ -2648,6 +2808,7 @@ templates:
     tags:
       - ok
       - rk
+      - rk3399
       - crypto
   - name: rk3399-roc-pc
     arch: arm64
@@ -2663,6 +2824,7 @@ templates:
       - ok
       - rk
       - crypto
+      - rk3399
   - name: rk3588-rock-5b
     arch: arm64
     larch: arm64
@@ -2677,6 +2839,7 @@ templates:
       - ok
       - rk
       - crypto
+      - rk3588
   - name: gemini-ssi1328
     arch: arm
     larch: arm
@@ -2749,12 +2912,36 @@ templates:
         type: mandatory
     tags:
       - ok
+  - name: k3-am625-beagleplay
+    arch: arm64
+    larch: arm64
+    devicetype: k3-am625-beagleplay
+    kernelfile: Image
+    mach: ti
+    dtb: ti/k3-am625-beagleplay.dtb
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
   - name: hifive-unleashed-a00
     arch: riscv
     larch: riscv
     devicetype: hifive-unleashed-a00
     kernelfile: Image
     dtb: sifive/hifive-unleashed-a00.dtb
+    mach: riscv
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+  - name: hifive-unmatched-a00
+    arch: riscv
+    larch: riscv
+    devicetype: hifive-unmatched-a00
+    kernelfile: Image
+    dtb: sifive/hifive-unmatched-a00.dtb
     mach: riscv
     configs:
       - name: CONFIG_SERIAL_8250=y
@@ -2788,3 +2975,28 @@ templates:
       - ok
       - crypto
       - dwmac_sun8i
+      - drm_sun4i
+  - name: mt8365-evk
+    arch: arm64
+    larch: arm64
+    devicetype: mt8365-evk
+    kernelfile: Image
+    dtb: mediatek/mt8365-evk.dtb
+    mach: arm64
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
+  - name: meson-g12a-u200
+    arch: arm64
+    larch: arm64
+    devicetype: meson-g12a-u200
+    kernelfile: Image
+    dtb: amlogic/meson-g12a-u200.dtb
+    mach: arm64
+    configs:
+      - name: CONFIG_SERIAL_8250=y
+        type: mandatory
+    tags:
+      - ok
